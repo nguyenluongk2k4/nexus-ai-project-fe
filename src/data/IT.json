@@ -1,0 +1,847 @@
+[
+  {
+    "id": "it_ksa_root",
+    "name": "Công nghệ thông tin",
+    "type": "root",
+    "description": "Lĩnh vực nghiên cứu, phát triển, triển khai và quản lý các hệ thống máy tính và phần mềm phục vụ con người.",
+    "children": [
+      {
+        "id": "spec_1",
+        "name": "Khoa học máy tính",
+        "type": "specialization",
+        "description": "Nghiên cứu nền tảng tính toán, thuật toán và cấu trúc dữ liệu.",
+        "children": [
+          {
+            "id": "ability_1_1",
+            "name": "Thiết kế thuật toán",
+            "type": "ability",
+            "description": "Khả năng xây dựng và tối ưu thuật toán giải quyết vấn đề.",
+            "children": [
+              {
+                "id": "skill_1_1_1",
+                "name": "Phân tích độ phức tạp",
+                "type": "skill",
+                "description": "Đánh giá hiệu suất thuật toán.",
+                "children": [
+                  {
+                    "id": "knowledge_1_1_1_1",
+                    "name": "Độ phức tạp thời gian & không gian",
+                    "type": "knowledge",
+                    "description": "Hiểu Big-O, Big-Theta, Big-Omega và phương pháp đánh giá."
+                  },
+                  {
+                    "id": "knowledge_1_1_1_2",
+                    "name": "Phân tích đệ quy",
+                    "type": "knowledge",
+                    "description": "Hiểu cách sử dụng công thức truy hồi và cây đệ quy."
+                  }
+                ]
+              },
+              {
+                "id": "skill_1_1_2",
+                "name": "Thiết kế thuật toán nâng cao",
+                "type": "skill",
+                "description": "Áp dụng chiến lược chia để trị, quy hoạch động, tham lam.",
+                "children": [
+                  {
+                    "id": "knowledge_1_1_2_1",
+                    "name": "Thuật toán chia để trị",
+                    "type": "knowledge",
+                    "description": "Hiểu Merge Sort, Quick Sort, Binary Search."
+                  },
+                  {
+                    "id": "knowledge_1_1_2_2",
+                    "name": "Thuật toán quy hoạch động",
+                    "type": "knowledge",
+                    "description": "Nắm vững khái niệm subproblem và overlapping subproblems."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "ability_1_2",
+            "name": "Lập trình và cấu trúc dữ liệu",
+            "type": "ability",
+            "description": "Khả năng cài đặt và tổ chức dữ liệu hiệu quả.",
+            "children": [
+              {
+                "id": "skill_1_2_1",
+                "name": "Lập trình hướng đối tượng",
+                "type": "skill",
+                "description": "Thiết kế class và quan hệ kế thừa.",
+                "children": [
+                  {
+                    "id": "knowledge_1_2_1_1",
+                    "name": "Nguyên lý OOP",
+                    "type": "knowledge",
+                    "description": "Encapsulation, Inheritance, Polymorphism, Abstraction."
+                  },
+                  {
+                    "id": "knowledge_1_2_1_2",
+                    "name": "Mẫu thiết kế cơ bản",
+                    "type": "knowledge",
+                    "description": "Singleton, Factory, Observer, Strategy."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "spec_2",
+        "name": "Kỹ thuật phần mềm",
+        "type": "specialization",
+        "description": "Thiết kế, phát triển, kiểm thử và bảo trì phần mềm.",
+        "children": [
+          {
+            "id": "ability_2_1",
+            "name": "Phát triển phần mềm",
+            "type": "ability",
+            "description": "Khả năng xây dựng hệ thống phần mềm hoàn chỉnh.",
+            "children": [
+              {
+                "id": "skill_2_1_1",
+                "name": "Quản lý vòng đời phần mềm",
+                "type": "skill",
+                "description": "Áp dụng mô hình phát triển phù hợp.",
+                "children": [
+                  {
+                    "id": "knowledge_2_1_1_1",
+                    "name": "Mô hình phát triển phần mềm",
+                    "type": "knowledge",
+                    "description": "Waterfall, Agile, Scrum, DevOps."
+                  },
+                  {
+                    "id": "knowledge_2_1_1_2",
+                    "name": "Quản lý thay đổi và version",
+                    "type": "knowledge",
+                    "description": "Sử dụng Git, CI/CD pipelines."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "ability_2_2",
+            "name": "Kiểm thử và đảm bảo chất lượng",
+            "type": "ability",
+            "description": "Đảm bảo phần mềm hoạt động ổn định và đúng yêu cầu.",
+            "children": [
+              {
+                "id": "skill_2_2_1",
+                "name": "Viết và chạy test case",
+                "type": "skill",
+                "description": "Thiết kế, thực thi và đánh giá test case.",
+                "children": [
+                  {
+                    "id": "knowledge_2_2_1_1",
+                    "name": "Kiểm thử đơn vị và tích hợp",
+                    "type": "knowledge",
+                    "description": "Hiểu Unit Test, Integration Test, Mocking."
+                  },
+                  {
+                    "id": "knowledge_2_2_1_2",
+                    "name": "Công cụ kiểm thử tự động",
+                    "type": "knowledge",
+                    "description": "JUnit, Selenium, Postman, Jest."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "spec_3",
+        "name": "Khoa học dữ liệu và Trí tuệ nhân tạo",
+        "type": "specialization",
+        "description": "Phân tích dữ liệu, học máy và mô hình hóa thông tin.",
+        "children": [
+          {
+            "id": "ability_3_1",
+            "name": "Xử lý và trực quan hóa dữ liệu",
+            "type": "ability",
+            "description": "Phân tích, làm sạch và trình bày dữ liệu.",
+            "children": [
+              {
+                "id": "skill_3_1_1",
+                "name": "Tiền xử lý dữ liệu",
+                "type": "skill",
+                "description": "Làm sạch, chuẩn hóa dữ liệu.",
+                "children": [
+                  {
+                    "id": "knowledge_3_1_1_1",
+                    "name": "Kỹ thuật xử lý dữ liệu thiếu và ngoại lai",
+                    "type": "knowledge",
+                    "description": "Xử lý missing values, outliers, normalization."
+                  },
+                  {
+                    "id": "knowledge_3_1_1_2",
+                    "name": "Công cụ xử lý dữ liệu",
+                    "type": "knowledge",
+                    "description": "Sử dụng Pandas, NumPy, SQL."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "ability_3_2",
+            "name": "Xây dựng mô hình học máy",
+            "type": "ability",
+            "description": "Khả năng thiết kế, huấn luyện và đánh giá mô hình ML/AI.",
+            "children": [
+              {
+                "id": "skill_3_2_1",
+                "name": "Lựa chọn thuật toán phù hợp",
+                "type": "skill",
+                "description": "Phân biệt các nhóm thuật toán học máy.",
+                "children": [
+                  {
+                    "id": "knowledge_3_2_1_1",
+                    "name": "Thuật toán giám sát và không giám sát",
+                    "type": "knowledge",
+                    "description": "Regression, Classification, Clustering."
+                  },
+                  {
+                    "id": "knowledge_3_2_1_2",
+                    "name": "Đánh giá mô hình",
+                    "type": "knowledge",
+                    "description": "Precision, Recall, F1, ROC, Cross Validation."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "spec_4",
+        "name": "Mạng máy tính và An ninh mạng",
+        "type": "specialization",
+        "description": "Thiết kế, quản trị mạng và bảo mật thông tin.",
+        "children": [
+          {
+            "id": "ability_4_1",
+            "name": "Quản trị hạ tầng mạng",
+            "type": "ability",
+            "description": "Cấu hình và duy trì hệ thống mạng.",
+            "children": [
+              {
+                "id": "skill_4_1_1",
+                "name": "Cấu hình thiết bị mạng",
+                "type": "skill",
+                "description": "Thiết lập router, switch, firewall.",
+                "children": [
+                  {
+                    "id": "knowledge_4_1_1_1",
+                    "name": "Giao thức mạng cơ bản",
+                    "type": "knowledge",
+                    "description": "TCP/IP, DNS, DHCP, VLAN."
+                  },
+                  {
+                    "id": "knowledge_4_1_1_2",
+                    "name": "Công cụ quản trị mạng",
+                    "type": "knowledge",
+                    "description": "Wireshark, Nmap, Netcat."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "ability_4_2",
+            "name": "Bảo mật hệ thống",
+            "type": "ability",
+            "description": "Đảm bảo an toàn dữ liệu và phòng chống tấn công.",
+            "children": [
+              {
+                "id": "skill_4_2_1",
+                "name": "Phát hiện và ứng phó sự cố",
+                "type": "skill",
+                "description": "Xử lý tấn công mạng và phục hồi hệ thống.",
+                "children": [
+                  {
+                    "id": "knowledge_4_2_1_1",
+                    "name": "Các loại tấn công phổ biến",
+                    "type": "knowledge",
+                    "description": "DDoS, Phishing, SQL Injection, Malware."
+                  },
+                  {
+                    "id": "knowledge_4_2_1_2",
+                    "name": "Công cụ bảo mật",
+                    "type": "knowledge",
+                    "description": "IDS/IPS, Antivirus, Firewall, SIEM."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "spec_5",
+        "name": "Phát triển Web và Di động",
+        "type": "specialization",
+        "description": "Thiết kế và triển khai ứng dụng web, mobile đa nền tảng.",
+        "children": [
+          {
+            "id": "ability_5_1",
+            "name": "Phát triển frontend và backend",
+            "type": "ability",
+            "description": "Xây dựng giao diện và API máy chủ.",
+            "children": [
+              {
+                "id": "skill_5_1_1",
+                "name": "Lập trình frontend",
+                "type": "skill",
+                "description": "Sử dụng HTML, CSS, JS framework.",
+                "children": [
+                  {
+                    "id": "knowledge_5_1_1_1",
+                    "name": "Framework frontend phổ biến",
+                    "type": "knowledge",
+                    "description": "React, Angular, Vue."
+                  },
+                  {
+                    "id": "knowledge_5_1_1_2",
+                    "name": "Thiết kế responsive UI",
+                    "type": "knowledge",
+                    "description": "Grid, Flexbox, UX cơ bản."
+                  }
+                ]
+              },
+              {
+                "id": "skill_5_1_2",
+                "name": "Phát triển backend",
+                "type": "skill",
+                "description": "Thiết kế API, xử lý dữ liệu, bảo mật backend.",
+                "children": [
+                  {
+                    "id": "knowledge_5_1_2_1",
+                    "name": "RESTful và GraphQL API",
+                    "type": "knowledge",
+                    "description": "Thiết kế và xác thực API."
+                  },
+                  {
+                    "id": "knowledge_5_1_2_2",
+                    "name": "CSDL backend",
+                    "type": "knowledge",
+                    "description": "SQL, NoSQL, ORM frameworks."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "auto_ksa_root",
+    "name": "Công nghệ ô tô",
+    "type": "root",
+    "description": "Ngành nghiên cứu, thiết kế, chế tạo, bảo trì và phát triển công nghệ ô tô hiện đại.",
+    "children": [
+    {
+      "id": "spec_design",
+      "name": "Kỹ thuật Thiết kế (Design Engineering)",
+      "type": "specialization",
+      "description": "Tập trung vào thiết kế tổng thể và chi tiết của các hệ thống trên ô tô.",
+      "children": [
+        {
+          "id": "ability_design_1",
+          "name": "Thiết kế linh kiện và hệ thống cơ khí",
+          "type": "ability",
+          "children": [
+            {
+              "id": "skill_design_1_1",
+              "name": "Sử dụng phần mềm CAD/CAE",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_design_1_1_1",
+                  "name": "Nguyên lý thiết kế 3D và mô phỏng",
+                  "type": "knowledge"
+                },
+                {
+                  "id": "knowledge_design_1_1_2",
+                  "name": "Sử dụng phần mềm SolidWorks, CATIA, hoặc Siemens NX",
+                  "type": "knowledge"
+                }
+              ]
+            },
+            {
+              "id": "skill_design_1_2",
+              "name": "Phân tích ứng suất và dao động",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_design_1_2_1",
+                  "name": "Cơ học vật rắn và mô phỏng FEA",
+                  "type": "knowledge"
+                },
+                {
+                  "id": "knowledge_design_1_2_2",
+                  "name": "Tối ưu hóa thiết kế cấu trúc",
+                  "type": "knowledge"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spec_body_chassis",
+      "name": "Kỹ thuật Thân vỏ và Khung gầm (Body and Chassis Engineering)",
+      "type": "specialization",
+      "description": "Tập trung vào cấu trúc thân xe, hệ thống treo, phanh và lái.",
+      "children": [
+        {
+          "id": "ability_body_1",
+          "name": "Phát triển và kiểm thử khung gầm",
+          "type": "ability",
+          "children": [
+            {
+              "id": "skill_body_1_1",
+              "name": "Phân tích tải trọng và độ bền khung gầm",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_body_1_1_1",
+                  "name": "Đặc tính chịu lực và biến dạng của khung gầm",
+                  "type": "knowledge"
+                },
+                {
+                  "id": "knowledge_body_1_1_2",
+                  "name": "Vật liệu và công nghệ hàn khung xe",
+                  "type": "knowledge"
+                }
+              ]
+            },
+            {
+              "id": "skill_body_1_2",
+              "name": "Kiểm tra hệ thống treo và phanh",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_body_1_2_1",
+                  "name": "Hệ thống giảm xóc và phân bố tải trọng",
+                  "type": "knowledge"
+                },
+                {
+                  "id": "knowledge_body_1_2_2",
+                  "name": "Nguyên lý hoạt động của phanh ABS và ESP",
+                  "type": "knowledge"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spec_powertrain",
+      "name": "Kỹ thuật Động lực (Powertrain Engineering)",
+      "type": "specialization",
+      "description": "Nghiên cứu động cơ, hộp số, hệ thống truyền lực và hệ thống hybrid.",
+      "children": [
+        {
+          "id": "ability_powertrain_1",
+          "name": "Thiết kế và kiểm định hệ thống truyền động",
+          "type": "ability",
+          "children": [
+            {
+              "id": "skill_powertrain_1_1",
+              "name": "Phân tích động học và công suất truyền động",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_powertrain_1_1_1",
+                  "name": "Đặc tính công suất, mô-men xoắn, tỷ số truyền",
+                  "type": "knowledge"
+                },
+                {
+                  "id": "knowledge_powertrain_1_1_2",
+                  "name": "Hiệu suất truyền động và tổn hao cơ năng",
+                  "type": "knowledge"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ability_ev",
+          "name": "Kỹ thuật Xe Hybrid và Xe điện (Hybrid and EV Engineering)",
+          "type": "ability",
+          "children": [
+            {
+              "id": "skill_ev_1",
+              "name": "Thiết kế hệ thống điện năng cao áp",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_ev_1_1",
+                  "name": "Cấu tạo pin lithium-ion và BMS",
+                  "type": "knowledge"
+                },
+                {
+                  "id": "knowledge_ev_1_2",
+                  "name": "Hệ thống truyền động điện và biến tần",
+                  "type": "knowledge"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spec_manufacturing",
+      "name": "Kỹ thuật Sản xuất (Manufacturing Engineering)",
+      "type": "specialization",
+      "description": "Thiết kế quy trình, dây chuyền và công nghệ sản xuất ô tô.",
+      "children": [
+        {
+          "id": "ability_manu_1",
+          "name": "Lập kế hoạch và giám sát quy trình sản xuất",
+          "type": "ability",
+          "children": [
+            {
+              "id": "skill_manu_1_1",
+              "name": "Phân tích luồng sản xuất và tối ưu layout",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_manu_1_1_1",
+                  "name": "Lean Manufacturing và Kaizen",
+                  "type": "knowledge"
+                },
+                {
+                  "id": "knowledge_manu_1_1_2",
+                  "name": "Thiết kế quy trình lắp ráp và kiểm định chất lượng",
+                  "type": "knowledge"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spec_quality",
+      "name": "Quản lý Chất lượng (Quality Control/Assurance)",
+      "type": "specialization",
+      "description": "Giám sát chất lượng sản phẩm và quy trình sản xuất.",
+      "children": [
+        {
+          "id": "ability_quality_1",
+          "name": "Đánh giá và cải tiến chất lượng",
+          "type": "ability",
+          "children": [
+            {
+              "id": "skill_quality_1_1",
+              "name": "Áp dụng tiêu chuẩn ISO/TS 16949",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_quality_1_1_1",
+                  "name": "Quy trình PDCA và Six Sigma",
+                  "type": "knowledge"
+                },
+                {
+                  "id": "knowledge_quality_1_1_2",
+                  "name": "Phương pháp FMEA và SPC",
+                  "type": "knowledge"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spec_materials",
+      "name": "Kỹ thuật Vật liệu (Materials Engineering)",
+      "type": "specialization",
+      "description": "Nghiên cứu vật liệu kim loại, composite và polymer ứng dụng trong ô tô.",
+      "children": [
+        {
+          "id": "ability_mat_1",
+          "name": "Lựa chọn và xử lý vật liệu",
+          "type": "ability",
+          "children": [
+            {
+              "id": "skill_mat_1_1",
+              "name": "Đánh giá cơ tính và khả năng gia công vật liệu",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_mat_1_1_1",
+                  "name": "Vật liệu thép cường độ cao, nhôm và composite",
+                  "type": "knowledge"
+                },
+                {
+                  "id": "knowledge_mat_1_1_2",
+                  "name": "Công nghệ xử lý nhiệt và phủ bề mặt",
+                  "type": "knowledge"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spec_ee",
+      "name": "Hệ thống Điện và Điện tử (Electrical and Electronic Systems)",
+      "type": "specialization",
+      "description": "Thiết kế và chẩn đoán các hệ thống điện, mạch điều khiển, và mạng giao tiếp trên ô tô.",
+      "children": [
+        {
+          "id": "ability_ee_1",
+          "name": "Thiết kế và phân tích mạch điện ô tô",
+          "type": "ability",
+          "children": [
+            {
+              "id": "skill_ee_1_1",
+              "name": "Đọc, thiết kế và kiểm tra sơ đồ điện",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_ee_1_1_1",
+                  "name": "Chuẩn kết nối và giao thức CAN, LIN, FlexRay",
+                  "type": "knowledge"
+                },
+                {
+                  "id": "knowledge_ee_1_1_2",
+                  "name": "Cấu tạo cảm biến và cơ cấu chấp hành điện tử",
+                  "type": "knowledge"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spec_embedded",
+      "name": "Kỹ thuật Phần mềm Nhúng (Embedded Software Engineering)",
+      "type": "specialization",
+      "description": "Phát triển phần mềm điều khiển cho ECU và hệ thống trên xe.",
+      "children": [
+        {
+          "id": "ability_emb_1",
+          "name": "Lập trình và kiểm thử phần mềm nhúng",
+          "type": "ability",
+          "children": [
+            {
+              "id": "skill_emb_1_1",
+              "name": "Lập trình C/C++ cho vi điều khiển ô tô",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_emb_1_1_1",
+                  "name": "Hệ điều hành thời gian thực (RTOS)",
+                  "type": "knowledge"
+                },
+                {
+                  "id": "knowledge_emb_1_1_2",
+                  "name": "Tiêu chuẩn AUTOSAR và MISRA C",
+                  "type": "knowledge"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spec_infotainment",
+      "name": "Hệ thống Thông tin Giải trí và Kết nối (Infotainment and Connectivity)",
+      "type": "specialization",
+      "description": "Phát triển hệ thống giải trí, định vị, kết nối thông minh trên xe.",
+      "children": [
+        {
+          "id": "ability_info_1",
+          "name": "Phát triển hệ thống giao diện người dùng trên xe",
+          "type": "ability",
+          "children": [
+            {
+              "id": "skill_info_1_1",
+              "name": "Tích hợp Android Auto, Apple CarPlay",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_info_1_1_1",
+                  "name": "Giao thức kết nối và bảo mật dữ liệu",
+                  "type": "knowledge"
+                },
+                {
+                  "id": "knowledge_info_1_1_2",
+                  "name": "Thiết kế UI/UX cho màn hình ô tô",
+                  "type": "knowledge"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spec_autonomous",
+      "name": "Công nghệ Xe tự hành (Autonomous Vehicle Technology)",
+      "type": "specialization",
+      "description": "Nghiên cứu các hệ thống cảm biến, thuật toán và điều khiển tự động trên xe.",
+      "children": [
+        {
+          "id": "ability_sensor",
+          "name": "Kỹ thuật Cảm biến (Sensor Technology)",
+          "type": "ability",
+          "children": [
+            {
+              "id": "skill_sensor_1",
+              "name": "Tích hợp và hiệu chuẩn cảm biến lidar, radar, camera",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_sensor_1_1",
+                  "name": "Nguyên lý hoạt động và giới hạn của từng loại cảm biến",
+                  "type": "knowledge"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ability_ai",
+          "name": "Thuật toán và Trí tuệ Nhân tạo (AI and Algorithms)",
+          "type": "ability",
+          "children": [
+            {
+              "id": "skill_ai_1",
+              "name": "Nhận dạng đối tượng và định vị xe",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_ai_1_1",
+                  "name": "Học sâu (Deep Learning) cho thị giác máy tính",
+                  "type": "knowledge"
+                },
+                {
+                  "id": "knowledge_ai_1_2",
+                  "name": "Thuật toán SLAM và lập kế hoạch đường đi",
+                  "type": "knowledge"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ability_adas",
+          "name": "Hệ thống Hỗ trợ Lái xe Nâng cao (ADAS)",
+          "type": "ability",
+          "children": [
+            {
+              "id": "skill_adas_1",
+              "name": "Tích hợp hệ thống cảnh báo và điều khiển tự động",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_adas_1_1",
+                  "name": "Cấu trúc hệ thống cruise control và phanh tự động",
+                  "type": "knowledge"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spec_diagnosis",
+      "name": "Chẩn đoán và Sửa chữa Ô tô (Diagnosis and Repair)",
+      "type": "specialization",
+      "description": "Kiểm tra, phân tích và khắc phục lỗi kỹ thuật trên xe.",
+      "children": [
+        {
+          "id": "ability_diag_1",
+          "name": "Chẩn đoán điện tử và hệ thống cơ khí",
+          "type": "ability",
+          "children": [
+            {
+              "id": "skill_diag_1_1",
+              "name": "Sử dụng thiết bị OBD-II và phần mềm chẩn đoán",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_diag_1_1_1",
+                  "name": "Mã lỗi DTC và hệ thống giao tiếp ECU",
+                  "type": "knowledge"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spec_inspection",
+      "name": "Kiểm định Kỹ thuật (Vehicle Inspection/Regulation)",
+      "type": "specialization",
+      "description": "Đánh giá tiêu chuẩn an toàn và môi trường cho xe cơ giới.",
+      "children": [
+        {
+          "id": "ability_ins_1",
+          "name": "Kiểm tra kỹ thuật định kỳ",
+          "type": "ability",
+          "children": [
+            {
+              "id": "skill_ins_1_1",
+              "name": "Đo khí thải và kiểm tra phanh, đèn, lái",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_ins_1_1_1",
+                  "name": "Tiêu chuẩn khí thải Euro, ECE, Việt Nam",
+                  "type": "knowledge"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spec_business",
+      "name": "Kinh doanh và Dịch vụ Kỹ thuật Ô tô (Automotive Business and Technical Service)",
+      "type": "specialization",
+      "description": "Quản lý đại lý, dịch vụ hậu mãi và kinh doanh phụ tùng ô tô.",
+      "children": [
+        {
+          "id": "ability_bus_1",
+          "name": "Quản lý dịch vụ kỹ thuật và khách hàng",
+          "type": "ability",
+          "children": [
+            {
+              "id": "skill_bus_1_1",
+              "name": "Tư vấn kỹ thuật và lập kế hoạch bảo dưỡng",
+              "type": "skill",
+              "children": [
+                {
+                  "id": "knowledge_bus_1_1_1",
+                  "name": "Quy trình chăm sóc khách hàng trong kỹ thuật ô tô",
+                  "type": "knowledge"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+]
