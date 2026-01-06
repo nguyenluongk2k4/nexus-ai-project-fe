@@ -7,7 +7,7 @@ import {
   LearningStats,
   LearningStatus,
   DailyGoal,
-} from '../types/learning';
+} from '../../domain/types/learning';
 
 interface LearningProgressContextType {
   // Progress Management

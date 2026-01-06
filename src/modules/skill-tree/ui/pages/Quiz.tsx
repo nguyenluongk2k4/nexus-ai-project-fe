@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
-import { Progress } from '../ui/progress';
+import { Progress } from '@/shared/components/ui/progress';
 
 interface Question {
   id: number;
