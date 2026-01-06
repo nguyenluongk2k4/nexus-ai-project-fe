@@ -1,5 +1,5 @@
-import { ChatGateway } from '@/domain/ports/ChatGateway';
-import { Message, ConnectionStatus } from '@/domain/entities/Message';
+import { ChatGateway } from '../domain/ports/ChatGateway';
+import { Message, ConnectionStatus } from '../domain/entities/Message';
 
 export class ChatWsGateway implements ChatGateway {
   private ws: WebSocket | null = null;

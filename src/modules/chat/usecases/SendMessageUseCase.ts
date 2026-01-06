@@ -1,4 +1,4 @@
-import { ChatService } from '@/domain/services/ChatService';
+import { ChatService } from '../domain/services/ChatService';
 
 export class SendMessageUseCase {
   constructor(private chatService: ChatService) {}

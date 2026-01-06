@@ -7,7 +7,8 @@ import {
   LearningStats,
   LearningStatus,
   DailyGoal,
-} from '../../domain/types/learning';
+} from '../../domain/entities/LearningEntities';
+import { initializeLearningDataUseCase, syncLearningDataUseCase, calculateStatsUseCase } from '../../providers';
 
 interface LearningProgressContextType {
   // Progress Management
@@ -53,11 +54,6 @@ interface LearningProgressContextType {
 
 const LearningProgressContext = createContext<LearningProgressContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'nexus_learning_progress';
-const REMINDERS_KEY = 'nexus_learning_reminders';
-const TIMELINE_KEY = 'nexus_learning_timeline';
-const SESSIONS_KEY = 'nexus_study_sessions';
-const GOALS_KEY = 'nexus_daily_goals';
 
 export function LearningProgressProvider({ children }: { children: ReactNode }) {
   const [progressData, setProgressData] = useState<Map<string, LearningProgress>>(new Map());
@@ -77,97 +73,51 @@ export function LearningProgressProvider({ children }: { children: ReactNode }) 
     longestStreak: 0,
   });
 
-  // Load data from localStorage on mount
+  // Load data via UseCase
   useEffect(() => {
-    const loadData = () => {
+    const loadData = async () => {
       try {
-        const savedProgress = localStorage.getItem(STORAGE_KEY);
-        if (savedProgress) {
-          const parsed = JSON.parse(savedProgress);
-          const map = new Map<string, LearningProgress>();
-          Object.entries(parsed).forEach(([key, value]) => {
-            const progress = value as LearningProgress;
-            // Convert date strings back to Date objects
-            if (progress.startedAt) progress.startedAt = new Date(progress.startedAt);
-            if (progress.completedAt) progress.completedAt = new Date(progress.completedAt);
-            if (progress.lastAccessedAt) progress.lastAccessedAt = new Date(progress.lastAccessedAt);
-            map.set(key, progress);
-          });
-          setProgressData(map);
-        }
-
-        const savedReminders = localStorage.getItem(REMINDERS_KEY);
-        if (savedReminders) {
-          const parsed = JSON.parse(savedReminders);
-          parsed.forEach((r: LearningReminder) => {
-            r.scheduledTime = new Date(r.scheduledTime);
-          });
-          setReminders(parsed);
-        }
-
-        const savedTimeline = localStorage.getItem(TIMELINE_KEY);
-        if (savedTimeline) {
-          const parsed = JSON.parse(savedTimeline);
-          parsed.forEach((t: TimelineItem) => {
-            t.scheduledDate = new Date(t.scheduledDate);
-            if (t.deadline) t.deadline = new Date(t.deadline);
-          });
-          setTimelineItems(parsed);
-        }
-
-        const savedSessions = localStorage.getItem(SESSIONS_KEY);
-        if (savedSessions) {
-          const parsed = JSON.parse(savedSessions);
-          parsed.forEach((s: StudySession) => {
-            s.startTime = new Date(s.startTime);
-            if (s.endTime) s.endTime = new Date(s.endTime);
-          });
-          setStudySessions(parsed);
-        }
-
-        const savedGoals = localStorage.getItem(GOALS_KEY);
-        if (savedGoals) {
-          const parsed = JSON.parse(savedGoals);
-          parsed.forEach((g: DailyGoal) => {
-            g.date = new Date(g.date);
-          });
-          setDailyGoals(parsed);
-        }
+        const data = await initializeLearningDataUseCase.execute();
+        
+        // Convert array back to Map for internal state
+        const map = new Map<string, LearningProgress>();
+        data.progress.forEach(p => map.set(p.resourceId, p));
+        setProgressData(map);
+        
+        setReminders(data.reminders);
+        setTimelineItems(data.timeline);
+        setStudySessions(data.sessions);
+        setDailyGoals(data.goals);
       } catch (error) {
-        console.error('Error loading learning progress data:', error);
+        console.error('Error loading learning data:', error);
       }
     };
 
     loadData();
   }, []);
 
-  // Save to localStorage whenever data changes
+  // Sync data changes via UseCase
   useEffect(() => {
-    try {
-      const obj = Object.fromEntries(progressData);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
-    } catch (error) {
-      console.error('Error saving progress data:', error);
-    }
+    syncLearningDataUseCase.saveProgress(Array.from(progressData.values()));
   }, [progressData]);
 
   useEffect(() => {
-    localStorage.setItem(REMINDERS_KEY, JSON.stringify(reminders));
+    syncLearningDataUseCase.saveReminders(reminders);
   }, [reminders]);
 
   useEffect(() => {
-    localStorage.setItem(TIMELINE_KEY, JSON.stringify(timelineItems));
+    syncLearningDataUseCase.saveTimeline(timelineItems);
   }, [timelineItems]);
 
   useEffect(() => {
-    localStorage.setItem(SESSIONS_KEY, JSON.stringify(studySessions));
+    syncLearningDataUseCase.saveSessions(studySessions);
   }, [studySessions]);
 
   useEffect(() => {
-    localStorage.setItem(GOALS_KEY, JSON.stringify(dailyGoals));
+    syncLearningDataUseCase.saveGoals(dailyGoals);
   }, [dailyGoals]);
 
-  // Calculate stats whenever progress data changes
+  // Calculate stats via UseCase
   useEffect(() => {
     refreshStats();
   }, [progressData, studySessions]);
@@ -330,62 +280,11 @@ export function LearningProgressProvider({ children }: { children: ReactNode }) 
   };
 
   const refreshStats = () => {
-    const allProgress = Array.from(progressData.values());
-    const notStarted = allProgress.filter((p) => p.status === 'not_started').length;
-    const inProgress = allProgress.filter((p) => p.status === 'in_progress').length;
-    const completed = allProgress.filter((p) => p.status === 'completed').length;
-    const totalTimeSpent = allProgress.reduce((sum, p) => sum + (p.actualTimeSpent || 0), 0);
-    const ratings = allProgress.filter((p) => p.rating).map((p) => p.rating!);
-    const averageRating = ratings.length > 0
-      ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length
-      : 0;
-
-    // Calculate streak
-    const studyDates = studySessions
-      .map((s) => s.startTime.toDateString())
-      .filter((date, index, self) => self.indexOf(date) === index)
-      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
-
-    let currentStreak = 0;
-    let longestStreak = 0;
-    let tempStreak = 0;
-    let lastDate: Date | null = null;
-
-    studyDates.forEach((dateStr) => {
-      const date = new Date(dateStr);
-      if (!lastDate) {
-        tempStreak = 1;
-        currentStreak = 1;
-      } else {
-        const diffDays = Math.floor(
-          (lastDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
-        );
-        if (diffDays === 1) {
-          tempStreak++;
-          if (dateStr === new Date().toDateString() || diffDays === 1) {
-            currentStreak = tempStreak;
-          }
-        } else {
-          tempStreak = 1;
-        }
-      }
-      longestStreak = Math.max(longestStreak, tempStreak);
-      lastDate = date;
-    });
-
-    const lastStudyDate = studyDates.length > 0 ? new Date(studyDates[0]) : undefined;
-
-    setStats({
-      totalResources: allProgress.length,
-      notStarted,
-      inProgress,
-      completed,
-      totalTimeSpent,
-      averageRating,
-      currentStreak,
-      longestStreak,
-      lastStudyDate,
-    });
+    const newStats = calculateStatsUseCase.execute(
+      Array.from(progressData.values()),
+      studySessions
+    );
+    setStats(newStats);
   };
 
   const setDailyGoal = (targetMinutes: number) => {

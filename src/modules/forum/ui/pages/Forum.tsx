@@ -1,141 +1,54 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageSquare, Eye, User, PenSquare, Bot, Code, Database } from 'lucide-react';
+import { getForumDashboardUseCase } from '../../providers';
+import { ForumPost, ForumCategory, ForumStats } from '../../domain/entities/ForumEntities';
 
-interface ForumPost {
-  id: number;
-  title: string;
-  author: string;
-  authorAvatar: string;
-  category: string;
-  categoryColor: string;
-  excerpt: string;
-  comments: number;
-  views: string;
-  timestamp: string;
-}
+const ICON_MAP: Record<string, any> = {
+  Bot,
+  Code,
+  Database,
+};
 
 export function Forum() {
   const navigate = useNavigate();
+  const [posts, setPosts] = useState<ForumPost[]>([]);
+  const [categories, setCategories] = useState<ForumCategory[]>([]);
+  const [stats, setStats] = useState<ForumStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const data = await getForumDashboardUseCase.execute();
+        setPosts(data.latestPosts);
+        setCategories(data.categories);
+        setStats(data.stats);
+      } catch (error) {
+        console.error('Failed to load forum data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
   const onNavigateToThread = (id: number) => {
     navigate(`/thread/${id}`);
   };
 
-  const onNavigateToSubForum = (category: string) => {
-    navigate(`/forum/${category}`);
+  const onNavigateToSubForum = (categoryId: string) => {
+    navigate(`/forum/${categoryId}`);
   };
 
-  const [posts] = useState<ForumPost[]>([
-    {
-      id: 1,
-      title: "Thảo luận về mô hình GPT-4 và ứng dụng trong thực tế",
-      author: "Nguyễn Văn A",
-      authorAvatar: "👨‍💻",
-      category: "AI",
-      categoryColor: "from-violet-500 to-purple-600",
-      excerpt: "GPT-4 đã mang lại nhiều cải tiến đáng kể so với các phiên bản trước. Chúng ta hãy cùng thảo luận về các ứng dụng thực tế...",
-      comments: 15,
-      views: "2.5k",
-      timestamp: "2 giờ trước"
-    },
-    {
-      id: 2,
-      title: "Hướng dẫn tối ưu React Performance với useMemo và useCallback",
-      author: "Trần Thị B",
-      authorAvatar: "👩‍💻",
-      category: "Software",
-      categoryColor: "from-blue-500 to-cyan-600",
-      excerpt: "Trong bài viết này, tôi sẽ chia sẻ các kỹ thuật tối ưu performance cho React application bằng cách sử dụng hooks...",
-      comments: 23,
-      views: "3.2k",
-      timestamp: "4 giờ trước"
-    },
-    {
-      id: 3,
-      title: "Phân tích dữ liệu lớn với Apache Spark và Python",
-      author: "Lê Văn C",
-      authorAvatar: "🧑‍💼",
-      category: "Data Analysis",
-      categoryColor: "from-orange-500 to-red-600",
-      excerpt: "Apache Spark là framework mạnh mẽ cho xử lý dữ liệu lớn. Hãy cùng tìm hiểu cách tích hợp với Python...",
-      comments: 12,
-      views: "1.8k",
-      timestamp: "5 giờ trước"
-    },
-    {
-      id: 4,
-      title: "Machine Learning Deployment Best Practices 2024",
-      author: "Phạm Thị D",
-      authorAvatar: "👨‍🔬",
-      category: "AI",
-      categoryColor: "from-violet-500 to-purple-600",
-      excerpt: "Triển khai ML models vào production đòi hỏi nhiều kỹ thuật và best practices. Tôi muốn chia sẻ kinh nghiệm...",
-      comments: 31,
-      views: "4.1k",
-      timestamp: "6 giờ trước"
-    },
-    {
-      id: 5,
-      title: "TypeScript 5.0 - Những tính năng mới đáng chú ý",
-      author: "Hoàng Văn E",
-      authorAvatar: "👨‍🎓",
-      category: "Software",
-      categoryColor: "from-blue-500 to-cyan-600",
-      excerpt: "TypeScript 5.0 đã được release với nhiều cải tiến về performance và developer experience...",
-      comments: 18,
-      views: "2.9k",
-      timestamp: "8 giờ trước"
-    },
-    {
-      id: 6,
-      title: "Data Visualization với D3.js và React",
-      author: "Vũ Thị F",
-      authorAvatar: "👩‍🎨",
-      category: "Data Analysis",
-      categoryColor: "from-orange-500 to-red-600",
-      excerpt: "Tạo các biểu đồ tương tác đẹp mắt bằng D3.js trong React application của bạn...",
-      comments: 9,
-      views: "1.5k",
-      timestamp: "1 ngày trước"
-    },
-    {
-      id: 7,
-      title: "Neural Networks từ cơ bản đến nâng cao",
-      author: "Đặng Văn G",
-      authorAvatar: "🧑‍🏫",
-      category: "AI",
-      categoryColor: "from-violet-500 to-purple-600",
-      excerpt: "Cùng tìm hiểu chi tiết về cách neural networks hoạt động, từ perceptron đơn giản đến deep learning...",
-      comments: 27,
-      views: "5.3k",
-      timestamp: "1 ngày trước"
-    }
-  ]);
-
-  const categories = [
-    {
-      id: 'ai',
-      name: 'Trí tuệ Nhân tạo (AI)',
-      icon: Bot,
-      color: 'from-violet-500 to-purple-600',
-      description: 'Machine Learning, Deep Learning, NLP'
-    },
-    {
-      id: 'software',
-      name: 'Phát triển Phần mềm',
-      icon: Code,
-      color: 'from-blue-500 to-cyan-600',
-      description: 'Web, Mobile, Desktop Development'
-    },
-    {
-      id: 'data',
-      name: 'Phân tích Dữ liệu',
-      icon: Database,
-      color: 'from-orange-500 to-red-600',
-      description: 'Data Science, Analytics, Visualization'
-    }
-  ];
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 overflow-auto bg-gradient-to-br from-background via-background to-accent/20">
@@ -164,20 +77,24 @@ export function Forum() {
                 <div
                   key={post.id}
                   className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all border border-border cursor-pointer"
-                  onClick={() => onNavigateToThread?.(post.id)}
+                  onClick={() => onNavigateToThread(post.id)}
                 >
                   {/* Author Info */}
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-100 to-teal-100 flex items-center justify-center text-xl">
-                      {post.authorAvatar}
+                      {post.author.avatar}
                     </div>
                     <div>
-                      <p className="font-medium text-sm">{post.author}</p>
-                      <p className="text-xs text-muted-foreground">{post.timestamp}</p>
+                      <p className="font-medium text-sm">{post.author.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(post.createdAt).toLocaleDateString('vi-VN')}
+                      </p>
                     </div>
-                    <span className={`ml-auto px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${post.categoryColor}`}>
-                      {post.category}
-                    </span>
+                    {post.categoryColor && (
+                      <span className={`ml-auto px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${post.categoryColor}`}>
+                        {post.categoryName}
+                      </span>
+                    )}
                   </div>
 
                   {/* Post Title */}
@@ -194,11 +111,11 @@ export function Forum() {
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <MessageSquare className="w-4 h-4" />
-                      <span>{post.comments} bình luận</span>
+                      <span>{post.stats.comments} bình luận</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Eye className="w-4 h-4" />
-                      <span>{post.views} lượt xem</span>
+                      <span>{post.stats.views} lượt xem</span>
                     </div>
                   </div>
                 </div>
@@ -219,11 +136,11 @@ export function Forum() {
               <h3 className="text-lg font-bold mb-4">Danh mục Diễn đàn</h3>
               <div className="space-y-3">
                 {categories.map((category) => {
-                  const Icon = category.icon;
+                  const Icon = ICON_MAP[category.iconName] || Bot;
                   return (
                     <button
                       key={category.id}
-                      onClick={() => onNavigateToSubForum?.(category.id)}
+                      onClick={() => onNavigateToSubForum(category.id)}
                       className="w-full flex items-start gap-3 p-4 rounded-lg hover:bg-accent transition-all text-left group"
                     >
                       <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${category.color} flex items-center justify-center flex-shrink-0`}>
@@ -244,23 +161,25 @@ export function Forum() {
             </div>
 
             {/* Stats Card */}
-            <div className="bg-gradient-to-br from-violet-50 to-teal-50 rounded-xl p-6 border border-violet-100">
-              <h3 className="text-lg font-bold mb-4">Thống kê diễn đàn</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Tổng bài viết</span>
-                  <span className="font-bold text-violet-600">1,234</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Thành viên</span>
-                  <span className="font-bold text-violet-600">5,678</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Trực tuyến</span>
-                  <span className="font-bold text-teal-600">142</span>
+            {stats && (
+              <div className="bg-gradient-to-br from-violet-50 to-teal-50 rounded-xl p-6 border border-violet-100">
+                <h3 className="text-lg font-bold mb-4">Thống kê diễn đàn</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Tổng bài viết</span>
+                    <span className="font-bold text-violet-600">{stats.totalPosts}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Thành viên</span>
+                    <span className="font-bold text-violet-600">{stats.totalMembers}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Trực tuyến</span>
+                    <span className="font-bold text-teal-600">{stats.onlineMembers}</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

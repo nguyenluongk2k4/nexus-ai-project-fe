@@ -1,14 +1,6 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Message, ConnectionStatus } from '@/domain/entities/Message';
-import { ChatWsGateway } from '@/modules/chat/infrastructure/ChatWsGateway';
-import { ChatService } from '@/domain/services/ChatService';
-import { SendMessageUseCase } from '@/modules/chat/usecases/SendMessageUseCase';
-
-// DI Manual setup (có thể tách ra app/providers.ts sau nếu phức tạp hơn)
-const host = window.location.hostname || 'localhost';
-const gateway = new ChatWsGateway(`ws://${host}:8000/ws`);
-const service = new ChatService(gateway);
-const sendMessageUseCase = new SendMessageUseCase(service);
+import { useState, useEffect, useCallback } from 'react';
+import { Message, ConnectionStatus } from '../../domain/entities/Message';
+import { sendMessageUseCase, getChatService } from '../../providers';
 
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -17,6 +9,7 @@ export function useChat() {
   const [sessionId, setSessionId] = useState<string | null>(null);
 
   useEffect(() => {
+    const service = getChatService();
     service.connect(
       (msg) => {
         if (msg.role === 'system' && msg.text.startsWith('Bắt đầu session: ')) {

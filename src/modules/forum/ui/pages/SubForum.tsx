@@ -1,131 +1,68 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronRight, MessageSquare, Eye, User, TrendingUp, Clock, Bot, Code, Database } from 'lucide-react';
+import { getPostsByCategoryUseCase } from '../../providers';
+import { ForumPost, ForumCategory } from '../../domain/entities/ForumEntities';
 
-interface Thread {
-  id: number;
-  title: string;
-  author: string;
-  authorAvatar: string;
-  date: string;
-  replies: number;
-  views: number;
-  isPinned?: boolean;
-  isHot?: boolean;
-}
+const ICON_MAP: Record<string, any> = {
+  Bot,
+  Code,
+  Database,
+};
 
 export function SubForum() {
-  const { category = 'ai' } = useParams<{ category: string }>();
+  const { category: categoryId = 'ai' } = useParams<{ category: string }>();
   const navigate = useNavigate();
+
+  const [category, setCategory] = useState<ForumCategory | null>(null);
+  const [threads, setThreads] = useState<ForumPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState<'latest' | 'popular'>('latest');
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const data = await getPostsByCategoryUseCase.execute(categoryId);
+        setCategory(data.category);
+        setThreads(data.posts);
+      } catch (error) {
+        console.error('Failed to load subforum data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [categoryId]);
 
   const onNavigateToThread = (id: number) => {
     navigate(`/thread/${id}`);
   };
-
-  const categoryInfo = {
-    ai: {
-      name: 'Trí tuệ Nhân tạo (AI)',
-      icon: Bot,
-      color: 'from-violet-500 to-purple-600',
-      description: 'Thảo luận về Machine Learning, Deep Learning, NLP và các công nghệ AI'
-    },
-    software: {
-      name: 'Phát triển Phần mềm',
-      icon: Code,
-      color: 'from-blue-500 to-cyan-600',
-      description: 'Chia sẻ kinh nghiệm về Web, Mobile, Desktop Development'
-    },
-    data: {
-      name: 'Phân tích Dữ liệu',
-      icon: Database,
-      color: 'from-orange-500 to-red-600',
-      description: 'Data Science, Analytics, Visualization và Big Data'
-    }
-  };
-
-  const currentCategory = categoryInfo[category as keyof typeof categoryInfo] || categoryInfo.ai;
-  const Icon = currentCategory.icon;
-
-  const [threads] = useState<Thread[]>([
-    {
-      id: 1,
-      title: "Thảo luận về mô hình GPT-4 và ứng dụng trong thực tế",
-      author: "Nguyễn Văn A",
-      authorAvatar: "👨‍💻",
-      date: "29/10/2024",
-      replies: 15,
-      views: 2534,
-      isPinned: true,
-      isHot: true
-    },
-    {
-      id: 4,
-      title: "Machine Learning Deployment Best Practices 2024",
-      author: "Phạm Thị D",
-      authorAvatar: "👨‍🔬",
-      date: "29/10/2024",
-      replies: 31,
-      views: 4123,
-      isHot: true
-    },
-    {
-      id: 7,
-      title: "Neural Networks từ cơ bản đến nâng cao",
-      author: "Đặng Văn G",
-      authorAvatar: "🧑‍🏫",
-      date: "28/10/2024",
-      replies: 27,
-      views: 5342
-    },
-    {
-      id: 8,
-      title: "Computer Vision với OpenCV và TensorFlow",
-      author: "Mai Văn H",
-      authorAvatar: "👨‍💼",
-      date: "28/10/2024",
-      replies: 19,
-      views: 3256
-    },
-    {
-      id: 9,
-      title: "Natural Language Processing - Xử lý ngôn ngữ tự nhiên",
-      author: "Phan Thị I",
-      authorAvatar: "👩‍🔬",
-      date: "27/10/2024",
-      replies: 23,
-      views: 2891
-    },
-    {
-      id: 10,
-      title: "Reinforcement Learning trong game AI",
-      author: "Lý Văn K",
-      authorAvatar: "🧑‍💻",
-      date: "27/10/2024",
-      replies: 14,
-      views: 1876
-    },
-    {
-      id: 11,
-      title: "Transfer Learning và Fine-tuning models",
-      author: "Bùi Thị L",
-      authorAvatar: "👩‍🎓",
-      date: "26/10/2024",
-      replies: 18,
-      views: 2145
-    }
-  ]);
-
-  const [sortBy, setSortBy] = useState<'latest' | 'popular'>('latest');
 
   const sortedThreads = [...threads].sort((a, b) => {
     if (a.isPinned && !b.isPinned) return -1;
     if (!a.isPinned && b.isPinned) return 1;
     
     if (sortBy === 'popular') {
-      return b.views - a.views;
+      return (Number(b.stats.views) || 0) - (Number(a.stats.views) || 0); // Handle string views if needed or convert in entity
     }
-    return 0; // Keep original order for 'latest'
+    // Default to latest (createdAt)
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
+
+  if (loading) {
+     return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
+      </div>
+    );
+  }
+
+  if (!category) {
+    return <div className="flex-1 p-6">Category not found</div>;
+  }
+
+  const Icon = ICON_MAP[category.iconName] || Bot;
 
   return (
     <div className="flex-1 overflow-auto bg-gradient-to-br from-background via-background to-accent/20">
@@ -139,18 +76,18 @@ export function SubForum() {
             Trang chủ
           </button>
           <ChevronRight className="w-4 h-4" />
-          <span className="text-foreground font-medium">{currentCategory.name}</span>
+          <span className="text-foreground font-medium">{category.name}</span>
         </div>
 
         {/* Category Header */}
-        <div className={`bg-gradient-to-r ${currentCategory.color} rounded-2xl p-8 mb-6 text-white shadow-lg`}>
+        <div className={`bg-gradient-to-r ${category.color} rounded-2xl p-8 mb-6 text-white shadow-lg`}>
           <div className="flex items-center gap-4 mb-3">
             <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
               <Icon className="w-8 h-8" />
             </div>
             <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-2">{currentCategory.name}</h1>
-              <p className="text-white/90">{currentCategory.description}</p>
+              <h1 className="text-3xl font-bold mb-2">{category.name}</h1>
+              <p className="text-white/90">{category.description}</p>
             </div>
           </div>
         </div>
@@ -191,7 +128,7 @@ export function SubForum() {
           {sortedThreads.map((thread) => (
             <div
               key={thread.id}
-              onClick={() => onNavigateToThread?.(thread.id)}
+              onClick={() => onNavigateToThread(thread.id)}
               className={`bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-all border cursor-pointer ${
                 thread.isPinned ? 'border-violet-300 bg-violet-50/50' : 'border-border'
               }`}
@@ -199,7 +136,7 @@ export function SubForum() {
               <div className="flex items-start gap-4">
                 {/* Author Avatar */}
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-100 to-teal-100 flex items-center justify-center text-xl flex-shrink-0">
-                  {thread.authorAvatar}
+                  {thread.author.avatar}
                 </div>
 
                 {/* Thread Info */}
@@ -225,10 +162,10 @@ export function SubForum() {
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <User className="w-4 h-4" />
-                      <span>{thread.author}</span>
+                      <span>{thread.author.name}</span>
                     </div>
                     <span>•</span>
-                    <span>{thread.date}</span>
+                    <span>{new Date(thread.createdAt).toLocaleDateString('vi-VN')}</span>
                   </div>
                 </div>
 
@@ -237,14 +174,14 @@ export function SubForum() {
                   <div className="text-center">
                     <div className="flex items-center gap-1 text-violet-600 font-semibold">
                       <MessageSquare className="w-4 h-4" />
-                      <span>{thread.replies}</span>
+                      <span>{thread.stats.comments}</span>
                     </div>
                     <div className="text-xs text-muted-foreground">trả lời</div>
                   </div>
                   <div className="text-center">
                     <div className="flex items-center gap-1 text-teal-600 font-semibold">
                       <Eye className="w-4 h-4" />
-                      <span>{thread.views.toLocaleString()}</span>
+                      <span>{thread.stats.views}</span>
                     </div>
                     <div className="text-xs text-muted-foreground">lượt xem</div>
                   </div>

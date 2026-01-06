@@ -1,142 +1,64 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronRight, ThumbsUp, MessageSquare, Share2, Bookmark, Clock } from 'lucide-react';
-
-interface Comment {
-  id: number;
-  author: string;
-  authorAvatar: string;
-  content: string;
-  timestamp: string;
-  likes: number;
-}
+import { getThreadDetailsUseCase } from '../../providers';
+import { ForumPost, ForumComment } from '../../domain/entities/ForumEntities';
 
 export function ThreadDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [post, setPost] = useState<ForumPost | null>(null);
+  const [comments, setComments] = useState<ForumComment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [replyContent, setReplyContent] = useState('');
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        if (!id) return;
+        setLoading(true);
+        const data = await getThreadDetailsUseCase.execute(Number(id));
+        setPost(data.post);
+        setComments(data.comments);
+      } catch (error) {
+        console.error('Failed to load thread details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [id]);
 
   const onNavigateToSubForum = () => {
-    // Navigate back to the AI category as a default or use the actual category from threadData
-    // For now, following the existing structure in SubForum where it defaults to 'ai'
-    navigate('/forum/ai');
-  };
-
-  const [replyContent, setReplyContent] = useState('');
-  const [comments] = useState<Comment[]>([
-    {
-      id: 1,
-      author: "Trần Văn B",
-      authorAvatar: "👨‍🔬",
-      content: "Rất hữu ích! Tôi đã thử nghiệm GPT-4 API và thấy performance tốt hơn nhiều so với GPT-3.5. Đặc biệt là khả năng hiểu context và reasoning.",
-      timestamp: "3 giờ trước",
-      likes: 8
-    },
-    {
-      id: 2,
-      author: "Lê Thị C",
-      authorAvatar: "👩‍💼",
-      content: "Mình đang implement một chatbot sử dụng GPT-4 cho doanh nghiệp. Có bạn nào có kinh nghiệm về prompt engineering không? Mình muốn tối ưu chi phí API calls.",
-      timestamp: "2 giờ trước",
-      likes: 5
-    },
-    {
-      id: 3,
-      author: "Nguyễn Văn D",
-      authorAvatar: "🧑‍💻",
-      content: "Câu hỏi hay! Mình suggest các bạn nên:\n1. Cache responses cho các queries tương tự\n2. Sử dụng system prompts hiệu quả\n3. Giới hạn max_tokens hợp lý\n4. Implement retry logic với exponential backoff",
-      timestamp: "1 giờ trước",
-      likes: 12
-    },
-    {
-      id: 4,
-      author: "Phạm Thị E",
-      authorAvatar: "👩‍🎓",
-      content: "GPT-4 vision API cũng rất mạnh! Mình đã dùng để phân tích hình ảnh y tế và độ chính xác khá ấn tượng.",
-      timestamp: "45 phút trước",
-      likes: 6
-    },
-    {
-      id: 5,
-      author: "Hoàng Văn F",
-      authorAvatar: "👨‍🏫",
-      content: "Có ai thử function calling chưa? Mình thấy tính năng này rất useful cho việc integrate với external tools.",
-      timestamp: "30 phút trước",
-      likes: 4
+    if (post) {
+      navigate(`/forum/${post.categoryId}`);
+    } else {
+      navigate('/forum');
     }
-  ]);
-
-  const threadData = {
-    title: "Thảo luận về mô hình GPT-4 và ứng dụng trong thực tế",
-    author: "Nguyễn Văn A",
-    authorAvatar: "👨‍💻",
-    category: "AI",
-    categoryName: "Trí tuệ Nhân tạo",
-    date: "29/10/2024 14:30",
-    views: 2534,
-    content: `
-# GPT-4: Một bước đột phá trong công nghệ AI
-
-Xin chào mọi người! 👋
-
-Gần đây mình có cơ hội làm việc với GPT-4 API và muốn chia sẻ một số insights về mô hình này cũng như các ứng dụng thực tế mà mình đã triển khai.
-
-## Điểm mạnh của GPT-4
-
-**1. Reasoning và Logic tốt hơn**
-- GPT-4 có khả năng suy luận logic phức tạp tốt hơn nhiều so với GPT-3.5
-- Có thể handle các bài toán toán học và lập trình phức tạp
-- Hiểu context dài hơn (128k tokens vs 4k-16k của GPT-3.5)
-
-**2. Multimodal Capabilities**
-- Có thể xử lý cả text và image
-- Vision API cho phép phân tích hình ảnh, đọc text từ ảnh, mô tả scene
-- Rất hữu ích cho các ứng dụng accessibility và education
-
-**3. Better Following Instructions**
-- Tuân thủ system prompts tốt hơn
-- Ít hallucination hơn
-- Consistent output format
-
-## Các Use Cases mình đã implement
-
-### 1. Chatbot hỗ trợ khách hàng
-- Tích hợp với CRM system
-- Function calling để query database
-- Multi-turn conversations với context awareness
-
-### 2. Code Review Assistant
-- Phân tích code và suggest improvements
-- Detect potential bugs và security issues
-- Generate unit tests tự động
-
-### 3. Content Generation
-- Blog posts, product descriptions
-- SEO optimization
-- Multi-language support
-
-## Challenges và Solutions
-
-**Chi phí cao**
-- Solution: Implement caching layer, optimize prompts
-- Sử dụng GPT-3.5 cho simple tasks, GPT-4 cho complex ones
-
-**Latency**
-- Solution: Streaming responses, async processing
-- Pre-compute common queries
-
-**Rate Limits**
-- Solution: Implement queue system, retry logic
-- Request rate limit increase từ OpenAI
-
-Mọi người có kinh nghiệm gì với GPT-4 không? Chia sẻ thêm nhé! 🚀
-    `
   };
 
   const handleSubmitReply = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Reply submitted:', replyContent);
+    // TODO: Call addCommentUseCase
     setReplyContent('');
   };
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
+      </div>
+    );
+  }
+
+  if (!post) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-xl font-bold">Thread not found</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 overflow-auto bg-gradient-to-br from-background via-background to-accent/20">
@@ -154,10 +76,10 @@ Mọi người có kinh nghiệm gì với GPT-4 không? Chia sẻ thêm nhé! �
             onClick={onNavigateToSubForum}
             className="hover:text-violet-600 transition-colors"
           >
-            {threadData.categoryName}
+            {post.categoryName}
           </button>
           <ChevronRight className="w-4 h-4" />
-          <span className="text-foreground font-medium truncate">{threadData.title}</span>
+          <span className="text-foreground font-medium truncate max-w-[300px]">{post.title}</span>
         </div>
 
         {/* Main Thread Post */}
@@ -166,31 +88,33 @@ Mọi người có kinh nghiệm gì với GPT-4 không? Chia sẻ thêm nhé! �
           <div className="mb-6 pb-6 border-b border-border">
             <div className="flex items-start gap-4 mb-4">
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-100 to-teal-100 flex items-center justify-center text-2xl flex-shrink-0">
-                {threadData.authorAvatar}
+                {post.author.avatar}
               </div>
               <div className="flex-1">
-                <h1 className="text-2xl font-bold mb-2">{threadData.title}</h1>
+                <h1 className="text-2xl font-bold mb-2">{post.title}</h1>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <span className="font-medium text-foreground">{threadData.author}</span>
+                  <span className="font-medium text-foreground">{post.author.name}</span>
                   <span>•</span>
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
-                    <span>{threadData.date}</span>
+                    <span>{new Date(post.createdAt).toLocaleDateString('vi-VN')}</span>
                   </div>
                   <span>•</span>
-                  <span>{threadData.views.toLocaleString()} lượt xem</span>
+                  <span>{Number(post.stats.views).toLocaleString()} lượt xem</span>
                 </div>
               </div>
-              <span className="px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r from-violet-500 to-purple-600">
-                {threadData.category}
-              </span>
+              {post.categoryName && (
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${post.categoryColor || 'from-violet-500 to-purple-600'}`}>
+                  {post.categoryName}
+                </span>
+              )}
             </div>
           </div>
 
           {/* Thread Content */}
           <div className="prose prose-slate max-w-none mb-6">
             <div className="whitespace-pre-wrap text-foreground leading-relaxed">
-              {threadData.content}
+              {post.content || post.excerpt}
             </div>
           </div>
 
@@ -198,7 +122,7 @@ Mọi người có kinh nghiệm gì với GPT-4 không? Chia sẻ thêm nhé! �
           <div className="flex items-center gap-3 pt-6 border-t border-border">
             <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-violet-50 to-purple-50 text-violet-700 hover:from-violet-100 hover:to-purple-100 transition-all font-medium">
               <ThumbsUp className="w-4 h-4" />
-              <span>Thích (24)</span>
+              <span>Thích ({post.stats.likes})</span>
             </button>
             <button className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-accent transition-all text-muted-foreground">
               <Share2 className="w-4 h-4" />
@@ -226,12 +150,14 @@ Mọi người có kinh nghiệm gì với GPT-4 không? Chia sẻ thêm nhé! �
               >
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-100 to-teal-100 flex items-center justify-center text-xl flex-shrink-0">
-                    {comment.authorAvatar}
+                    {comment.author.avatar}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="font-semibold">{comment.author}</span>
-                      <span className="text-sm text-muted-foreground">{comment.timestamp}</span>
+                      <span className="font-semibold">{comment.author.name}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {new Date(comment.createdAt).toLocaleDateString('vi-VN')}
+                      </span>
                     </div>
                     <p className="text-foreground mb-3 whitespace-pre-wrap leading-relaxed">
                       {comment.content}
