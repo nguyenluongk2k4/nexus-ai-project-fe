@@ -3,7 +3,7 @@ import { ChatWsGateway } from './infrastructure/ChatWsGateway';
 import { SendMessageUseCase } from './usecases/SendMessageUseCase';
 
 const host = window.location.hostname || 'localhost';
-const chatGateway = new ChatWsGateway(`ws://${host}:8000/ws`);
+const chatGateway = new ChatWsGateway(`ws://${host}:8000/api/chat/ws`);
 const chatService = new ChatService(chatGateway);
 
 export const sendMessageUseCase = new SendMessageUseCase(chatService);
