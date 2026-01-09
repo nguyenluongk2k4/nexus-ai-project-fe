@@ -1,9 +1,13 @@
-import { useState, useEffect } from 'react';
-import { Lock, CheckCircle2, Circle, BookOpen, Target, Clock, TrendingUp, Award, ExternalLink, Lightbulb, Code } from 'lucide-react';
-import { Button } from '@/shared/components/ui/button';
-import { Card } from '@/shared/components/ui/card';
-import { LearningResourceManager } from '@/shared/components/LearningResourceManager';
+import { useState, useEffect, useMemo } from 'react';
+import { ArrowLeft, Check, Lock, Play, Share2, Zap, BookOpen, Clock, Star, Rocket, Bell, Calendar, Edit3, Minus, Plus } from 'lucide-react';
 import { useSkillTree, SkillNode } from '@/modules/skill-tree/ui/hooks/useSkillTree';
+
+// Node types for different states
+type NodeStatus = 'completed' | 'in-progress' | 'locked';
+
+interface TreeNode extends SkillNode {
+  progress?: number; // 0-100 for in-progress nodes
+}
 
 export function SkillTree() {
   const { 
@@ -16,10 +20,8 @@ export function SkillTree() {
     specializations
   } = useSkillTree();
 
-  const [selectedNode, setSelectedNode] = useState<SkillNode | null>(null);
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const [visibleLevels, setVisibleLevels] = useState<number[]>([0, 1, 2, 3]);
-  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+  const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
+  const [zoomLevel, setZoomLevel] = useState(100);
   const [focusedBranch, setFocusedBranch] = useState<{
     abilityId?: string;
     skillId?: string;
@@ -27,86 +29,40 @@ export function SkillTree() {
 
   useEffect(() => {
     if (showTree) {
-       setSelectedNode(null);
-       setExpandedNodes(new Set());
-       setFocusedBranch(null);
-       setZoomLevel(1);
+      setSelectedNode(null);
+      setFocusedBranch(null);
+      setZoomLevel(100);
     }
   }, [showTree]);
 
-  const selectSpec = (id: string) => {
-    const spec = specializations.find((s: any) => s.id === id);
-    if (spec) selectSpecialization(spec);
-  };
-
-  // Recalculate positions for visible nodes to spread them out
-  const repositionVisibleNodes = (nodes: SkillNode[]): SkillNode[] => {
-    const repositioned = [...nodes];
-    
-    // Group by level
-    const byLevel: Record<number, SkillNode[]> = {};
-    repositioned.forEach(node => {
-      if (!byLevel[node.level]) byLevel[node.level] = [];
-      byLevel[node.level].push(node);
-    });
-    
-    // Reposition each level
-    Object.keys(byLevel).forEach(levelStr => {
-      const level = parseInt(levelStr);
-      const nodesAtLevel = byLevel[level];
-      const count = nodesAtLevel.length;
-      
-      if (count === 1) {
-        // Single node - center it
-        nodesAtLevel[0].x = 50;
-      } else {
-        // Multiple nodes - spread evenly across width
-        const spacing = 80 / (count + 1); // Use 80% of width with padding
-        const startX = 10; // 10% padding from left
-        
-        nodesAtLevel.forEach((node, idx) => {
-          node.x = startX + (spacing * (idx + 1));
-        });
-      }
-    });
-    
-    return repositioned;
+  // Convert status to new format
+  const getNodeStatus = (node: SkillNode): NodeStatus => {
+    if (node.status === 'unlocked') return 'completed';
+    if (node.status === 'available') return 'in-progress';
+    return 'locked';
   };
 
   // Get visible nodes based on focused branch
-  const getVisibleNodes = (): SkillNode[] => {
-    // Safety check
-    if (!skillNodes || skillNodes.length === 0) {
-      return [];
-    }
-
+  const visibleNodes = useMemo(() => {
+    if (!skillNodes || skillNodes.length === 0) return [];
+    
     if (!focusedBranch) {
-      // Show all level 0 and 1 by default - use original positions
       return skillNodes.filter((node: SkillNode) => node.level <= 1);
     }
 
     const visible: SkillNode[] = [];
-    
-    // Always show root
     const root = skillNodes.find(n => n.level === 0);
-    if (root) visible.push({...root}); // Clone to avoid mutating original
+    if (root) visible.push({...root});
 
     if (focusedBranch.skillId) {
-      // Focused on a skill - show: root, parent ability, this skill, and its knowledge
       const skill = skillNodes.find(n => n.id === focusedBranch.skillId);
       if (skill) {
         visible.push({...skill});
-        
-        // Find parent ability: ability's connections contains this skill id
         const parentAbility = skillNodes.find(n => 
-          n.level === 1 && n.connections && n.connections.includes(skill.id)
+          n.level === 1 && n.connections?.includes(skill.id)
         );
-        if (parentAbility) {
-          visible.push({...parentAbility});
-        }
-        
-        // Add all knowledge of this skill: skill's connections contains knowledge ids
-        if (skill.connections && skill.connections.length > 0) {
+        if (parentAbility) visible.push({...parentAbility});
+        if (skill.connections?.length > 0) {
           const knowledge = skillNodes.filter(n => 
             n.level === 3 && skill.connections.includes(n.id)
           );
@@ -114,13 +70,10 @@ export function SkillTree() {
         }
       }
     } else if (focusedBranch.abilityId) {
-      // Focused on an ability - show: root, this ability, and its skills
       const ability = skillNodes.find(n => n.id === focusedBranch.abilityId);
       if (ability) {
         visible.push({...ability});
-        
-        // Add all skills of this ability: ability's connections contains skill ids
-        if (ability.connections && ability.connections.length > 0) {
+        if (ability.connections?.length > 0) {
           const skills = skillNodes.filter(n => 
             n.level === 2 && ability.connections.includes(n.id)
           );
@@ -129,87 +82,76 @@ export function SkillTree() {
       }
     }
 
-    // Reposition nodes to spread them out
-    const finalVisible = visible.length > 0 ? visible : (root ? [{...root}] : []);
-    return repositionVisibleNodes(finalVisible);
-  };
+    return visible;
+  }, [skillNodes, focusedBranch]);
 
-  // Handle node click for expand/collapse
-  const handleNodeClick = (node: SkillNode) => {
-    try {
-      setSelectedNode(node);
-
-      if (node.level === 1) {
-        // Clicked on ability
-        if (focusedBranch?.abilityId === node.id) {
-          // Collapse - back to showing all abilities
-          setFocusedBranch(null);
-        } else {
-          // Expand this ability
-          setFocusedBranch({ abilityId: node.id });
-        }
-      } else if (node.level === 2) {
-        // Clicked on skill - expand to show knowledge
-        // Find parent ability: ability's connections array contains this skill's id
-        const parentAbility = skillNodes.find(n => 
-          n.level === 1 && n.connections && n.connections.includes(node.id)
-        );
-        
-        if (focusedBranch?.skillId === node.id) {
-          // Collapse skill - back to showing ability's skills
-          setFocusedBranch({ abilityId: parentAbility?.id });
-        } else {
-          // Expand this skill
-          setFocusedBranch({ 
-            abilityId: parentAbility?.id,
-            skillId: node.id 
-          });
-        }
-      } else if (node.level === 3) {
-        // Clicked on knowledge - just select it
-        // Keep current focus
-      } else if (node.level === 0) {
-        // Clicked on root - collapse all
-        setFocusedBranch(null);
+  // Reposition nodes for display
+  const repositionedNodes = useMemo(() => {
+    const nodes = [...visibleNodes];
+    const byLevel: Record<number, SkillNode[]> = {};
+    
+    nodes.forEach(node => {
+      if (!byLevel[node.level]) byLevel[node.level] = [];
+      byLevel[node.level].push(node);
+    });
+    
+    Object.keys(byLevel).forEach(levelStr => {
+      const level = parseInt(levelStr);
+      const nodesAtLevel = byLevel[level];
+      const count = nodesAtLevel.length;
+      
+      if (count === 1) {
+        nodesAtLevel[0].x = 50;
+      } else {
+        const spacing = 70 / (count + 1);
+        const startX = 15;
+        nodesAtLevel.forEach((node, idx) => {
+          node.x = startX + (spacing * (idx + 1));
+        });
       }
-    } catch (error) {
-      console.error('Error in handleNodeClick:', error);
-      // Fallback: just select the node without changing focus
-      setSelectedNode(node);
+    });
+    
+    return nodes;
+  }, [visibleNodes]);
+
+  const handleNodeClick = (node: SkillNode) => {
+    setSelectedNode(node as TreeNode);
+
+    if (node.level === 1) {
+      if (focusedBranch?.abilityId === node.id) {
+        setFocusedBranch(null);
+      } else {
+        setFocusedBranch({ abilityId: node.id });
+      }
+    } else if (node.level === 2) {
+      const parentAbility = skillNodes.find(n => 
+        n.level === 1 && n.connections?.includes(node.id)
+      );
+      if (focusedBranch?.skillId === node.id) {
+        setFocusedBranch({ abilityId: parentAbility?.id });
+      } else {
+        setFocusedBranch({ abilityId: parentAbility?.id, skillId: node.id });
+      }
+    } else if (node.level === 0) {
+      setFocusedBranch(null);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'unlocked':
-        return 'from-teal-400 to-teal-600';
-      case 'available':
-        return 'from-violet-400 to-violet-600';
-      default:
-        return 'from-gray-300 to-gray-400';
-    }
+  // Generate bezier path between nodes
+  const generatePath = (fromX: number, fromY: number, toX: number, toY: number) => {
+    const midY = (fromY + toY) / 2;
+    return `M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY}`;
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'unlocked':
-        return CheckCircle2;
-      case 'available':
-        return Circle;
-      default:
-        return Lock;
-    }
-  };
-
-  return (
-    <div className="flex-1 bg-white p-8 overflow-auto">
-      {!showTree ? (
-        // Specialization Selection Screen
+  if (!showTree) {
+    // Specialization Selection
+    return (
+      <div className="flex-1 bg-slate-50 p-8 overflow-auto">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-foreground mb-4">Chọn Chuyên Ngành IT</h1>
-            <p className="text-lg text-muted-foreground">
-              Khám phá lộ trình học tập chi tiết cho 5 chuyên ngành công nghệ hàng đầu
+            <h1 className="text-4xl font-extrabold text-slate-800 mb-4 tracking-tight">Chọn Chuyên Ngành IT</h1>
+            <p className="text-lg text-slate-500">
+              Khám phá lộ trình học tập chi tiết cho các chuyên ngành công nghệ
             </p>
           </div>
           
@@ -219,21 +161,17 @@ export function SkillTree() {
                 key={spec.id}
                 onClick={() => selectSpecialization(spec)}
                 disabled={loading}
-                className="group p-8 rounded-2xl border-2 border-border bg-white hover:border-violet-400 hover:shadow-2xl transition-all duration-300 text-left transform hover:-translate-y-1"
+                className="group p-8 rounded-2xl border border-slate-200 bg-white hover:border-indigo-400 hover:shadow-xl transition-all duration-300 text-left transform hover:-translate-y-1"
               >
                 <div className="mb-6">
                   <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${spec.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
-                    <span className="text-3xl">
-                      {spec.icon}
-                    </span>
+                    <span className="text-3xl">{spec.icon}</span>
                   </div>
                 </div>
-                
-                <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-violet-700">
+                <h3 className="text-xl font-bold text-slate-800 mb-3 group-hover:text-indigo-600">
                   {spec.name}
                 </h3>
-                
-                <div className="mt-6 inline-flex items-center text-violet-600 font-semibold group-hover:text-violet-700">
+                <div className="mt-6 inline-flex items-center text-indigo-600 font-semibold">
                   Khám phá skill tree
                   <svg className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -246,483 +184,438 @@ export function SkillTree() {
           {loading && (
             <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
               <div className="bg-white rounded-xl p-8 shadow-2xl">
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-violet-500 border-t-transparent mx-auto mb-4"></div>
-                <p className="text-foreground font-medium">Đang tải skill tree...</p>
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent mx-auto mb-4"></div>
+                <p className="text-slate-800 font-medium">Đang tải skill tree...</p>
               </div>
             </div>
           )}
         </div>
-      ) : (
-        // Skill Tree View
-        <div className="w-[95%] max-w-[1800px] mx-auto px-4">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <button
-                onClick={backToSelection}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Quay lại chọn chuyên ngành
-              </button>
-              <h1 className="text-2xl font-bold text-foreground mb-2">{selectedSpecialization?.name}</h1>
-              <div className="space-y-1">
-                <p className="text-muted-foreground">
-                  <strong className="text-foreground">Cách sử dụng:</strong> Click vào Ability để xem Skills → Click vào Skill để xem Knowledge chi tiết
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Click lại vào node đang mở để thu gọn. Dùng nút "Thu gọn tất cả" để reset về view ban đầu.
-                </p>
+      </div>
+    );
+  }
+
+  // Skill Tree View
+  return (
+    <div className="flex-1 flex flex-col min-w-0 bg-slate-50">
+      {/* Header */}
+      <header className="h-16 border-b border-slate-200 bg-white/80 backdrop-blur-md px-8 flex items-center justify-between z-10 flex-shrink-0">
+        <div className="flex items-center gap-4">
+          <button onClick={backToSelection} className="text-slate-400 hover:text-indigo-600 transition-colors">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h2 className="text-lg font-bold text-slate-800">{selectedSpecialization?.name}</h2>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center bg-slate-100 rounded-full px-3 py-1 gap-2">
+            <span className="text-[11px] font-bold text-slate-500">ZOOM</span>
+            <button 
+              onClick={() => setZoomLevel(Math.max(50, zoomLevel - 10))}
+              className="p-1 hover:text-indigo-600 transition-colors"
+            >
+              <Minus className="w-4 h-4" />
+            </button>
+            <span className="text-xs font-mono w-12 text-center font-bold">{zoomLevel}%</span>
+            <button 
+              onClick={() => setZoomLevel(Math.min(150, zoomLevel + 10))}
+              className="p-1 hover:text-indigo-600 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+          <button 
+            onClick={() => { setZoomLevel(100); setFocusedBranch(null); }}
+            className="px-4 py-1.5 bg-slate-900 text-white rounded-full text-xs font-bold hover:bg-slate-800 transition-all"
+          >
+            RESET VIEW
+          </button>
+        </div>
+      </header>
+
+      <div className="flex-1 flex overflow-hidden">
+        {/* Tree Canvas */}
+        <div className="flex-1 relative overflow-hidden">
+          {/* Legend */}
+          <div className="absolute top-6 left-8 flex items-center gap-6 bg-white/90 backdrop-blur p-4 rounded-xl border border-slate-200 shadow-sm z-20">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
+                <Check className="w-2 h-2 text-white" />
               </div>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Completed</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full border-2 border-dashed border-indigo-500"></div>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">In Progress</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-slate-200 flex items-center justify-center">
+                <Lock className="w-2 h-2 text-slate-500" />
+              </div>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Locked</span>
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-4 gap-6">
-            {/* Tree Visualization */}
-            <div className="lg:col-span-3 bg-white rounded-xl border border-border shadow-sm overflow-hidden">
-              {/* Controls */}
-              <div className="p-4 bg-gray-50 border-b border-border flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-medium text-foreground">Hiển thị level:</span>
-                  {[0, 1, 2, 3].map((level) => (
-                    <button
-                      key={level}
-                      onClick={() => {
-                        if (visibleLevels.includes(level)) {
-                          setVisibleLevels(visibleLevels.filter(l => l !== level));
-                        } else {
-                          setVisibleLevels([...visibleLevels, level].sort());
-                        }
-                      }}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                        visibleLevels.includes(level)
-                          ? 'bg-violet-600 text-white'
-                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                      }`}
-                    >
-                      {level === 0 ? 'Root' : level === 1 ? 'Ability' : level === 2 ? 'Skill' : 'Knowledge'}
-                    </button>
-                  ))}
-                  <div className="h-4 w-px bg-gray-300 mx-1"></div>
-                  <button
-                    onClick={() => setVisibleLevels([0, 1, 2, 3])}
-                    className="px-3 py-1 rounded-lg text-xs font-medium bg-teal-100 text-teal-700 hover:bg-teal-200 transition-colors"
-                  >
-                    Tất cả
-                  </button>
-                  <button
-                    onClick={() => setVisibleLevels([0])}
-                    className="px-3 py-1 rounded-lg text-xs font-medium bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors"
-                  >
-                    Thu gọn
-                  </button>
-                </div>
+          {/* SVG Tree */}
+          <svg 
+            className="w-full h-full" 
+            viewBox="0 0 100 80"
+            style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'center' }}
+          >
+            {/* Connection Paths */}
+            {repositionedNodes.map((node) => {
+              const nodeMap = new Map(repositionedNodes.map(n => [n.id, n]));
+              return node.connections?.map((targetId) => {
+                const target = nodeMap.get(targetId);
+                if (!target) return null;
                 
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setFocusedBranch(null)}
-                    className="px-3 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg text-sm font-medium transition-colors"
-                  >
-                    🔄 Thu gọn tất cả
-                  </button>
-                  
-                  <div className="h-4 w-px bg-gray-300"></div>
-                  
-                  <span className="text-sm font-medium text-foreground">Zoom:</span>
-                  <button
-                    onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.2))}
-                    className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition-colors"
-                  >
-                    -
-                  </button>
-                  <span className="text-sm text-muted-foreground w-12 text-center">{Math.round(zoomLevel * 100)}%</span>
-                  <button
-                    onClick={() => setZoomLevel(Math.min(3, zoomLevel + 0.2))}
-                    className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition-colors"
-                  >
-                    +
-                  </button>
-                  <button
-                    onClick={() => setZoomLevel(1)}
-                    className="px-3 py-1 bg-violet-100 hover:bg-violet-200 text-violet-700 rounded-lg text-sm font-medium transition-colors"
-                  >
-                    Reset Zoom
-                  </button>
-                </div>
-              </div>
+                const status = getNodeStatus(node);
+                const isCompleted = status === 'completed';
+                
+                return (
+                  <path
+                    key={`${node.id}-${targetId}`}
+                    d={generatePath(node.x, node.y, target.x, target.y)}
+                    fill="none"
+                    stroke={isCompleted ? '#6366f1' : '#cbd5e1'}
+                    strokeWidth="0.4"
+                    strokeLinecap="round"
+                    opacity={isCompleted ? 0.6 : 0.4}
+                  />
+                );
+              });
+            })}
+
+            {/* Nodes */}
+            {repositionedNodes.map((node) => {
+              const status = getNodeStatus(node);
+              const isSelected = selectedNode?.id === node.id;
+              const isExpanded = (node.level === 1 && focusedBranch?.abilityId === node.id) || 
+                                (node.level === 2 && focusedBranch?.skillId === node.id);
               
-              {/* Info bar */}
-              <div className="px-4 py-2 bg-gradient-to-r from-blue-50 to-violet-50 border-b border-blue-100 flex items-center justify-between text-xs flex-wrap gap-2">
-                <div className="flex items-center gap-2 text-blue-700">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>
-                    Hiển thị {getVisibleNodes().filter(n => visibleLevels.includes(n.level)).length}/{skillNodes.length} nodes
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-violet-700 font-medium">💡 Click node có dấu <span className="inline-flex items-center justify-center w-4 h-4 bg-green-500 text-white rounded-full text-[10px] font-bold mx-1">+</span> để xem chi tiết</span>
-                </div>
-              </div>
+              // Node sizes based on level
+              const size = node.level === 0 ? 6 : node.level === 1 ? 5 : 4;
+              const radius = size / 2;
               
-              {/* SVG Canvas */}
-              <div className="p-4 overflow-auto h-[calc(100vh-25rem)]">
-                <div className="relative w-full h-full" style={{ minWidth: '1200px', minHeight: '900px' }}>
-                  <svg 
-                    className="w-full h-full" 
-                    viewBox="0 0 100 70" 
-                    preserveAspectRatio="xMidYMid meet"
-                    style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'center' }}
+              return (
+                <g
+                  key={node.id}
+                  transform={`translate(${node.x}, ${node.y})`}
+                  onClick={() => handleNodeClick(node)}
+                  className="cursor-pointer"
+                  style={{ transition: 'all 0.3s ease' }}
+                >
+                  {/* Glow effect for active node */}
+                  {status === 'in-progress' && (
+                    <circle
+                      r={radius + 2}
+                      fill="url(#glowGradient)"
+                      opacity="0.3"
+                    />
+                  )}
+
+                  {/* Progress ring for in-progress */}
+                  {status === 'in-progress' && (
+                    <>
+                      <circle
+                        r={radius + 0.5}
+                        fill="none"
+                        stroke="#e2e8f0"
+                        strokeWidth="0.3"
+                      />
+                      <circle
+                        r={radius + 0.5}
+                        fill="none"
+                        stroke="#6366f1"
+                        strokeWidth="0.3"
+                        strokeDasharray={`${2 * Math.PI * (radius + 0.5) * 0.35} ${2 * Math.PI * (radius + 0.5)}`}
+                        strokeLinecap="round"
+                        transform="rotate(-90)"
+                      />
+                    </>
+                  )}
+
+                  {/* Main node */}
+                  <rect
+                    x={-radius}
+                    y={-radius}
+                    width={size}
+                    height={size}
+                    rx={size * 0.3}
+                    fill={
+                      status === 'completed' ? '#10b981' :
+                      status === 'in-progress' ? '#6366f1' :
+                      '#e2e8f0'
+                    }
+                    stroke={isSelected ? '#6366f1' : 'transparent'}
+                    strokeWidth="0.3"
+                    className="transition-all hover:opacity-90"
+                  />
+
+                  {/* Status icon */}
+                  {status === 'completed' && (
+                    <g transform={`translate(${radius - 0.8}, ${-radius - 0.5})`}>
+                      <circle r="0.8" fill="#059669" stroke="white" strokeWidth="0.15" />
+                      <path d="M-0.3 0 L-0.1 0.2 L0.3 -0.2" fill="none" stroke="white" strokeWidth="0.15" />
+                    </g>
+                  )}
+
+                  {status === 'locked' && (
+                    <g transform="translate(0, 0)">
+                      <rect x="-0.4" y="-0.3" width="0.8" height="0.6" rx="0.1" fill="#94a3b8" />
+                      <path d="M-0.25 -0.3 L-0.25 -0.5 Q0 -0.8 0.25 -0.5 L0.25 -0.3" fill="none" stroke="#94a3b8" strokeWidth="0.15" />
+                    </g>
+                  )}
+
+                  {/* Node icon for root/ability */}
+                  {node.level <= 1 && status !== 'locked' && (
+                    <text
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="white"
+                      fontSize="2"
+                      fontWeight="bold"
+                    >
+                      {node.level === 0 ? '🧠' : '📊'}
+                    </text>
+                  )}
+
+                  {/* Label */}
+                  <text
+                    y={radius + 2}
+                    textAnchor="middle"
+                    fill={status === 'completed' ? '#059669' : status === 'in-progress' ? '#6366f1' : '#64748b'}
+                    fontSize="1.5"
+                    fontWeight={status !== 'locked' ? '600' : '400'}
                   >
-                  {/* Gradient definitions */}
-                  <defs>
-                    {skillNodes.map((node) => (
-                      <linearGradient key={`${node.id}-gradient`} id={`${node.id}-gradient`} x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor={node.status === 'unlocked' ? '#14b8a6' : node.status === 'available' ? '#8b5cf6' : '#9ca3af'} />
-                        <stop offset="100%" stopColor={node.status === 'unlocked' ? '#0891b2' : node.status === 'available' ? '#7c3aed' : '#6b7280'} />
-                      </linearGradient>
-                    ))}
-                  </defs>
+                    {node.label.length > 15 ? node.label.substring(0, 12) + '...' : node.label}
+                  </text>
 
-                  {/* Connection Lines */}
-                  {(() => {
-                    const visibleNodes = getVisibleNodes();
-                    const visibleNodesMap = new Map(visibleNodes.map(n => [n.id, n]));
-                    
-                    return visibleNodes
-                      .filter(node => visibleLevels.includes(node.level))
-                      .flatMap((node) =>
-                        node.connections.map((targetId) => {
-                          // Find target in repositioned visible nodes, not original skillNodes
-                          const target = visibleNodesMap.get(targetId);
-                          if (!target || !visibleLevels.includes(target.level)) return null;
-                      
-                          const isUnlocked = node.status === 'unlocked' && (target.status === 'unlocked' || target.status === 'available');
-                          
-                          return (
-                            <line
-                              key={`${node.id}-${targetId}`}
-                              x1={node.x}
-                              y1={node.y}
-                              x2={target.x}
-                              y2={target.y}
-                              stroke={isUnlocked ? '#8b5cf6' : '#d4d4d8'}
-                              strokeWidth="0.3"
-                              strokeDasharray={isUnlocked ? '0' : '1,1'}
-                              opacity={isUnlocked ? 0.6 : 0.3}
-                            />
-                          );
-                        })
-                      );
-                  })()}
+                  {/* Active indicator */}
+                  {isExpanded && (
+                    <text
+                      y={radius + 4}
+                      textAnchor="middle"
+                      fill="#6366f1"
+                      fontSize="1"
+                      fontWeight="bold"
+                    >
+                      ▼ EXPANDED
+                    </text>
+                  )}
+                </g>
+              );
+            })}
 
-                  {/* Skill Nodes */}
-                  {getVisibleNodes()
-                    .filter(node => visibleLevels.includes(node.level))
-                    .map((node) => {
-                    const Icon = getStatusIcon(node.status);
-                    const isSelected = selectedNode?.id === node.id;
-                    const hasChildren = node.connections.length > 0;
-                    const isExpanded = (node.level === 1 && focusedBranch?.abilityId === node.id) || 
-                                      (node.level === 2 && focusedBranch?.skillId === node.id);
-                    
-                    return (
-                      <g
-                        key={node.id}
-                        transform={`translate(${node.x}, ${node.y})`}
-                        onClick={() => handleNodeClick(node)}
-                        className="cursor-pointer"
-                        style={{ transition: 'all 0.3s' }}
-                      >
-                        {/* Outer ring for selected */}
-                        {isSelected && (
-                          <circle
-                            r="4"
-                            fill="none"
-                            stroke="#8b5cf6"
-                            strokeWidth="0.4"
-                            opacity="0.5"
-                          />
-                        )}
-                        
-                        {/* Node circle */}
-                        <circle
-                          r="2"
-                          fill={`url(#${node.id}-gradient)`}
-                          className={`${node.status !== 'locked' ? 'hover:opacity-80' : ''} transition-opacity`}
-                        />
-                        
-                        {/* Expand/Collapse indicator */}
-                        {hasChildren && (node.level === 1 || node.level === 2) && (
-                          <circle
-                            cx="2.5"
-                            cy="-2.5"
-                            r="1"
-                            fill={isExpanded ? '#f59e0b' : '#10b981'}
-                            stroke="white"
-                            strokeWidth="0.2"
-                          />
-                        )}
-                        
-                        {/* Plus/Minus icon */}
-                        {hasChildren && (node.level === 1 || node.level === 2) && (
-                          <text
-                            x="2.5"
-                            y="-1.8"
-                            textAnchor="middle"
-                            className="pointer-events-none select-none"
-                            style={{ fontSize: '1.2px', fill: 'white', fontWeight: 'bold' }}
-                          >
-                            {isExpanded ? '−' : '+'}
-                          </text>
-                        )}
-                        
-                        {/* Label */}
-                        <text
-                          y="4"
-                          textAnchor="middle"
-                          className="pointer-events-none select-none"
-                          style={{ fontSize: '1.8px', fill: '#3f3f46', fontWeight: '500' }}
-                        >
-                          {node.label}
-                        </text>
-                      </g>
-                    );
-                  })}
-                </svg>
+            {/* Gradient definitions */}
+            <defs>
+              <radialGradient id="glowGradient">
+                <stop offset="0%" stopColor="#6366f1" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+          </svg>
+        </div>
+
+        {/* Detail Panel */}
+        <aside className="w-[400px] bg-white border-l border-slate-200 flex flex-col shadow-xl z-20 flex-shrink-0">
+          <div className="p-6 h-full overflow-y-auto">
+            {selectedNode ? (
+              <>
+                {/* Header */}
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex flex-col gap-2">
+                    <span className={`px-2 py-1 text-[10px] font-bold rounded w-fit tracking-wider uppercase ${
+                      getNodeStatus(selectedNode) === 'completed' ? 'bg-emerald-100 text-emerald-700' :
+                      getNodeStatus(selectedNode) === 'in-progress' ? 'bg-indigo-100 text-indigo-700' :
+                      'bg-slate-100 text-slate-500'
+                    }`}>
+                      {getNodeStatus(selectedNode) === 'completed' ? 'Đã hoàn thành' :
+                       getNodeStatus(selectedNode) === 'in-progress' ? 'Đang học' : 'Bị khóa'}
+                    </span>
+                    <h3 className="text-xl font-extrabold text-slate-800 leading-tight">
+                      {selectedNode.fullName}
+                    </h3>
+                  </div>
+                  <button className="p-2 text-slate-400 hover:text-slate-600">
+                    <Share2 className="w-5 h-5" />
+                  </button>
                 </div>
-              </div>
-            </div>
 
-            {/* Skill Details Sidebar */}
-            <div className="space-y-4 h-[calc(100vh-16rem)] overflow-y-auto">
-              {selectedNode ? (
-                <div className="bg-white rounded-xl border border-border shadow-lg h-full">
-                  {/* Header */}
-                  <div className={`p-6 bg-gradient-to-br ${getStatusColor(selectedNode.status)} text-white rounded-t-xl`}>
-                    <div className="flex items-center gap-3 mb-2">
-                      {(() => {
-                        const Icon = getStatusIcon(selectedNode.status);
-                        return <Icon className="w-6 h-6" />;
-                      })()}
-                      <span className="text-sm font-medium uppercase tracking-wide">
-                        {selectedNode.nodeData.type}
+                {/* Description */}
+                {selectedNode.nodeData?.description && (
+                  <div className="mb-6">
+                    <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Mô tả</h4>
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                      {selectedNode.nodeData.description}
+                    </p>
+                  </div>
+                )}
+
+                {/* Metadata Grid */}
+                <div className="grid grid-cols-3 gap-3 mb-6">
+                  {selectedNode.nodeData?.difficultyLevel && (
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <Zap className="w-3.5 h-3.5 text-purple-500" />
+                        <span className="text-[9px] font-bold text-slate-500 uppercase">Độ khó</span>
+                      </div>
+                      <p className="text-[11px] font-bold text-slate-700">{selectedNode.nodeData.difficultyLevel}</p>
+                    </div>
+                  )}
+                  {selectedNode.nodeData?.estimatedTimeToComplete && (
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <Clock className="w-3.5 h-3.5 text-blue-500" />
+                        <span className="text-[9px] font-bold text-slate-500 uppercase">Thời gian</span>
+                      </div>
+                      <p className="text-[11px] font-bold text-slate-700">{selectedNode.nodeData.estimatedTimeToComplete}</p>
+                    </div>
+                  )}
+                  {selectedNode.nodeData?.importanceScore && (
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <Star className="w-3.5 h-3.5 text-amber-500" />
+                        <span className="text-[9px] font-bold text-slate-500 uppercase">Quan trọng</span>
+                      </div>
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3].map((i) => (
+                          <span 
+                            key={i} 
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              i <= Math.ceil(selectedNode.nodeData.importanceScore / 3.5) 
+                                ? 'bg-amber-500' 
+                                : 'bg-slate-200'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Tools */}
+                {selectedNode.nodeData?.tools?.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Công cụ</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedNode.nodeData.tools.slice(0, 5).map((tool: string, idx: number) => (
+                        <span key={idx} className="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-md text-xs font-medium">
+                          {tool}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Learning Resources */}
+                {selectedNode.nodeData?.learningResources?.length > 0 && (
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <BookOpen className="w-4 h-4" /> Tài liệu học tập
+                      </h4>
+                      <span className="text-[10px] font-bold text-indigo-600 px-2 py-0.5 bg-indigo-50 rounded">
+                        0/{selectedNode.nodeData.learningResources.length} HOÀN THÀNH
                       </span>
                     </div>
-                    <h3 className="text-xl font-bold">{selectedNode.fullName}</h3>
-                  </div>
-                  
-                  {/* Content */}
-                  <div className="p-6 space-y-6">
-                    {/* Description */}
-                    {selectedNode.nodeData.description && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <BookOpen className="w-4 h-4 text-violet-600" />
-                          <h4 className="font-semibold text-foreground">Mô tả</h4>
-                        </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          {selectedNode.nodeData.description}
-                        </p>
-                      </div>
-                    )}
-                    
-                    {/* Metadata */}
-                    <div className="grid grid-cols-2 gap-4">
-                      {selectedNode.nodeData.difficultyLevel && (
-                        <div className="bg-violet-50 rounded-lg p-3">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Target className="w-4 h-4 text-violet-600" />
-                            <span className="text-xs font-medium text-violet-900">Độ khó</span>
+                    <div className="space-y-3">
+                      {selectedNode.nodeData.learningResources.slice(0, 3).map((resource: any, idx: number) => {
+                        const resourceName = typeof resource === 'string' ? resource : (resource.name || resource.title || 'Tài liệu');
+                        const isFirst = idx === 0;
+                        
+                        return (
+                          <div 
+                            key={idx} 
+                            className={`group p-4 rounded-xl bg-white border transition-all ${
+                              isFirst 
+                                ? 'border-l-4 border-l-indigo-500 border-slate-200 shadow-sm' 
+                                : 'border-slate-200 hover:border-indigo-300'
+                            }`}
+                          >
+                            <div className="flex items-start gap-3 mb-3">
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                isFirst ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500'
+                              }`}>
+                                {isFirst ? <Play className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className={`text-sm font-bold leading-tight truncate ${
+                                  isFirst ? 'text-indigo-600' : 'text-slate-700 group-hover:text-indigo-600'
+                                }`}>
+                                  {resourceName}
+                                </p>
+                                <p className="text-[10px] text-slate-400 mt-0.5">
+                                  {typeof resource === 'object' && resource.type ? resource.type : 'Tài liệu học tập'}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <select className="flex-1 text-[11px] bg-slate-50 border-slate-200 rounded-lg py-1.5 font-medium focus:ring-indigo-500 focus:border-indigo-500">
+                                <option>Chưa bắt đầu</option>
+                                <option>Đang học</option>
+                                <option>Hoàn thành</option>
+                              </select>
+                              <div className="flex gap-1">
+                                <button className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                                  <Bell className="w-4 h-4" />
+                                </button>
+                                <button className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                                  <Calendar className="w-4 h-4" />
+                                </button>
+                                <button className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                                  <Edit3 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-sm font-semibold text-violet-700">
-                            {selectedNode.nodeData.difficultyLevel}
-                          </p>
-                        </div>
-                      )}
-                      
-                      {selectedNode.nodeData.estimatedTimeToComplete && (
-                        <div className="bg-teal-50 rounded-lg p-3">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Clock className="w-4 h-4 text-teal-600" />
-                            <span className="text-xs font-medium text-teal-900">Thời gian</span>
-                          </div>
-                          <p className="text-sm font-semibold text-teal-700">
-                            {selectedNode.nodeData.estimatedTimeToComplete}
-                          </p>
-                        </div>
-                      )}
-                      
-                      {selectedNode.nodeData.importanceScore && (
-                        <div className="bg-amber-50 rounded-lg p-3">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Award className="w-4 h-4 text-amber-600" />
-                            <span className="text-xs font-medium text-amber-900">Điểm quan trọng</span>
-                          </div>
-                          <p className="text-sm font-semibold text-amber-700">
-                            {selectedNode.nodeData.importanceScore}/10
-                          </p>
-                        </div>
-                      )}
-                      
-                      {selectedNode.nodeData.marketDemand && (
-                        <div className="bg-green-50 rounded-lg p-3">
-                          <div className="flex items-center gap-2 mb-1">
-                            <TrendingUp className="w-4 h-4 text-green-600" />
-                            <span className="text-xs font-medium text-green-900">Nhu cầu thị trường</span>
-                          </div>
-                          <p className="text-sm font-semibold text-green-700">
-                            {selectedNode.nodeData.marketDemand}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Tools */}
-                    {selectedNode.nodeData.tools && selectedNode.nodeData.tools.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Code className="w-4 h-4 text-violet-600" />
-                          <h4 className="font-semibold text-foreground">Công cụ</h4>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedNode.nodeData.tools.map((tool: string, idx: number) => (
-                            <span key={idx} className="px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-xs font-medium">
-                              {tool}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Keywords */}
-                    {selectedNode.nodeData.keywords && selectedNode.nodeData.keywords.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Lightbulb className="w-4 h-4 text-violet-600" />
-                          <h4 className="font-semibold text-foreground">Từ khóa</h4>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedNode.nodeData.keywords.slice(0, 8).map((keyword: string, idx: number) => (
-                            <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
-                              {keyword}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Learning Resources */}
-                    {selectedNode.nodeData.learningResources && selectedNode.nodeData.learningResources.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <ExternalLink className="w-4 h-4 text-violet-600" />
-                          <h4 className="font-semibold text-foreground">Tài liệu học tập</h4>
-                        </div>
-                        <div className="space-y-3">
-                          {selectedNode.nodeData.learningResources.map((resource: any, idx: number) => {
-                            // Handle both string and object formats
-                            const resourceName = typeof resource === 'string' ? resource : (resource.name || resource.title || resource.url || 'Tài liệu học tập');
-                            const resourceUrl = typeof resource === 'string' ? resource : (resource.url || '#');
-                            
-                            return (
-                              <LearningResourceManager
-                                key={idx}
-                                resourceUrl={resourceUrl}
-                                resourceName={resourceName}
-                                nodeId={selectedNode.id}
-                                nodeName={selectedNode.fullName}
-                                specializationId={selectedSpecialization?.id || ''}
-                                specializationName={selectedSpecialization?.name || ''}
-                                estimatedTime={selectedNode.nodeData.estimatedTimeToComplete}
-                              />
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Project Ideas */}
-                    {selectedNode.nodeData.projectIdeas && selectedNode.nodeData.projectIdeas.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Lightbulb className="w-4 h-4 text-violet-600" />
-                          <h4 className="font-semibold text-foreground">Ý tưởng dự án</h4>
-                        </div>
-                        <ul className="space-y-3">
-                          {selectedNode.nodeData.projectIdeas.slice(0, 3).map((idea: any, idx: number) => (
-                            <li key={idx} className="pl-4 border-l-2 border-violet-300">
-                              {typeof idea === 'string' ? (
-                                <p className="text-sm text-muted-foreground">{idea}</p>
-                              ) : (
-                                <div>
-                                  <p className="text-sm font-medium text-foreground mb-1">{idea.title}</p>
-                                  <p className="text-xs text-muted-foreground">{idea.description}</p>
-                                </div>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {/* Actions */}
-                    <div className="pt-4 space-y-2">
-                      {selectedNode.status === 'available' && (
-                        <button className="w-full bg-gradient-to-r from-violet-600 to-teal-500 text-white py-3 px-4 rounded-lg hover:opacity-90 transition-opacity font-semibold">
-                          Bắt đầu học
-                        </button>
-                      )}
-                      
-                      {selectedNode.status === 'unlocked' && (
-                        <button className="w-full border-2 border-violet-600 text-violet-600 py-3 px-4 rounded-lg hover:bg-violet-50 transition-colors font-semibold">
-                          Ôn tập lại
-                        </button>
-                      )}
-                      
-                      {selectedNode.status === 'locked' && (
-                        <div className="text-center py-3 text-muted-foreground text-sm">
-                          Hoàn thành các kỹ năng trước để mở khóa
-                        </div>
-                      )}
+                        );
+                      })}
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="bg-white rounded-xl border border-border p-8 shadow-sm text-center">
-                  <div className="w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <BookOpen className="w-8 h-8 text-violet-600" />
-                  </div>
-                  <p className="text-muted-foreground">
-                    Chọn một node để xem chi tiết
-                  </p>
-                </div>
-              )}
+                )}
 
-              {/* Legend */}
-              <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
-                <h4 className="text-foreground mb-4">Legend</h4>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-teal-400 to-teal-600"></div>
-                    <span className="text-muted-foreground">Unlocked</span>
+                {/* Project Ideas */}
+                {selectedNode.nodeData?.projectIdeas?.length > 0 && (
+                  <div className="mb-6 p-4 rounded-xl bg-indigo-50/50 border border-indigo-100">
+                    <h4 className="text-[11px] font-bold text-indigo-600 uppercase tracking-widest mb-2 flex items-center gap-2">
+                      <Rocket className="w-4 h-4" /> Ý tưởng dự án
+                    </h4>
+                    <p className="text-xs font-semibold text-slate-700 mb-1">
+                      {typeof selectedNode.nodeData.projectIdeas[0] === 'string' 
+                        ? selectedNode.nodeData.projectIdeas[0] 
+                        : selectedNode.nodeData.projectIdeas[0]?.title}
+                    </p>
+                    {typeof selectedNode.nodeData.projectIdeas[0] === 'object' && (
+                      <p className="text-[11px] text-slate-500 leading-relaxed">
+                        {selectedNode.nodeData.projectIdeas[0].description}
+                      </p>
+                    )}
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-violet-400 to-violet-600"></div>
-                    <span className="text-muted-foreground">Available</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-gray-300 to-gray-400"></div>
-                    <span className="text-muted-foreground">Locked</span>
-                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="mt-8 space-y-3 pt-6 border-t border-slate-100">
+                  {getNodeStatus(selectedNode) !== 'locked' && (
+                    <button className="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/25 hover:bg-indigo-700 transition-all flex items-center justify-center gap-2">
+                      <Zap className="w-5 h-5" /> Bắt đầu học
+                    </button>
+                  )}
+                  <button className="w-full py-3 bg-white text-slate-600 font-bold rounded-xl border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-2 text-sm">
+                    <BookOpen className="w-4 h-4" /> Làm bài kiểm tra
+                  </button>
                 </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-center text-slate-400">
+                <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                  <BookOpen className="w-10 h-10 text-slate-300" />
+                </div>
+                <p className="font-medium">Chọn một node để xem chi tiết</p>
+                <p className="text-sm mt-2">Click vào các skill trên cây để bắt đầu</p>
               </div>
-            </div>
+            )}
           </div>
-        </div>
-      )}
+        </aside>
+      </div>
     </div>
   );
 }
