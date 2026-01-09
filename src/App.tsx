@@ -21,7 +21,7 @@ const ProtectedRoute = () => {
   const { isAuthenticated, isLoading } = useAuth();
   
   if (isLoading) {
-    return <div className="flex h-screen items-center justify-center bg-[#0f172a] text-white">Loading...</div>;
+    return <div className="flex h-screen items-center justify-center text-white">Loading...</div>;
   }
   
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
@@ -45,7 +45,7 @@ export default function App() {
                 element={
                   <div className="flex h-screen w-screen overflow-hidden">
                     <Navigation />
-                    <main className="flex-1 overflow-auto bg-[#0f172a]">
+                    <main className="flex-1 overflow-auto bg-white">
                       <Routes>
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/skilltree" element={<SkillTree />} />
@@ -54,6 +54,7 @@ export default function App() {
                         <Route path="/insights" element={<LearningInsights />} />
                         <Route path="/timeline" element={<Timeline />} />
                         <Route path="/chat" element={<Chat />} />
+                        <Route path="/chat/c/:sessionId" element={<Chat />} />
                         <Route path="/forum" element={<Forum />} />
                         <Route path="/forum/:category" element={<SubForum />} />
                         <Route path="/thread/:id" element={<ThreadDetail />} />

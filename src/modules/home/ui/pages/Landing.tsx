@@ -6,7 +6,7 @@ export function Landing() {
   const navigate = useNavigate();
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-violet-50/30 to-teal-50/30">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="border-b border-border bg-white/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">

@@ -18,7 +18,7 @@ export class ChatWsGateway implements ChatGateway {
 
     this.ws.onopen = () => {
       onStatusChange('idle');
-      this.startNewSession();
+      // Don't auto-create session - let it happen when user sends first message
     };
 
     this.ws.onmessage = (event) => {
