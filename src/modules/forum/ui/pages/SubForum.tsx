@@ -65,7 +65,7 @@ export function SubForum() {
   const Icon = ICON_MAP[category.iconName] || Bot;
 
   return (
-    <div className="flex-1 overflow-auto bg-gradient-to-br from-background via-background to-accent/20">
+    <div className="flex-1 overflow-auto bg-white">
       <div className="max-w-[1200px] mx-auto p-6">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm mb-6 text-muted-foreground">

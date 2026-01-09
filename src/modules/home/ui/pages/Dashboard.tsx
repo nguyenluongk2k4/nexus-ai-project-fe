@@ -13,7 +13,7 @@ export function Dashboard() {
   const { metrics, weeklyActivity, skillProgress, recentActivity } = data;
 
   return (
-    <div className="flex-1 bg-gradient-to-br from-white via-violet-50/20 to-teal-50/20 p-8 overflow-auto">
+    <div className="flex-1 bg-white p-8 overflow-auto">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-foreground mb-2">Welcome back, Alex</h1>

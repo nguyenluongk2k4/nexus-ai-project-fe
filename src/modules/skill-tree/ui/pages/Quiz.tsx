@@ -85,7 +85,7 @@ export function Quiz() {
     const percentage = Math.round((score / quizQuestions.length) * 100);
     
     return (
-      <div className="flex-1 bg-gradient-to-br from-white via-violet-50/20 to-teal-50/20 p-8 overflow-auto flex items-center justify-center">
+      <div className="flex-1 bg-white p-8 overflow-auto flex items-center justify-center">
         <div className="max-w-2xl w-full">
           <div className="bg-white rounded-xl border border-border p-12 shadow-sm text-center">
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-100 to-teal-100 flex items-center justify-center mx-auto mb-6">
@@ -112,7 +112,7 @@ export function Quiz() {
   }
 
   return (
-    <div className="flex-1 bg-gradient-to-br from-white via-violet-50/20 to-teal-50/20 p-8 overflow-auto">
+    <div className="flex-1 bg-white p-8 overflow-auto">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-foreground mb-2">Knowledge Assessment</h1>
