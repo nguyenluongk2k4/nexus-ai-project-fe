@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
-import { SkillTreeService } from '@/domain/services/SkillTreeService';
+import { getSkillTreeService } from '../../providers';
 import { SpecializationData, SPECIALIZATIONS } from '@/domain/data/skillTreeData';
 
-const service = new SkillTreeService();
+// Get service from providers (DI)
+const service = getSkillTreeService();
 
 export interface SkillNode {
   id: string;
