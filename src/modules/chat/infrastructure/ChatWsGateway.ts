@@ -1,5 +1,6 @@
 import { ChatGateway } from '../domain/ports/ChatGateway';
 import { Message, ConnectionStatus } from '../domain/entities/Message';
+import { treeNodeService, TreeNodeData } from '@/modules/skill-tree/domain/services/treeNodeService';
 
 export class ChatWsGateway implements ChatGateway {
   private ws: WebSocket | null = null;
@@ -32,7 +33,6 @@ export class ChatWsGateway implements ChatGateway {
               text: `Bắt đầu session: ${data.session_id}`,
               timestamp: new Date().toISOString()
             });
-            // Emit a special event or just handle it as a system message
             break;
           case 'status':
             onStatusChange(data.status as ConnectionStatus);
@@ -44,6 +44,21 @@ export class ChatWsGateway implements ChatGateway {
               text: data.text,
               timestamp: new Date().toISOString()
             });
+            break;
+          case 'tree_nodes':
+            // Update tree with incoming nodes (creates if empty, updates if exists)
+            if (data.nodes && Array.isArray(data.nodes)) {
+              treeNodeService.updateNodes(data.nodes as TreeNodeData[]);
+            }
+            break;
+          case 'tree_resources':
+            // Update nodes with learning resources
+            if (data.resources && typeof data.resources === 'object') {
+              treeNodeService.setResources(data.resources as any);
+            }
+            break;
+          case 'tree_loading':
+            treeNodeService.setLoading(true);
             break;
           case 'error':
             onError(data.message || 'Lỗi từ máy chủ');
@@ -67,10 +82,12 @@ export class ChatWsGateway implements ChatGateway {
 
   sendMessage(text: string, sessionId: string | null): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      const token = localStorage.getItem('token');
       this.ws.send(JSON.stringify({
         type: 'user_message',
         text,
-        session_id: sessionId
+        session_id: sessionId,
+        token: token
       }));
     }
   }

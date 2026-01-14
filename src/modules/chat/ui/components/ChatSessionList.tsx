@@ -5,6 +5,10 @@ import { X, MessageSquare, Plus, Loader2, ChevronDown } from 'lucide-react';
 export interface ChatSession {
   id: string;
   title: string | null;
+  context_data?: {
+    tree_nodes?: any[];
+    [key: string]: any;
+  };
   created_at: string;
   updated_at: string;
 }

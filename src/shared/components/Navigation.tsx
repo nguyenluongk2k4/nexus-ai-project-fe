@@ -13,7 +13,7 @@ export function Navigation() {
     { id: 'jobs', label: 'Job Matches', icon: Briefcase, path: '/jobs' },
     { id: 'insights', label: 'Insights', icon: TrendingUp, path: '/insights' },
     { id: 'timeline', label: 'Lịch Học', icon: Calendar, path: '/timeline' },
-    { id: 'chat', label: 'Chat', icon: MessageSquare, path: '/chat' },
+    // { id: 'chat', label: 'Chat', icon: MessageSquare, path: '/chat' },
     { id: 'forum', label: 'Diễn Đàn', icon: Users, path: '/forum' },
   ];
 
