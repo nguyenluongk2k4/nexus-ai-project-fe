@@ -16,6 +16,9 @@ export function SkillTree() {
   // Subscribe to tree state Observable
   const [treeState, setTreeState] = useState<TreeState>({ nodes: [], loading: false, error: null });
   
+    // Destructure loadSessionTree from hook
+    const { loadSessionTree } = useSkillTree();
+
   useEffect(() => {
     const subscription = treeState$.subscribe(setTreeState);
     return () => subscription.unsubscribe();
@@ -54,6 +57,15 @@ export function SkillTree() {
       selectSession(sessionId);
       console.log('Session selected:', sessionId);
     };
+
+    // Load tree when session changes
+    useEffect(() => {
+      if (currentSessionId) {
+        loadSessionTree(currentSessionId);
+      }
+    }, [currentSessionId, loadSessionTree]);
+
+    // Handle new chat - clear tree and start new session
 
     // Handle new chat - clear tree and start new session
     const handleNewChat = () => {

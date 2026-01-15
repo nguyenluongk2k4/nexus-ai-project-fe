@@ -1,10 +1,13 @@
 import { SPECIALIZATIONS, SPECIALIZATION_DATA_MAP } from '@/domain/data/skillTreeData';
+import { SkillTreeGateway } from '../ports/SkillTreeGateway';
 
 /**
  * SkillTree Service - Domain layer
  * Handles skill tree data fetching and processing
  */
 export class SkillTreeService {
+  constructor(private gateway: SkillTreeGateway) {}
+
   async getSpecializations() {
     return SPECIALIZATIONS;
   }
@@ -18,25 +21,14 @@ export class SkillTreeService {
   }
 
   async getNodeResources(nodeId: string) {
-    // Lazy load: import HttpClient here if circular dependency issues, 
-    // or just assume HttpClient is safe.
-    // We'll use a direct fetch or the shared client if accessible.
-    const token = localStorage.getItem('token');
-    const headers = {
-      'Authorization': `Bearer ${token}`
-    };
-    
-    try {
-      // Use configured API_URL or relative path
-      const res = await fetch(`http://localhost:8000/api/skill-tree/nodes/${nodeId}/resources`, {
-        headers
-      });
-      
-      if (!res.ok) return [];
-      return await res.json();
-    } catch (e) {
-      console.error("Failed to fetch resources", e);
-      return [];
-    }
+    return this.gateway.getNodeResources(nodeId);
+  }
+
+  async updateResourceStatus(resourceId: string, status: 'not_started' | 'in_progress' | 'completed') {
+    return this.gateway.updateResourceStatus(resourceId, status);
+  }
+
+  async getTreeBySession(sessionId: string) {
+    return this.gateway.getTreeBySession(sessionId);
   }
 }

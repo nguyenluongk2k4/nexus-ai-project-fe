@@ -5,12 +5,15 @@ import { InitializeLearningDataUseCase } from './usecases/InitializeLearningData
 import { SyncLearningDataUseCase } from './usecases/SyncLearningDataUseCase';
 import { CalculateStatsUseCase } from './usecases/CalculateStatsUseCase';
 
+import { SkillTreeHttpGateway } from './infrastructure/gateway/SkillTreeHttpGateway';
+
 // Gateways (Infrastructure)
 const learningGateway = new LocalStorageLearningGateway();
+const skillTreeGateway = new SkillTreeHttpGateway();
 
 // Services (Domain)
 const learningService = new LearningService(learningGateway);
-const skillTreeService = new SkillTreeService();
+const skillTreeService = new SkillTreeService(skillTreeGateway);
 
 // UseCases (Application)
 export const initializeLearningDataUseCase = new InitializeLearningDataUseCase(learningService);
