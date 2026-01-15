@@ -89,9 +89,23 @@ export function SkillTree() {
     };
   
     // Convert tree nodes from Observable to SkillNode format for visualization
-    // Now includes 'filled' status for skeleton vs real data
+    // Build connections from parentId relationships
     const skillNodes: SkillNode[] = useMemo(() => {
-      return treeState.nodes.map((node) => ({
+      const nodes = treeState.nodes;
+      
+      // Build a map of parent -> children for connections
+      const childrenByParent: Record<string, string[]> = {};
+      nodes.forEach(node => {
+        const parentId = (node as any).parentId;
+        if (parentId) {
+          if (!childrenByParent[parentId]) {
+            childrenByParent[parentId] = [];
+          }
+          childrenByParent[parentId].push(node.id);
+        }
+      });
+      
+      return nodes.map((node) => ({
         id: node.id,
         label: node.filled 
           ? (node.name.length > 15 ? node.name.substring(0, 12) + '...' : node.name)
@@ -101,7 +115,8 @@ export function SkillTree() {
         x: 50, // Will be repositioned
         y: 10 + (node.level * 20),
         status: node.filled ? 'available' as const : 'locked' as const,
-        connections: (node as any).connections || [], // Use connections from node (populated from edges)
+        // Build connections: either from node.connections or from childrenByParent map
+        connections: (node as any).connections || childrenByParent[node.id] || [],
         nodeData: {
           description: node.description,
           difficultyLevel: node.metadata?.difficultyLevel,
