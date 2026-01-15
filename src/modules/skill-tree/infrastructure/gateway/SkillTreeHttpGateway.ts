@@ -30,4 +30,13 @@ export class SkillTreeHttpGateway implements SkillTreeGateway {
       return null;
     }
   }
+
+  async getNodeChildren(nodeId: string): Promise<{ nodes: any[], edges: any[] }> {
+    try {
+      return await httpClient.get<{ nodes: any[], edges: any[] }>(apiConfig.endpoints.skillTree.nodeChildren(nodeId));
+    } catch (e) {
+      console.error("Failed to fetch node children", e);
+      return { nodes: [], edges: [] };
+    }
+  }
 }

@@ -150,13 +150,14 @@ export function useSkillTree() {
               id: apiNode.id,
               label: apiNode.label.length > 15 ? apiNode.label.substring(0, 15) + '...' : apiNode.label,
               fullName: apiNode.label,
-              status: apiNode.data?.status === 'completed' || apiNode.data?.status === 'in-progress' ? 'unlocked' : 'available', // Simple mapping
-              level: 1, // Default level, or calculate from Y?
+              status: apiNode.data?.status === 'completed' || apiNode.data?.status === 'in-progress' ? 'unlocked' : 'available',
+              level: apiNode.level ?? 0, // Use level from API (0=root, 1=ability, 2=skill)
               x: apiNode.position?.x || 50,
               y: apiNode.position?.y || 50,
               connections: [],
               nodeData: {
                   ...apiNode.data,
+                  filled: true, // Mark as filled since data comes from API
                   learningResources: [] // Will be loaded lazily
               }
           });
@@ -179,12 +180,11 @@ export function useSkillTree() {
       const serviceNodes: any[] = finalNodes.map(n => ({
         id: n.id,
         name: n.fullName,
-        type: 'skill', // simplified
+        type: 'skill',
         level: n.level,
         filled: n.status !== 'locked',
-        parentId: null, // connections handling is different in service vs hook, but mainly for display
-        // We might need to map connections back if service uses them for layout
-        // But for now, let's just push the nodes so they render
+        parentId: null,
+        connections: n.connections, // CRITICAL: Include connections for edge drawing
         metadata: n.nodeData,
         resources: n.nodeData.learningResources
       }));

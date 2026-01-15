@@ -64,6 +64,7 @@ export const apiConfig = {
     // Skill Tree Module
     skillTree: {
       nodeResources: (nodeId: string) => `/skill-tree/nodes/${nodeId}/resources`,
+      nodeChildren: (nodeId: string) => `/skill-tree/nodes/${nodeId}/children`,
       resourceProgress: (resourceId: string) => `/skill-tree/resources/${resourceId}/progress`,
       treeBySession: (sessionId: string) => `/skill-tree/session/${sessionId}`,
     },

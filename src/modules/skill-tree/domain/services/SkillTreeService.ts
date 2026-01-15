@@ -31,4 +31,8 @@ export class SkillTreeService {
   async getTreeBySession(sessionId: string) {
     return this.gateway.getTreeBySession(sessionId);
   }
+
+  async getNodeChildren(nodeId: string) {
+    return this.gateway.getNodeChildren(nodeId);
+  }
 }

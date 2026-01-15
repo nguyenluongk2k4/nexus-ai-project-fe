@@ -46,9 +46,10 @@ export class ChatWsGateway implements ChatGateway {
             });
             break;
           case 'tree_nodes':
-            // Update tree with incoming nodes (creates if empty, updates if exists)
+            // Replace tree with generated nodes from chat
             if (data.nodes && Array.isArray(data.nodes)) {
-              treeNodeService.updateNodes(data.nodes as TreeNodeData[]);
+              treeNodeService.setNodes(data.nodes as TreeNodeData[]);
+              console.log(`🌳 [WS] Tree replaced with ${data.nodes.length} generated nodes`);
             }
             break;
           case 'tree_resources':
@@ -59,6 +60,15 @@ export class ChatWsGateway implements ChatGateway {
             break;
           case 'tree_loading':
             treeNodeService.setLoading(true);
+            break;
+          case 'tree_update':
+            // Tree was generated/updated - trigger refetch via API
+            treeNodeService.setLoading(false);
+            // Emit an event that SkillTree can listen to for refetch
+            window.dispatchEvent(new CustomEvent('tree-updated', { 
+              detail: { sessionId: data.session_id, nodeCount: data.node_count }
+            }));
+            console.log(`🌳 [WS] Tree updated with ${data.node_count} nodes, triggering refetch...`);
             break;
           case 'error':
             onError(data.message || 'Lỗi từ máy chủ');

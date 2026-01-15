@@ -156,5 +156,28 @@ export const treeNodeService = {
    */
   getCurrentState() {
     return treeState$.getValue();
+  },
+
+  /**
+   * Update connections for a specific node
+   * Used for lazy loading to connect parent to newly loaded children
+   */
+  updateNodeConnections(nodeId: string, connectionIds: string[]) {
+    const current = treeState$.getValue();
+    const nodeMap = new Map(current.nodes.map(n => [n.id, n]));
+    
+    if (nodeMap.has(nodeId)) {
+      const node = nodeMap.get(nodeId)!;
+      const existingConnections = (node as any).connections || [];
+      // Merge: add new connections without duplicates
+      const mergedConnections = [...new Set([...existingConnections, ...connectionIds])];
+      nodeMap.set(nodeId, { ...node, connections: mergedConnections } as any);
+      
+      treeState$.next({
+        ...current,
+        nodes: Array.from(nodeMap.values())
+      });
+      console.log(`🔗 [TreeNode] Updated connections for ${nodeId}:`, mergedConnections.length);
+    }
   }
 };
