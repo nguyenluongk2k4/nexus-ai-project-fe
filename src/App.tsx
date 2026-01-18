@@ -12,6 +12,9 @@ import { SubForum } from '@/modules/forum/ui/pages/SubForum';
 import { ThreadDetail } from '@/modules/forum/ui/pages/ThreadDetail';
 import { CreatePost } from '@/modules/forum/ui/pages/CreatePost';
 import { Timeline } from '@/modules/skill-tree/ui/pages/Timeline';
+import { Profile } from '@/modules/profile/ui/pages/Profile';
+import { Purchase } from '@/modules/purchase/ui/pages/Purchase';
+import { PurchaseSuccess } from '@/modules/purchase/ui/pages/PurchaseSuccess';
 import { LearningProgressProvider } from '@/modules/skill-tree/ui/contexts/LearningProgressContext';
 import { AuthProvider, useAuth } from '@/modules/auth/AuthProvider';
 import { LoginPage } from '@/modules/auth/ui/LoginPage';
@@ -60,6 +63,9 @@ export default function App() {
                         <Route path="/forum/new" element={<CreatePost />} />
                         <Route path="/forum/:category" element={<SubForum />} />
                         <Route path="/thread/:id" element={<ThreadDetail />} />
+                        <Route path="/profile" element={<Profile />} />
+                        <Route path="/purchase" element={<Purchase />} />
+                        <Route path="/purchase/success" element={<PurchaseSuccess />} />
                         <Route path="*" element={<Navigate to="/dashboard" replace />} />
                       </Routes>
                     </main>

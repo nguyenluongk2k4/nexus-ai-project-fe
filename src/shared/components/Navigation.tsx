@@ -5,7 +5,7 @@ import { useAuth } from '@/modules/auth/AuthProvider';
 export function Navigation() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  
+
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
     { id: 'skilltree', label: 'Skill Tree', icon: GitBranch, path: '/skilltree' },
@@ -30,7 +30,7 @@ export function Navigation() {
         </h1>
         <p className="text-muted-foreground mt-1 text-sm">Learn & Grow</p>
       </div>
-      
+
       <div className="flex-1 space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -52,11 +52,20 @@ export function Navigation() {
           );
         })}
       </div>
-      
+
       {/* User Info */}
       {user && (
         <div className="border-t border-border pt-4 mb-4">
-          <div className="flex items-center gap-3 px-4 py-2">
+          <NavLink
+            to="/profile"
+            className={({ isActive }) => `
+              flex items-center gap-3 px-4 py-2 rounded-xl transition-all
+              ${isActive
+                ? 'bg-gradient-to-r from-violet-50 to-teal-50'
+                : 'hover:bg-accent'
+              }
+            `}
+          >
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-teal-400 flex items-center justify-center text-white font-semibold">
               {user.fullName?.charAt(0)?.toUpperCase() || user.username?.charAt(0)?.toUpperCase() || 'U'}
             </div>
@@ -68,10 +77,10 @@ export function Navigation() {
                 {user.email}
               </p>
             </div>
-          </div>
+          </NavLink>
         </div>
       )}
-      
+
       <button
         onClick={handleLogout}
         className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-red-50 hover:text-red-600 transition-all font-medium"
