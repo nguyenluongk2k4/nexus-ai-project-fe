@@ -126,7 +126,10 @@ export function Forum() {
           {/* Right Column - Categories & Actions */}
           <div className="space-y-4">
             {/* Create Post Button */}
-            <button className="w-full bg-gradient-to-r from-violet-600 to-teal-500 text-white py-3 px-4 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2">
+            <button
+              onClick={() => navigate('/forum/new')}
+              className="w-full bg-gradient-to-r from-violet-600 to-teal-500 text-white py-3 px-4 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
+            >
               <PenSquare className="w-5 h-5" />
               Tạo bài viết mới
             </button>
