@@ -44,6 +44,26 @@ export class ChatWsGateway implements ChatGateway {
               text: data.text,
               timestamp: new Date().toISOString()
             });
+            // Start tree loading immediately when bot responds
+            treeNodeService.setLoading(true);
+            break;
+          case 'tree_generating':
+            // Signal that tree generation should start via HTTP streaming
+            // Dispatch event for SkillTree component to handle
+            treeNodeService.setLoading(true);
+            window.dispatchEvent(new CustomEvent('tree-generate', { 
+              detail: { 
+                sessionId: data.session_id, 
+                message: data.message 
+              }
+            }));
+            console.log(`🌳 [WS] Tree generating signal received, triggering HTTP stream...`);
+            break;
+          case 'tree_resources':
+            // Update nodes with learning resources
+            if (data.resources && typeof data.resources === 'object') {
+              treeNodeService.setResources(data.resources as any);
+            }
             break;
           case 'error':
             onError(data.message || 'Lỗi từ máy chủ');

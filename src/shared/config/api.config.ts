@@ -60,6 +60,17 @@ export const apiConfig = {
         rebuild: '/admin/sync/rebuild',
       },
     },
+
+    // Skill Tree Module
+    skillTree: {
+      nodeResources: (nodeId: string) => `/skill-tree/nodes/${encodeURIComponent(nodeId)}/resources`,
+      nodeChildren: (nodeId: string, sessionId?: string) => 
+        sessionId 
+          ? `/skill-tree/nodes/${encodeURIComponent(nodeId)}/children?session_id=${sessionId}`
+          : `/skill-tree/nodes/${encodeURIComponent(nodeId)}/children`,
+      resourceProgress: (resourceId: string) => `/skill-tree/resources/${resourceId}/progress`,
+      treeBySession: (sessionId: string) => `/skill-tree/session/${sessionId}`,
+    },
     
     // Learning Module (placeholders for future)
     learning: {
