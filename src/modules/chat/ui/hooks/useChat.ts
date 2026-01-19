@@ -4,7 +4,13 @@ import { Message, ConnectionStatus } from '../../domain/entities/Message';
 import { sendMessageUseCase, getChatService, getSessionGateway } from '../../providers';
 import { ChatSession } from '../components/ChatSessionList';
 
-export function useChat() {
+interface UseChatOptions {
+  /** If true, prevents navigation to /chat routes (for embedded chat in SkillTree) */
+  disableNavigation?: boolean;
+}
+
+export function useChat(options: UseChatOptions = {}) {
+  const { disableNavigation = false } = options;
   const navigate = useNavigate();
   const { sessionId: urlSessionId } = useParams<{ sessionId: string }>();
   
@@ -88,8 +94,11 @@ export function useChat() {
   const startNewChat = useCallback(() => {
     setMessages([]);
     setCurrentSessionId(null);
-    navigate('/chat');
-  }, [navigate]);
+    setCurrentSessionId(null);
+    if (!disableNavigation) {
+      navigate('/chat');
+    }
+  }, [navigate, disableNavigation]);
 
   // Initial load - only once
   useEffect(() => {
@@ -118,8 +127,10 @@ export function useChat() {
       if (msg.role === 'system' && msg.text.startsWith('Bắt đầu session: ')) {
         const newSessionId = msg.text.replace('Bắt đầu session: ', '');
         setCurrentSessionId(newSessionId);
-        // Navigate to the new session URL
-        navigate(`/chat/c/${newSessionId}`, { replace: true });
+        // Navigate to the new session URL only if navigation is enabled
+        if (!disableNavigation) {
+          navigate(`/chat/c/${newSessionId}`, { replace: true });
+        }
         // Reload sessions after a brief delay to show new one
         setTimeout(() => loadSessions(true), 500);
         return; // Don't add system message to chat
@@ -139,6 +150,22 @@ export function useChat() {
 
     return () => service.disconnect();
   }, [navigate, loadSessions]);
+
+  // Restore tree context when session changes
+  useEffect(() => {
+    if (currentSessionId && sessions.length > 0) {
+      const session = sessions.find(s => s.id === currentSessionId);
+      if (session?.context_data?.tree_nodes) {
+        import('../../../skill-tree/domain/services/treeNodeService').then(({ treeNodeService }) => {
+           // Small delay to ensure UI is ready
+           setTimeout(() => {
+             treeNodeService.updateNodes(session.context_data!.tree_nodes as any);
+             console.log('🌳 [useChat] Restored tree from session context');
+           }, 100);
+        });
+      }
+    }
+  }, [currentSessionId, sessions]);
 
   const send = useCallback(async (text: string) => {
     try {
@@ -172,6 +199,7 @@ export function useChat() {
     loadMoreSessions,
     loadingMore,
     currentSessionId,
-    startNewChat
+    startNewChat,
+    selectSession: loadSessionMessages
   };
 }

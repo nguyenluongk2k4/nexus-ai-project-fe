@@ -1,728 +1,588 @@
-import { useState, useEffect } from 'react';
-import { Lock, CheckCircle2, Circle, BookOpen, Target, Clock, TrendingUp, Award, ExternalLink, Lightbulb, Code } from 'lucide-react';
-import { Button } from '@/shared/components/ui/button';
-import { Card } from '@/shared/components/ui/card';
-import { LearningResourceManager } from '@/shared/components/LearningResourceManager';
+import { useState, useEffect, useMemo } from 'react';
+import { Check, Lock, Minus, Plus, MessageSquare, Loader2 } from 'lucide-react';
 import { useSkillTree, SkillNode } from '@/modules/skill-tree/ui/hooks/useSkillTree';
+import { useChat } from '@/modules/chat/ui/hooks/useChat';
+import { RightPanel } from '../components/RightPanel';
+import { treeState$, TreeNodeData, TreeState, treeNodeService } from '../../domain/services/treeNodeService';
+
+// Node types for different states
+type NodeStatus = 'completed' | 'in-progress' | 'locked';
+
+interface TreeNode extends SkillNode {
+  progress?: number; // 0-100 for in-progress nodes
+}
 
 export function SkillTree() {
-  const { 
-    skillNodes, 
-    selectedSpecialization, 
-    loading, 
-    showTree, 
-    selectSpecialization, 
-    backToSelection,
-    specializations
-  } = useSkillTree();
-
-  const [selectedNode, setSelectedNode] = useState<SkillNode | null>(null);
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const [visibleLevels, setVisibleLevels] = useState<number[]>([0, 1, 2, 3]);
-  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
-  const [focusedBranch, setFocusedBranch] = useState<{
-    abilityId?: string;
-    skillId?: string;
-  } | null>(null);
+  // Subscribe to tree state Observable
+  const [treeState, setTreeState] = useState<TreeState>({ nodes: [], loading: false, error: null });
+  
+    // Destructure loadSessionTree from hook
+    const { loadSessionTree } = useSkillTree();
 
   useEffect(() => {
-    if (showTree) {
-       setSelectedNode(null);
-       setExpandedNodes(new Set());
-       setFocusedBranch(null);
-       setZoomLevel(1);
-    }
-  }, [showTree]);
+    const subscription = treeState$.subscribe(setTreeState);
+    return () => subscription.unsubscribe();
+  }, []);
 
-  const selectSpec = (id: string) => {
-    const spec = specializations.find((s: any) => s.id === id);
-    if (spec) selectSpecialization(spec);
-  };
+    // Chat hook for right panel (disable navigation on new chat/session)
+    const {
+      messages,
+      status,
+      error,
+      clearError,
+      send,
+      sessions,
+      sessionsLoading,
+      hasMore,
+      loadMoreSessions,
+      loadingMore,
+      currentSessionId,
+      startNewChat,
+      selectSession
+    } = useChat({ disableNavigation: true });
+  
+    const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+    const [zoomLevel, setZoomLevel] = useState(100);
+    const [focusedBranch, setFocusedBranch] = useState<{
+      abilityId?: string;
+      skillId?: string;
+    } | null>(null);
+    const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
+    const [activeTab, setActiveTab] = useState<'chat' | 'resource'>('chat');
+    const [loadingNodeId, setLoadingNodeId] = useState<string | null>(null); // For lazy loading indicator
+  
+    // Handle session selection - stay on SkillTree page (don't redirect to /chat)
+    // Handle session selection - stay on SkillTree page (don't redirect to /chat)
+    const handleSelectSession = (sessionId: string) => {
+      // Manually load session messages since we're not changing URL
+      selectSession(sessionId);
+      console.log('Session selected:', sessionId);
+    };
 
-  // Recalculate positions for visible nodes to spread them out
-  const repositionVisibleNodes = (nodes: SkillNode[]): SkillNode[] => {
-    const repositioned = [...nodes];
-    
-    // Group by level
-    const byLevel: Record<number, SkillNode[]> = {};
-    repositioned.forEach(node => {
-      if (!byLevel[node.level]) byLevel[node.level] = [];
-      byLevel[node.level].push(node);
-    });
-    
-    // Reposition each level
-    Object.keys(byLevel).forEach(levelStr => {
-      const level = parseInt(levelStr);
-      const nodesAtLevel = byLevel[level];
-      const count = nodesAtLevel.length;
+    // DISABLED: Don't auto-load tree from API on session change
+    // This was loading the default template before WS could send generated tree
+    // Tree will now only come from WebSocket tree_nodes message
+    // useEffect(() => {
+    //   if (currentSessionId) {
+    //     loadSessionTree(currentSessionId);
+    //   }
+    // }, [currentSessionId, loadSessionTree]);
+
+    // Listen for tree-updated event from WebSocket (keeping this for debugging)
+    useEffect(() => {
+      const handleTreeUpdated = (event: CustomEvent) => {
+        const { sessionId } = event.detail;
+        if (sessionId && currentSessionId === sessionId) {
+          console.log('🔄 Tree updated via WS, refetching...');
+          loadSessionTree(sessionId);
+        }
+      };
       
-      if (count === 1) {
-        // Single node - center it
-        nodesAtLevel[0].x = 50;
+      window.addEventListener('tree-updated', handleTreeUpdated as EventListener);
+      return () => window.removeEventListener('tree-updated', handleTreeUpdated as EventListener);
+    }, [currentSessionId, loadSessionTree]);
+
+    // Handle new chat - clear tree and start new session
+    const handleNewChat = () => {
+      treeNodeService.clear();
+      startNewChat();
+    };
+  
+    // Convert tree nodes from Observable to SkillNode format for visualization
+    // Build connections from parentId relationships
+    const skillNodes: SkillNode[] = useMemo(() => {
+      const nodes = treeState.nodes;
+      
+      // Build a map of parent -> children for connections
+      const childrenByParent: Record<string, string[]> = {};
+      nodes.forEach(node => {
+        const parentId = (node as any).parentId;
+        if (parentId) {
+          if (!childrenByParent[parentId]) {
+            childrenByParent[parentId] = [];
+          }
+          childrenByParent[parentId].push(node.id);
+        }
+      });
+      
+      return nodes.map((node) => ({
+        id: node.id,
+        label: node.filled 
+          ? (node.name.length > 15 ? node.name.substring(0, 12) + '...' : node.name)
+          : '?',
+        fullName: node.name,
+        level: node.level,
+        x: 50, // Will be repositioned
+        y: 10 + (node.level * 20),
+        status: node.filled ? 'available' as const : 'locked' as const,
+        // Build connections: either from node.connections or from childrenByParent map
+        connections: (node as any).connections || childrenByParent[node.id] || [],
+        nodeData: {
+          description: node.description,
+          difficultyLevel: node.metadata?.difficultyLevel,
+          estimatedTimeToComplete: node.metadata?.estimatedHours ? `${node.metadata.estimatedHours} giờ` : undefined,
+          filled: node.filled, // Pass filled status for rendering
+          learningResources: node.resources, // Pass resources to node details (mapped to learningResources for UI)
+        }
+      }));
+    }, [treeState.nodes]);
+  
+    // Count filled nodes
+    const filledCount = treeState.nodes.filter(n => n.filled).length;
+    const totalCount = treeState.nodes.length;
+  
+    // Convert status to new format
+    const getNodeStatus = (node: SkillNode): NodeStatus => {
+      if (node.status === 'unlocked') return 'completed';
+      if (node.status === 'available') return 'in-progress';
+      return 'locked';
+    };
+  
+    // Get visible nodes based on focused branch (PROGRESSIVE REVEAL)
+    // Default: show level 0 + 1 only
+    // Click level 1 → show its level 2 children
+    // Click level 2 → show its level 3 children
+    const visibleNodes = useMemo(() => {
+      if (!skillNodes || skillNodes.length === 0) return [];
+      
+      const visible: SkillNode[] = [];
+      
+      // Always show root (level 0)
+      const root = skillNodes.find(n => n.level === 0);
+      if (root) visible.push({...root});
+      
+      // If focused on an ability, ONLY show that ability (hide siblings for cleaner UX)
+      if (focusedBranch?.abilityId) {
+        const ability = skillNodes.find(n => n.id === focusedBranch.abilityId);
+        if (ability) {
+          visible.push({...ability});
+          
+          // If focused on a skill, ONLY show that skill (hide sibling skills)
+          if (focusedBranch?.skillId) {
+            const skill = skillNodes.find(n => n.id === focusedBranch.skillId);
+            if (skill) {
+              visible.push({...skill});
+              
+              // Show level 3 children (knowledge) of focused skill
+              if (skill.connections && skill.connections.length > 0) {
+                const knowledge = skillNodes.filter(n => 
+                  n.level === 3 && skill.connections!.includes(n.id)
+                );
+                visible.push(...knowledge.map(n => ({...n})));
+              }
+            }
+          } else {
+            // No skill focused: show all level 2 skills of the focused ability
+            if (ability.connections && ability.connections.length > 0) {
+              const skills = skillNodes.filter(n => 
+                n.level === 2 && ability.connections!.includes(n.id)
+              );
+              visible.push(...skills.map(n => ({...n})));
+            }
+          }
+        }
       } else {
-        // Multiple nodes - spread evenly across width
-        const spacing = 80 / (count + 1); // Use 80% of width with padding
-        const startX = 10; // 10% padding from left
-        
-        nodesAtLevel.forEach((node, idx) => {
-          node.x = startX + (spacing * (idx + 1));
-        });
+        // No focus: show all level 1 (abilities) 
+        const abilities = skillNodes.filter(n => n.level === 1);
+        visible.push(...abilities.map(n => ({...n})));
       }
-    });
-    
-    return repositioned;
-  };
-
-  // Get visible nodes based on focused branch
-  const getVisibleNodes = (): SkillNode[] => {
-    // Safety check
-    if (!skillNodes || skillNodes.length === 0) {
-      return [];
-    }
-
-    if (!focusedBranch) {
-      // Show all level 0 and 1 by default - use original positions
-      return skillNodes.filter((node: SkillNode) => node.level <= 1);
-    }
-
-    const visible: SkillNode[] = [];
-    
-    // Always show root
-    const root = skillNodes.find(n => n.level === 0);
-    if (root) visible.push({...root}); // Clone to avoid mutating original
-
-    if (focusedBranch.skillId) {
-      // Focused on a skill - show: root, parent ability, this skill, and its knowledge
-      const skill = skillNodes.find(n => n.id === focusedBranch.skillId);
-      if (skill) {
-        visible.push({...skill});
+      
+      return visible;
+    }, [skillNodes, focusedBranch]);
+  
+    // Reposition nodes for display
+    const repositionedNodes = useMemo(() => {
+      const nodes = [...visibleNodes];
+      const byLevel: Record<number, SkillNode[]> = {};
+      
+      nodes.forEach(node => {
+        if (!byLevel[node.level]) byLevel[node.level] = [];
+        byLevel[node.level].push(node);
+      });
+      
+      Object.keys(byLevel).forEach(levelStr => {
+        const level = parseInt(levelStr);
+        const nodesAtLevel = byLevel[level];
+        const count = nodesAtLevel.length;
         
-        // Find parent ability: ability's connections contains this skill id
-        const parentAbility = skillNodes.find(n => 
-          n.level === 1 && n.connections && n.connections.includes(skill.id)
-        );
-        if (parentAbility) {
-          visible.push({...parentAbility});
-        }
-        
-        // Add all knowledge of this skill: skill's connections contains knowledge ids
-        if (skill.connections && skill.connections.length > 0) {
-          const knowledge = skillNodes.filter(n => 
-            n.level === 3 && skill.connections.includes(n.id)
-          );
-          visible.push(...knowledge.map(n => ({...n})));
-        }
-      }
-    } else if (focusedBranch.abilityId) {
-      // Focused on an ability - show: root, this ability, and its skills
-      const ability = skillNodes.find(n => n.id === focusedBranch.abilityId);
-      if (ability) {
-        visible.push({...ability});
-        
-        // Add all skills of this ability: ability's connections contains skill ids
-        if (ability.connections && ability.connections.length > 0) {
-          const skills = skillNodes.filter(n => 
-            n.level === 2 && ability.connections.includes(n.id)
-          );
-          visible.push(...skills.map(n => ({...n})));
-        }
-      }
-    }
-
-    // Reposition nodes to spread them out
-    const finalVisible = visible.length > 0 ? visible : (root ? [{...root}] : []);
-    return repositionVisibleNodes(finalVisible);
-  };
-
-  // Handle node click for expand/collapse
-  const handleNodeClick = (node: SkillNode) => {
-    try {
-      setSelectedNode(node);
-
-      if (node.level === 1) {
-        // Clicked on ability
-        if (focusedBranch?.abilityId === node.id) {
-          // Collapse - back to showing all abilities
-          setFocusedBranch(null);
+        if (count === 1) {
+          nodesAtLevel[0].x = 50;
         } else {
-          // Expand this ability
-          setFocusedBranch({ abilityId: node.id });
-        }
-      } else if (node.level === 2) {
-        // Clicked on skill - expand to show knowledge
-        // Find parent ability: ability's connections array contains this skill's id
-        const parentAbility = skillNodes.find(n => 
-          n.level === 1 && n.connections && n.connections.includes(node.id)
-        );
-        
-        if (focusedBranch?.skillId === node.id) {
-          // Collapse skill - back to showing ability's skills
-          setFocusedBranch({ abilityId: parentAbility?.id });
-        } else {
-          // Expand this skill
-          setFocusedBranch({ 
-            abilityId: parentAbility?.id,
-            skillId: node.id 
+          const spacing = 70 / (count + 1);
+          const startX = 15;
+          nodesAtLevel.forEach((node, idx) => {
+            node.x = startX + (spacing * (idx + 1));
           });
         }
-      } else if (node.level === 3) {
-        // Clicked on knowledge - just select it
-        // Keep current focus
+      });
+      
+      return nodes;
+    }, [visibleNodes]);
+  
+    // Derive selected node from current state (ensures reactivity)
+    const selectedNode = useMemo(() => 
+      skillNodes.find(n => n.id === selectedNodeId) as TreeNode || null
+    , [skillNodes, selectedNodeId]);
+  
+    const handleNodeClick = async (node: SkillNode) => {
+      setSelectedNodeId(node.id);
+      setActiveTab('resource'); // Auto-switch to resource tab
+  
+      if (node.level === 1) {
+        if (focusedBranch?.abilityId === node.id) {
+          // Toggle off
+          setFocusedBranch(null);
+        } else {
+          // Expand: Set focus and lazy load children
+          setFocusedBranch({ abilityId: node.id });
+          
+          // Check if children already loaded (look for level 2 nodes connected to this node)
+          const existingNode = treeState.nodes.find(n => n.id === node.id);
+          const hasLoadedChildren = (existingNode as any)?.connections?.length > 0 && 
+            treeState.nodes.some(n => n.level === 2 && (existingNode as any)?.connections?.includes(n.id));
+          
+          if (!hasLoadedChildren) {
+            // Set loading state
+            setLoadingNodeId(node.id);
+            
+            try {
+              // LAZY LOADING: Call API to fetch children
+              const { getSkillTreeService } = await import('../../providers');
+              const childData = await getSkillTreeService().getNodeChildren(node.id);
+              
+              if (childData.nodes.length > 0) {
+                // Get direct children IDs (level 2)
+                const directChildIds = childData.nodes
+                  .filter((n: any) => n.level === 2)
+                  .map((n: any) => n.id);
+                
+                // Convert child nodes
+                const newNodes = childData.nodes.map((n: any) => {
+                  // Build connections for level 2 nodes (to level 3)
+                  const nodeConnections = childData.edges
+                    .filter((e: any) => e.source === n.id)
+                    .map((e: any) => e.target);
+                  
+                  return {
+                    id: n.id,
+                    name: n.label,
+                    type: n.type,
+                    level: n.level,
+                    parentId: n.level === 2 ? node.id : null,
+                    filled: true,
+                    description: n.data?.description,
+                    metadata: n.data,
+                    connections: nodeConnections
+                  };
+                });
+                
+                // Also update the parent node's connections to include direct children
+                const parentUpdate = {
+                  id: node.id,
+                  connections: directChildIds
+                };
+                
+                // Merge: first add children, then update parent connections
+                treeNodeService.updateNodes(newNodes);
+                treeNodeService.updateNodeConnections(node.id, directChildIds);
+                
+                console.log(`🌳 Lazy loaded ${newNodes.length} children for node ${node.id}`);
+              }
+            } finally {
+              setLoadingNodeId(null);
+            }
+          }
+        }
+      } else if (node.level === 2) {
+        const parentAbility = skillNodes.find(n => 
+          n.level === 1 && n.connections?.includes(node.id)
+        );
+        if (focusedBranch?.skillId === node.id) {
+          setFocusedBranch({ abilityId: parentAbility?.id });
+        } else {
+          setFocusedBranch({ abilityId: parentAbility?.id, skillId: node.id });
+        }
       } else if (node.level === 0) {
-        // Clicked on root - collapse all
         setFocusedBranch(null);
       }
-    } catch (error) {
-      console.error('Error in handleNodeClick:', error);
-      // Fallback: just select the node without changing focus
-      setSelectedNode(node);
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'unlocked':
-        return 'from-teal-400 to-teal-600';
-      case 'available':
-        return 'from-violet-400 to-violet-600';
-      default:
-        return 'from-gray-300 to-gray-400';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'unlocked':
-        return CheckCircle2;
-      case 'available':
-        return Circle;
-      default:
-        return Lock;
-    }
-  };
-
-  return (
-    <div className="flex-1 bg-white p-8 overflow-auto">
-      {!showTree ? (
-        // Specialization Selection Screen
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-foreground mb-4">Chọn Chuyên Ngành IT</h1>
-            <p className="text-lg text-muted-foreground">
-              Khám phá lộ trình học tập chi tiết cho 5 chuyên ngành công nghệ hàng đầu
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {specializations.map((spec) => (
-              <button
-                key={spec.id}
-                onClick={() => selectSpecialization(spec)}
-                disabled={loading}
-                className="group p-8 rounded-2xl border-2 border-border bg-white hover:border-violet-400 hover:shadow-2xl transition-all duration-300 text-left transform hover:-translate-y-1"
+    };
+  
+    // Generate bezier path between nodes
+    const generatePath = (fromX: number, fromY: number, toX: number, toY: number) => {
+      const midY = (fromY + toY) / 2;
+      return `M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY}`;
+    };
+  
+    // Main layout - always show with tree canvas (empty or with data)
+    return (
+      <div className="flex-1 flex flex-col min-w-0 h-full bg-slate-50">
+        {/* Header */}
+        <header className="h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md px-6 flex items-center justify-between z-10 flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+              <span className="text-white text-sm">🌳</span>
+            </div>
+            <h2 className="text-lg font-bold text-slate-800">Skill Tree</h2>
+            
+            {/* Back button when focused - smart navigation */}
+            {focusedBranch?.abilityId && (
+              <button 
+                onClick={() => {
+                  if (focusedBranch.skillId) {
+                    // Back from skill to ability view
+                    setFocusedBranch({ abilityId: focusedBranch.abilityId });
+                  } else {
+                    // Back from ability to all abilities
+                    setFocusedBranch(null);
+                  }
+                }}
+                className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-full text-xs font-medium text-slate-600 transition-colors"
               >
-                <div className="mb-6">
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${spec.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
-                    <span className="text-3xl">
-                      {spec.icon}
-                    </span>
+                ← {focusedBranch.skillId ? 'Quay lại Skills' : 'Quay lại'}
+              </button>
+            )}
+            
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+              filledCount > 0 
+                ? 'bg-indigo-100 text-indigo-700' 
+                : 'bg-slate-100 text-slate-500'
+            }`}>
+              {filledCount}/{totalCount} nodes
+            </span>
+            
+            {/* Loading indicator for lazy loading */}
+            {(treeState.loading || loadingNodeId) && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-indigo-50 rounded-full">
+                <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
+                <span className="text-xs text-indigo-600 font-medium">Đang tải...</span>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center bg-slate-100 rounded-full px-3 py-1 gap-2">
+              <span className="text-[11px] font-bold text-slate-500">ZOOM</span>
+              <button 
+                onClick={() => setZoomLevel(Math.max(50, zoomLevel - 10))}
+                className="p-1 hover:text-indigo-600 transition-colors"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <span className="text-xs font-mono w-10 text-center font-bold">{zoomLevel}%</span>
+              <button 
+                onClick={() => setZoomLevel(Math.min(150, zoomLevel + 10))}
+                className="p-1 hover:text-indigo-600 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </header>
+  
+        <div className="flex-1 flex overflow-hidden">
+          {/* Tree Canvas - shows empty state or tree */}
+          <div className="flex-1 relative overflow-hidden">
+            {totalCount === 0 ? (
+              /* Empty State - shown before first data */
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center max-w-lg px-6">
+                  {treeState.loading ? (
+                    <>
+                      <Loader2 className="w-16 h-16 mx-auto text-indigo-500 animate-spin mb-6" />
+                      <h2 className="text-xl font-bold text-slate-700 mb-2">Đang tạo Skill Tree...</h2>
+                      <p className="text-slate-500">AI đang phân tích và chọn lộ trình phù hợp</p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-20 h-20 mx-auto bg-gradient-to-br from-indigo-100 to-purple-100 rounded-3xl flex items-center justify-center mb-6 shadow-lg">
+                        <span className="text-4xl">🌳</span>
+                      </div>
+                      <h2 className="text-2xl font-bold text-slate-800 mb-3">Skill Tree</h2>
+                      <p className="text-slate-500 mb-6 leading-relaxed">
+                        Sử dụng chat bên phải để hỏi về lộ trình học tập.<br/>
+                        AI sẽ tự động tạo skill tree phù hợp với bạn.
+                      </p>
+                      
+                      <div className="flex items-center gap-2 justify-center text-indigo-500">
+                        <MessageSquare className="w-5 h-5" />
+                        <span className="text-sm font-medium">Chat để bắt đầu</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            ) : (
+              /* Tree Visualization - shown after first data */
+              <>
+                {/* Legend */}
+                <div className="absolute top-6 left-8 flex items-center gap-6 bg-white/90 backdrop-blur p-4 rounded-xl border border-slate-200 shadow-sm z-20">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-lg bg-indigo-500"></div>
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Node</span>
                   </div>
+                  <span className="text-xs text-slate-400">{totalCount} nodes</span>
                 </div>
+  
+            {/* SVG Tree - Always visible (skeleton or filled) */}
+            <svg 
+              className="w-full h-full" 
+              viewBox="0 0 100 80"
+              style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'center' }}
+            >
+              {/* Connection Paths */}
+              {repositionedNodes.map((node) => {
+                const nodeMap = new Map(repositionedNodes.map(n => [n.id, n]));
+                return node.connections?.map((targetId) => {
+                  const target = nodeMap.get(targetId);
+                  if (!target) return null;
+                  
+                  const isFilled = node.nodeData?.filled;
+                  
+                  return (
+                    <path
+                      key={`${node.id}-${targetId}`}
+                      d={generatePath(node.x, node.y, target.x, target.y)}
+                      fill="none"
+                      stroke={isFilled ? '#6366f1' : '#cbd5e1'}
+                      strokeWidth="0.4"
+                      strokeLinecap="round"
+                      strokeDasharray={isFilled ? 'none' : '1,1'}
+                      opacity={isFilled ? 0.6 : 0.3}
+                    />
+                  );
+                });
+              })}
+  
+              {/* Nodes */}
+              {repositionedNodes.map((node) => {
+                const isFilled = node.nodeData?.filled;
+                const isSelected = selectedNode?.id === node.id;
+                const isExpanded = (node.level === 1 && focusedBranch?.abilityId === node.id) || 
+                                  (node.level === 2 && focusedBranch?.skillId === node.id);
+                const isLoading = loadingNodeId === node.id; // Loading indicator
                 
-                <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-violet-700">
-                  {spec.name}
-                </h3>
+                // Node sizes based on level
+                const size = node.level === 0 ? 6 : node.level === 1 ? 5 : 4;
+                const radius = size / 2;
                 
-                <div className="mt-6 inline-flex items-center text-violet-600 font-semibold group-hover:text-violet-700">
-                  Khám phá skill tree
-                  <svg className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </div>
-              </button>
-            ))}
-          </div>
-          
-          {loading && (
-            <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-              <div className="bg-white rounded-xl p-8 shadow-2xl">
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-violet-500 border-t-transparent mx-auto mb-4"></div>
-                <p className="text-foreground font-medium">Đang tải skill tree...</p>
-              </div>
-            </div>
-          )}
-        </div>
-      ) : (
-        // Skill Tree View
-        <div className="w-[95%] max-w-[1800px] mx-auto px-4">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <button
-                onClick={backToSelection}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Quay lại chọn chuyên ngành
-              </button>
-              <h1 className="text-2xl font-bold text-foreground mb-2">{selectedSpecialization?.name}</h1>
-              <div className="space-y-1">
-                <p className="text-muted-foreground">
-                  <strong className="text-foreground">Cách sử dụng:</strong> Click vào Ability để xem Skills → Click vào Skill để xem Knowledge chi tiết
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Click lại vào node đang mở để thu gọn. Dùng nút "Thu gọn tất cả" để reset về view ban đầu.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid lg:grid-cols-4 gap-6">
-            {/* Tree Visualization */}
-            <div className="lg:col-span-3 bg-white rounded-xl border border-border shadow-sm overflow-hidden">
-              {/* Controls */}
-              <div className="p-4 bg-gray-50 border-b border-border flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-medium text-foreground">Hiển thị level:</span>
-                  {[0, 1, 2, 3].map((level) => (
-                    <button
-                      key={level}
-                      onClick={() => {
-                        if (visibleLevels.includes(level)) {
-                          setVisibleLevels(visibleLevels.filter(l => l !== level));
-                        } else {
-                          setVisibleLevels([...visibleLevels, level].sort());
-                        }
-                      }}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                        visibleLevels.includes(level)
-                          ? 'bg-violet-600 text-white'
-                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                      }`}
+                return (
+                  <g
+                    key={node.id}
+                    transform={`translate(${node.x}, ${node.y})`}
+                    onClick={() => handleNodeClick(node)}
+                    className="cursor-pointer"
+                    style={{ transition: 'all 0.3s ease' }}
+                  >
+                    {/* Loading spinner */}
+                    {isLoading && (
+                      <circle
+                        r={radius + 2}
+                        fill="none"
+                        stroke="#6366f1"
+                        strokeWidth="0.3"
+                        strokeDasharray="2,2"
+                        className="animate-spin"
+                        style={{ transformOrigin: 'center', animation: 'spin 1s linear infinite' }}
+                      />
+                    )}
+                    {/* Placeholder pulse animation */}
+                    {!isFilled && (
+                      <circle
+                        r={radius + 1}
+                        fill="none"
+                        stroke="#6366f1"
+                        strokeWidth="0.2"
+                        opacity="0.3"
+                        className="animate-pulse"
+                      />
+                    )}
+  
+                    {/* Main node */}
+                    <rect
+                      x={-radius}
+                      y={-radius}
+                      width={size}
+                      height={size}
+                      rx={size * 0.3}
+                      fill={isFilled ? '#6366f1' : '#f1f5f9'}
+                      stroke={isSelected ? '#6366f1' : isFilled ? 'transparent' : '#cbd5e1'}
+                      strokeWidth={isFilled ? '0.3' : '0.2'}
+                      strokeDasharray={isFilled ? 'none' : '0.5,0.5'}
+                      className="transition-all hover:opacity-90"
+                    />
+  
+                    {/* Node content */}
+                    <text
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill={isFilled ? 'white' : '#94a3b8'}
+                      fontSize={isFilled ? '1.5' : '2'}
+                      fontWeight="bold"
                     >
-                      {level === 0 ? 'Root' : level === 1 ? 'Ability' : level === 2 ? 'Skill' : 'Knowledge'}
-                    </button>
-                  ))}
-                  <div className="h-4 w-px bg-gray-300 mx-1"></div>
-                  <button
-                    onClick={() => setVisibleLevels([0, 1, 2, 3])}
-                    className="px-3 py-1 rounded-lg text-xs font-medium bg-teal-100 text-teal-700 hover:bg-teal-200 transition-colors"
-                  >
-                    Tất cả
-                  </button>
-                  <button
-                    onClick={() => setVisibleLevels([0])}
-                    className="px-3 py-1 rounded-lg text-xs font-medium bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors"
-                  >
-                    Thu gọn
-                  </button>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setFocusedBranch(null)}
-                    className="px-3 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg text-sm font-medium transition-colors"
-                  >
-                    🔄 Thu gọn tất cả
-                  </button>
-                  
-                  <div className="h-4 w-px bg-gray-300"></div>
-                  
-                  <span className="text-sm font-medium text-foreground">Zoom:</span>
-                  <button
-                    onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.2))}
-                    className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition-colors"
-                  >
-                    -
-                  </button>
-                  <span className="text-sm text-muted-foreground w-12 text-center">{Math.round(zoomLevel * 100)}%</span>
-                  <button
-                    onClick={() => setZoomLevel(Math.min(3, zoomLevel + 0.2))}
-                    className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition-colors"
-                  >
-                    +
-                  </button>
-                  <button
-                    onClick={() => setZoomLevel(1)}
-                    className="px-3 py-1 bg-violet-100 hover:bg-violet-200 text-violet-700 rounded-lg text-sm font-medium transition-colors"
-                  >
-                    Reset Zoom
-                  </button>
-                </div>
-              </div>
-              
-              {/* Info bar */}
-              <div className="px-4 py-2 bg-gradient-to-r from-blue-50 to-violet-50 border-b border-blue-100 flex items-center justify-between text-xs flex-wrap gap-2">
-                <div className="flex items-center gap-2 text-blue-700">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>
-                    Hiển thị {getVisibleNodes().filter(n => visibleLevels.includes(n.level)).length}/{skillNodes.length} nodes
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-violet-700 font-medium">💡 Click node có dấu <span className="inline-flex items-center justify-center w-4 h-4 bg-green-500 text-white rounded-full text-[10px] font-bold mx-1">+</span> để xem chi tiết</span>
-                </div>
-              </div>
-              
-              {/* SVG Canvas */}
-              <div className="p-4 overflow-auto h-[calc(100vh-25rem)]">
-                <div className="relative w-full h-full" style={{ minWidth: '1200px', minHeight: '900px' }}>
-                  <svg 
-                    className="w-full h-full" 
-                    viewBox="0 0 100 70" 
-                    preserveAspectRatio="xMidYMid meet"
-                    style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'center' }}
-                  >
-                  {/* Gradient definitions */}
-                  <defs>
-                    {skillNodes.map((node) => (
-                      <linearGradient key={`${node.id}-gradient`} id={`${node.id}-gradient`} x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor={node.status === 'unlocked' ? '#14b8a6' : node.status === 'available' ? '#8b5cf6' : '#9ca3af'} />
-                        <stop offset="100%" stopColor={node.status === 'unlocked' ? '#0891b2' : node.status === 'available' ? '#7c3aed' : '#6b7280'} />
-                      </linearGradient>
-                    ))}
-                  </defs>
-
-                  {/* Connection Lines */}
-                  {(() => {
-                    const visibleNodes = getVisibleNodes();
-                    const visibleNodesMap = new Map(visibleNodes.map(n => [n.id, n]));
-                    
-                    return visibleNodes
-                      .filter(node => visibleLevels.includes(node.level))
-                      .flatMap((node) =>
-                        node.connections.map((targetId) => {
-                          // Find target in repositioned visible nodes, not original skillNodes
-                          const target = visibleNodesMap.get(targetId);
-                          if (!target || !visibleLevels.includes(target.level)) return null;
-                      
-                          const isUnlocked = node.status === 'unlocked' && (target.status === 'unlocked' || target.status === 'available');
-                          
-                          return (
-                            <line
-                              key={`${node.id}-${targetId}`}
-                              x1={node.x}
-                              y1={node.y}
-                              x2={target.x}
-                              y2={target.y}
-                              stroke={isUnlocked ? '#8b5cf6' : '#d4d4d8'}
-                              strokeWidth="0.3"
-                              strokeDasharray={isUnlocked ? '0' : '1,1'}
-                              opacity={isUnlocked ? 0.6 : 0.3}
-                            />
-                          );
-                        })
-                      );
-                  })()}
-
-                  {/* Skill Nodes */}
-                  {getVisibleNodes()
-                    .filter(node => visibleLevels.includes(node.level))
-                    .map((node) => {
-                    const Icon = getStatusIcon(node.status);
-                    const isSelected = selectedNode?.id === node.id;
-                    const hasChildren = node.connections.length > 0;
-                    const isExpanded = (node.level === 1 && focusedBranch?.abilityId === node.id) || 
-                                      (node.level === 2 && focusedBranch?.skillId === node.id);
-                    
-                    return (
-                      <g
-                        key={node.id}
-                        transform={`translate(${node.x}, ${node.y})`}
-                        onClick={() => handleNodeClick(node)}
-                        className="cursor-pointer"
-                        style={{ transition: 'all 0.3s' }}
+                      {isFilled ? (node.level === 0 ? '🧠' : '✓') : '?'}
+                    </text>
+  
+                    {/* Label */}
+                    <text
+                      y={radius + 2.5}
+                      textAnchor="middle"
+                      fill={isFilled ? '#6366f1' : '#94a3b8'}
+                      fontSize="1.5"
+                      fontWeight={isFilled ? '600' : '400'}
+                    >
+                      {node.label}
+                    </text>
+  
+                    {/* Active indicator */}
+                    {isExpanded && (
+                      <text
+                        y={radius + 4.5}
+                        textAnchor="middle"
+                        fill="#6366f1"
+                        fontSize="1"
+                        fontWeight="bold"
                       >
-                        {/* Outer ring for selected */}
-                        {isSelected && (
-                          <circle
-                            r="4"
-                            fill="none"
-                            stroke="#8b5cf6"
-                            strokeWidth="0.4"
-                            opacity="0.5"
-                          />
-                        )}
-                        
-                        {/* Node circle */}
-                        <circle
-                          r="2"
-                          fill={`url(#${node.id}-gradient)`}
-                          className={`${node.status !== 'locked' ? 'hover:opacity-80' : ''} transition-opacity`}
-                        />
-                        
-                        {/* Expand/Collapse indicator */}
-                        {hasChildren && (node.level === 1 || node.level === 2) && (
-                          <circle
-                            cx="2.5"
-                            cy="-2.5"
-                            r="1"
-                            fill={isExpanded ? '#f59e0b' : '#10b981'}
-                            stroke="white"
-                            strokeWidth="0.2"
-                          />
-                        )}
-                        
-                        {/* Plus/Minus icon */}
-                        {hasChildren && (node.level === 1 || node.level === 2) && (
-                          <text
-                            x="2.5"
-                            y="-1.8"
-                            textAnchor="middle"
-                            className="pointer-events-none select-none"
-                            style={{ fontSize: '1.2px', fill: 'white', fontWeight: 'bold' }}
-                          >
-                            {isExpanded ? '−' : '+'}
-                          </text>
-                        )}
-                        
-                        {/* Label */}
-                        <text
-                          y="4"
-                          textAnchor="middle"
-                          className="pointer-events-none select-none"
-                          style={{ fontSize: '1.8px', fill: '#3f3f46', fontWeight: '500' }}
-                        >
-                          {node.label}
-                        </text>
-                      </g>
-                    );
-                  })}
-                </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Skill Details Sidebar */}
-            <div className="space-y-4 h-[calc(100vh-16rem)] overflow-y-auto">
-              {selectedNode ? (
-                <div className="bg-white rounded-xl border border-border shadow-lg h-full">
-                  {/* Header */}
-                  <div className={`p-6 bg-gradient-to-br ${getStatusColor(selectedNode.status)} text-white rounded-t-xl`}>
-                    <div className="flex items-center gap-3 mb-2">
-                      {(() => {
-                        const Icon = getStatusIcon(selectedNode.status);
-                        return <Icon className="w-6 h-6" />;
-                      })()}
-                      <span className="text-sm font-medium uppercase tracking-wide">
-                        {selectedNode.nodeData.type}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold">{selectedNode.fullName}</h3>
-                  </div>
-                  
-                  {/* Content */}
-                  <div className="p-6 space-y-6">
-                    {/* Description */}
-                    {selectedNode.nodeData.description && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <BookOpen className="w-4 h-4 text-violet-600" />
-                          <h4 className="font-semibold text-foreground">Mô tả</h4>
-                        </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          {selectedNode.nodeData.description}
-                        </p>
-                      </div>
+                        ▼ EXPANDED
+                      </text>
                     )}
-                    
-                    {/* Metadata */}
-                    <div className="grid grid-cols-2 gap-4">
-                      {selectedNode.nodeData.difficultyLevel && (
-                        <div className="bg-violet-50 rounded-lg p-3">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Target className="w-4 h-4 text-violet-600" />
-                            <span className="text-xs font-medium text-violet-900">Độ khó</span>
-                          </div>
-                          <p className="text-sm font-semibold text-violet-700">
-                            {selectedNode.nodeData.difficultyLevel}
-                          </p>
-                        </div>
-                      )}
-                      
-                      {selectedNode.nodeData.estimatedTimeToComplete && (
-                        <div className="bg-teal-50 rounded-lg p-3">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Clock className="w-4 h-4 text-teal-600" />
-                            <span className="text-xs font-medium text-teal-900">Thời gian</span>
-                          </div>
-                          <p className="text-sm font-semibold text-teal-700">
-                            {selectedNode.nodeData.estimatedTimeToComplete}
-                          </p>
-                        </div>
-                      )}
-                      
-                      {selectedNode.nodeData.importanceScore && (
-                        <div className="bg-amber-50 rounded-lg p-3">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Award className="w-4 h-4 text-amber-600" />
-                            <span className="text-xs font-medium text-amber-900">Điểm quan trọng</span>
-                          </div>
-                          <p className="text-sm font-semibold text-amber-700">
-                            {selectedNode.nodeData.importanceScore}/10
-                          </p>
-                        </div>
-                      )}
-                      
-                      {selectedNode.nodeData.marketDemand && (
-                        <div className="bg-green-50 rounded-lg p-3">
-                          <div className="flex items-center gap-2 mb-1">
-                            <TrendingUp className="w-4 h-4 text-green-600" />
-                            <span className="text-xs font-medium text-green-900">Nhu cầu thị trường</span>
-                          </div>
-                          <p className="text-sm font-semibold text-green-700">
-                            {selectedNode.nodeData.marketDemand}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Tools */}
-                    {selectedNode.nodeData.tools && selectedNode.nodeData.tools.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Code className="w-4 h-4 text-violet-600" />
-                          <h4 className="font-semibold text-foreground">Công cụ</h4>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedNode.nodeData.tools.map((tool: string, idx: number) => (
-                            <span key={idx} className="px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-xs font-medium">
-                              {tool}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Keywords */}
-                    {selectedNode.nodeData.keywords && selectedNode.nodeData.keywords.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Lightbulb className="w-4 h-4 text-violet-600" />
-                          <h4 className="font-semibold text-foreground">Từ khóa</h4>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedNode.nodeData.keywords.slice(0, 8).map((keyword: string, idx: number) => (
-                            <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
-                              {keyword}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Learning Resources */}
-                    {selectedNode.nodeData.learningResources && selectedNode.nodeData.learningResources.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <ExternalLink className="w-4 h-4 text-violet-600" />
-                          <h4 className="font-semibold text-foreground">Tài liệu học tập</h4>
-                        </div>
-                        <div className="space-y-3">
-                          {selectedNode.nodeData.learningResources.map((resource: any, idx: number) => {
-                            // Handle both string and object formats
-                            const resourceName = typeof resource === 'string' ? resource : (resource.name || resource.title || resource.url || 'Tài liệu học tập');
-                            const resourceUrl = typeof resource === 'string' ? resource : (resource.url || '#');
-                            
-                            return (
-                              <LearningResourceManager
-                                key={idx}
-                                resourceUrl={resourceUrl}
-                                resourceName={resourceName}
-                                nodeId={selectedNode.id}
-                                nodeName={selectedNode.fullName}
-                                specializationId={selectedSpecialization?.id || ''}
-                                specializationName={selectedSpecialization?.name || ''}
-                                estimatedTime={selectedNode.nodeData.estimatedTimeToComplete}
-                              />
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Project Ideas */}
-                    {selectedNode.nodeData.projectIdeas && selectedNode.nodeData.projectIdeas.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Lightbulb className="w-4 h-4 text-violet-600" />
-                          <h4 className="font-semibold text-foreground">Ý tưởng dự án</h4>
-                        </div>
-                        <ul className="space-y-3">
-                          {selectedNode.nodeData.projectIdeas.slice(0, 3).map((idea: any, idx: number) => (
-                            <li key={idx} className="pl-4 border-l-2 border-violet-300">
-                              {typeof idea === 'string' ? (
-                                <p className="text-sm text-muted-foreground">{idea}</p>
-                              ) : (
-                                <div>
-                                  <p className="text-sm font-medium text-foreground mb-1">{idea.title}</p>
-                                  <p className="text-xs text-muted-foreground">{idea.description}</p>
-                                </div>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {/* Actions */}
-                    <div className="pt-4 space-y-2">
-                      {selectedNode.status === 'available' && (
-                        <button className="w-full bg-gradient-to-r from-violet-600 to-teal-500 text-white py-3 px-4 rounded-lg hover:opacity-90 transition-opacity font-semibold">
-                          Bắt đầu học
-                        </button>
-                      )}
-                      
-                      {selectedNode.status === 'unlocked' && (
-                        <button className="w-full border-2 border-violet-600 text-violet-600 py-3 px-4 rounded-lg hover:bg-violet-50 transition-colors font-semibold">
-                          Ôn tập lại
-                        </button>
-                      )}
-                      
-                      {selectedNode.status === 'locked' && (
-                        <div className="text-center py-3 text-muted-foreground text-sm">
-                          Hoàn thành các kỹ năng trước để mở khóa
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-white rounded-xl border border-border p-8 shadow-sm text-center">
-                  <div className="w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <BookOpen className="w-8 h-8 text-violet-600" />
-                  </div>
-                  <p className="text-muted-foreground">
-                    Chọn một node để xem chi tiết
-                  </p>
-                </div>
-              )}
-
-              {/* Legend */}
-              <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
-                <h4 className="text-foreground mb-4">Legend</h4>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-teal-400 to-teal-600"></div>
-                    <span className="text-muted-foreground">Unlocked</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-violet-400 to-violet-600"></div>
-                    <span className="text-muted-foreground">Available</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-gray-300 to-gray-400"></div>
-                    <span className="text-muted-foreground">Locked</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+                  </g>
+                );
+              })}
+  
+              {/* Gradient definitions */}
+              <defs>
+                <radialGradient id="glowGradient">
+                  <stop offset="0%" stopColor="#6366f1" stopOpacity="0.5" />
+                  <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+                </radialGradient>
+              </defs>
+            </svg>
+              </>
+            )}
           </div>
+  
+          {/* Right Panel with Tabs */}
+          <RightPanel
+            selectedNode={selectedNode}
+            getNodeStatus={getNodeStatus}
+            messages={messages}
+            status={status}
+            error={error}
+            onClearError={clearError}
+            onSend={send}
+            sessions={sessions}
+            sessionsLoading={sessionsLoading}
+            hasMore={hasMore}
+            onLoadMore={loadMoreSessions}
+            loadingMore={loadingMore}
+            currentSessionId={currentSessionId}
+            onSelectSession={handleSelectSession}
+            onNewChat={handleNewChat}
+            isCollapsed={rightPanelCollapsed}
+            onToggleCollapse={() => setRightPanelCollapsed(!rightPanelCollapsed)}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
         </div>
-      )}
-    </div>
-  );
-}
+      </div>
+    );
+  }

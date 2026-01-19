@@ -2,9 +2,11 @@ import { MetricCard } from '@/shared/components/MetricCard';
 import { Clock, Award, Target, TrendingUp } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useDashboard } from '../hooks/useDashboard';
+import { useAuth } from '@/modules/auth/AuthProvider';
 
 export function Dashboard() {
   const { data, loading, error } = useDashboard();
+  const { user } = useAuth();
 
   if (loading) return <div className="p-8">Đang tải dashboard...</div>;
   if (error) return <div className="p-8 text-red-500">{error}</div>;
@@ -12,11 +14,14 @@ export function Dashboard() {
 
   const { metrics, weeklyActivity, skillProgress, recentActivity } = data;
 
+  // Get display name
+  const displayName = user?.fullName || user?.username || 'bạn';
+
   return (
     <div className="flex-1 bg-white p-8 overflow-auto">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-foreground mb-2">Welcome back, Alex</h1>
+          <h1 className="text-foreground mb-2">Chào mừng trở lại, {displayName}</h1>
           <p className="text-muted-foreground">Track your learning progress and continue your journey</p>
         </div>
 

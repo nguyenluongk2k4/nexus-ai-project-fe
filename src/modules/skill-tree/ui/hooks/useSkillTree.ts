@@ -1,8 +1,10 @@
 import { useState, useCallback } from 'react';
-import { SkillTreeService } from '@/domain/services/SkillTreeService';
+import { getSkillTreeService } from '../../providers';
 import { SpecializationData, SPECIALIZATIONS } from '@/domain/data/skillTreeData';
+import { treeNodeService } from '@/modules/skill-tree/domain/services/treeNodeService';
 
-const service = new SkillTreeService();
+// Get service from providers (DI)
+const service = getSkillTreeService();
 
 export interface SkillNode {
   id: string;
@@ -129,6 +131,78 @@ export function useSkillTree() {
     }
   }, [convertSpecializationToNodes]);
 
+  const loadSessionTree = useCallback(async (sessionId: string) => {
+    setLoading(true);
+    try {
+      const treeData = await service.getTreeBySession(sessionId);
+      if (!treeData || !treeData.nodes) {
+        // Fallback or empty state
+        setSkillNodes([]);
+        return;
+      }
+      
+      // Convert API data to SkillNodes
+      const nodesMap = new Map<string, SkillNode>();
+      
+      // 1. Create Nodes
+      treeData.nodes.forEach((apiNode: any) => {
+          nodesMap.set(apiNode.id, {
+              id: apiNode.id,
+              label: apiNode.label.length > 15 ? apiNode.label.substring(0, 15) + '...' : apiNode.label,
+              fullName: apiNode.label,
+              status: apiNode.data?.status === 'completed' || apiNode.data?.status === 'in-progress' ? 'unlocked' : 'available',
+              level: apiNode.level ?? 0, // Use level from API (0=root, 1=ability, 2=skill)
+              x: apiNode.position?.x || 50,
+              y: apiNode.position?.y || 50,
+              connections: [],
+              nodeData: {
+                  ...apiNode.data,
+                  filled: true, // Mark as filled since data comes from API
+                  learningResources: [] // Will be loaded lazily
+              }
+          });
+      });
+
+      // 2. Add Connections from Edges
+      if (treeData.edges) {
+          treeData.edges.forEach((edge: any) => {
+              const sourceNode = nodesMap.get(edge.source);
+              if (sourceNode) {
+                  sourceNode.connections.push(edge.target);
+              }
+          });
+      }
+      
+      const finalNodes = Array.from(nodesMap.values());
+      
+      // Update Service (Global State) to Trigger UI Update in SkillTree.tsx
+      // Map SkillNode back to TreeNodeData structure expected by service
+      const serviceNodes: any[] = finalNodes.map(n => ({
+        id: n.id,
+        name: n.fullName,
+        type: 'skill',
+        level: n.level,
+        filled: n.status !== 'locked',
+        parentId: null,
+        connections: n.connections, // CRITICAL: Include connections for edge drawing
+        metadata: n.nodeData,
+        resources: n.nodeData.learningResources
+      }));
+
+      // CRITICAL: Replace existing tree (Clean slate)
+      treeNodeService.setNodes(serviceNodes);
+      
+      // Also update local state (optional, but good for hook consistency)
+      setSkillNodes(finalNodes);
+      setShowTree(true);
+      
+    } catch (error) {
+      console.error('Error loading session tree:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const backToSelection = () => {
     setShowTree(false);
     setSelectedSpecialization(null);
@@ -141,6 +215,7 @@ export function useSkillTree() {
     loading,
     showTree,
     selectSpecialization,
+    loadSessionTree, // Exposed
     backToSelection,
     specializations: SPECIALIZATIONS
   };
