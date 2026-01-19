@@ -1,19 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Check, Lock, Minus, Plus, MessageSquare, Loader2, Settings } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Lock, CheckCircle2, Circle, BookOpen, Target, Clock, TrendingUp, Award, ExternalLink, Lightbulb, Code } from 'lucide-react';
+import { Button } from '@/shared/components/ui/button';
+import { Card } from '@/shared/components/ui/card';
+import { LearningResourceManager } from '@/shared/components/LearningResourceManager';
 import { useSkillTree, SkillNode } from '@/modules/skill-tree/ui/hooks/useSkillTree';
-import { useChat } from '@/modules/chat/ui/hooks/useChat';
-import { RightPanel } from '../components/RightPanel';
-import { NodeManagementModal } from '../components/NodeManagementModal';
-
-import { NodeTooltip } from '../components/NodeTooltip';
-import { treeState$, TreeNodeData, TreeState, treeNodeService } from '../../domain/services/treeNodeService';
-
-// Node types for different states
-type NodeStatus = 'completed' | 'in-progress' | 'locked';
-
-interface TreeNode extends SkillNode {
-  progress?: number; // 0-100 for in-progress nodes
-}
 
 export function SkillTree() {
   const { 
@@ -44,200 +34,31 @@ export function SkillTree() {
     }
   }, [showTree]);
 
-    // Chat hook for right panel (disable navigation on new chat/session)
-    const {
-      messages,
-      status,
-      error,
-      clearError,
-      send,
-      sessions,
-      sessionsLoading,
-      hasMore,
-      loadMoreSessions,
-      loadingMore,
-      currentSessionId,
-      startNewChat,
-      selectSession
-    } = useChat({ disableNavigation: true });
-  
-    const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-    const [zoomLevel, setZoomLevel] = useState(100);
-    const [focusedBranch, setFocusedBranch] = useState<{
-      abilityId?: string;
-      skillId?: string;
-    } | null>(null);
-    const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
-    const [activeTab, setActiveTab] = useState<'chat' | 'resource'>('chat');
-    const [loadingNodeId, setLoadingNodeId] = useState<string | null>(null); // For lazy loading indicator
+  const selectSpec = (id: string) => {
+    const spec = specializations.find((s: any) => s.id === id);
+    if (spec) selectSpecialization(spec);
+  };
+
+  // Recalculate positions for visible nodes to spread them out
+  const repositionVisibleNodes = (nodes: SkillNode[]): SkillNode[] => {
+    const repositioned = [...nodes];
     
-    // Management modal state
-    const [managementModalOpen, setManagementModalOpen] = useState(false);
-    const [managementNode, setManagementNode] = useState<{
-      id: string;
-      label: string;
-      fullName?: string;
-      type: string;
-      level: number;
-      description?: string;
-    } | null>(null);
+    // Group by level
+    const byLevel: Record<number, SkillNode[]> = {};
+    repositioned.forEach(node => {
+      if (!byLevel[node.level]) byLevel[node.level] = [];
+      byLevel[node.level].push(node);
+    });
     
-    // Tooltip state
-    const [hoveredNode, setHoveredNode] = useState<SkillNode | null>(null);
-    const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  
-    // Handle session selection - stay on SkillTree page (don't redirect to /chat)
-    // Handle session selection - stay on SkillTree page (don't redirect to /chat)
-    const handleSelectSession = (sessionId: string) => {
-      // Manually load session messages since we're not changing URL
-      selectSession(sessionId);
-      console.log('Session selected:', sessionId);
-    };
-
-    // DISABLED: Don't auto-load tree from API on session change
-    // This was loading the default template (DevOps) before generated tree arrives
-    // Tree will now only come from HTTP streaming after user chats
-    // useEffect(() => {
-    //   if (currentSessionId) {
-    //     loadSessionTree(currentSessionId);
-    //   }
-    // }, [currentSessionId, loadSessionTree]);
-
-    // Listen for tree-generate event from WebSocket - call HTTP streaming endpoint
-    useEffect(() => {
-      const handleTreeGenerate = async (event: CustomEvent) => {
-        const { sessionId, message } = event.detail;
-        if (!sessionId || !message) return;
-        
-        console.log('🌳 Starting tree generation via HTTP stream...');
-        
-        // Import gateway and call streaming method
-        const { SkillTreeHttpGateway } = await import('../../infrastructure/gateway/SkillTreeHttpGateway');
-        const gateway = new SkillTreeHttpGateway();
-        
-        await gateway.generateTreeStream(
-          message,
-          sessionId,
-          (status, statusMessage) => {
-            console.log(`🌳 [Status] ${status}: ${statusMessage}`);
-            if (status === 'done') {
-              treeNodeService.setLoading(false);
-            }
-          },
-          (nodes) => {
-            console.log(`🌳 [Nodes] Received ${nodes.length} nodes`);
-            treeNodeService.setNodes(nodes);
-          },
-          (error) => {
-            console.error('🌳 [Error]', error);
-            treeNodeService.setLoading(false);
-          }
-        );
-      };
+    // Reposition each level
+    Object.keys(byLevel).forEach(levelStr => {
+      const level = parseInt(levelStr);
+      const nodesAtLevel = byLevel[level];
+      const count = nodesAtLevel.length;
       
-      window.addEventListener('tree-generate', handleTreeGenerate as unknown as EventListener);
-      return () => window.removeEventListener('tree-generate', handleTreeGenerate as unknown as EventListener);
-    }, []);
-
-    // Handle new chat - clear tree and start new session
-    const handleNewChat = () => {
-      treeNodeService.clear();
-      startNewChat();
-    };
-  
-    // Convert tree nodes from Observable to SkillNode format for visualization
-    // Build connections from parentId relationships
-    const skillNodes: SkillNode[] = useMemo(() => {
-      const nodes = treeState.nodes;
-      
-      // Build a map of parent -> children for connections
-      const childrenByParent: Record<string, string[]> = {};
-      nodes.forEach(node => {
-        const parentId = (node as any).parentId;
-        if (parentId) {
-          if (!childrenByParent[parentId]) {
-            childrenByParent[parentId] = [];
-          }
-          childrenByParent[parentId].push(node.id);
-        }
-      });
-      
-      return nodes.map((node) => ({
-        id: node.id,
-        label: node.filled 
-          ? (node.name.length > 15 ? node.name.substring(0, 12) + '...' : node.name)
-          : '?',
-        fullName: node.full_name || node.name,
-        level: node.level,
-        x: 50, // Will be repositioned
-        y: 10 + (node.level * 20),
-        status: node.filled ? 'available' as const : 'locked' as const,
-        // Build connections: either from node.connections or from childrenByParent map
-        connections: (node as any).connections || childrenByParent[node.id] || [],
-        nodeData: {
-          description: node.description,
-          difficultyLevel: node.metadata?.difficultyLevel,
-          estimatedTimeToComplete: node.metadata?.estimatedHours ? `${node.metadata.estimatedHours} giờ` : undefined,
-          filled: node.filled, // Pass filled status for rendering
-          learningResources: node.resources, // Pass resources to node details (mapped to learningResources for UI)
-        }
-      }));
-    }, [treeState.nodes]);
-  
-    // Count filled nodes
-    const filledCount = treeState.nodes.filter(n => n.filled).length;
-    const totalCount = treeState.nodes.length;
-  
-    // Convert status to new format
-    const getNodeStatus = (node: SkillNode): NodeStatus => {
-      if (node.status === 'unlocked') return 'completed';
-      if (node.status === 'available') return 'in-progress';
-      return 'locked';
-    };
-  
-    // Get visible nodes based on focused branch (PROGRESSIVE REVEAL)
-    // Default: show level 0 + 1 only
-    // Click level 1 → show its level 2 children
-    // Click level 2 → show its level 3 children
-    const visibleNodes = useMemo(() => {
-      if (!skillNodes || skillNodes.length === 0) return [];
-      
-      const visible: SkillNode[] = [];
-      
-      // Always show root (level 0)
-      const root = skillNodes.find(n => n.level === 0);
-      if (root) visible.push({...root});
-      
-      // If focused on an ability, ONLY show that ability (hide siblings for cleaner UX)
-      if (focusedBranch?.abilityId) {
-        const ability = skillNodes.find(n => n.id === focusedBranch.abilityId);
-        if (ability) {
-          visible.push({...ability});
-          
-          // If focused on a skill, ONLY show that skill (hide sibling skills)
-          if (focusedBranch?.skillId) {
-            const skill = skillNodes.find(n => n.id === focusedBranch.skillId);
-            if (skill) {
-              visible.push({...skill});
-              
-              // Show level 3 children (knowledge) of focused skill
-              if (skill.connections && skill.connections.length > 0) {
-                const knowledge = skillNodes.filter(n => 
-                  n.level === 3 && skill.connections!.includes(n.id)
-                );
-                visible.push(...knowledge.map(n => ({...n})));
-              }
-            }
-          } else {
-            // No skill focused: show all level 2 skills of the focused ability
-            if (ability.connections && ability.connections.length > 0) {
-              const skills = skillNodes.filter(n => 
-                n.level === 2 && ability.connections!.includes(n.id)
-              );
-              visible.push(...skills.map(n => ({...n})));
-            }
-          }
-        }
+      if (count === 1) {
+        // Single node - center it
+        nodesAtLevel[0].x = 50;
       } else {
         // Multiple nodes - spread evenly across width
         const spacing = 80 / (count + 1); // Use 80% of width with padding
@@ -324,7 +145,7 @@ export function SkillTree() {
           // Collapse - back to showing all abilities
           setFocusedBranch(null);
         } else {
-          // Just expand focus - all nodes already loaded via streaming
+          // Expand this ability
           setFocusedBranch({ abilityId: node.id });
         }
       } else if (node.level === 2) {
@@ -351,78 +172,45 @@ export function SkillTree() {
         // Clicked on root - collapse all
         setFocusedBranch(null);
       }
-    };
-  
-    // Handle Manage node button click
-    const handleManageClick = (node: SkillNode, event: React.MouseEvent) => {
-      event.stopPropagation(); // Prevent node click
-      
-      setManagementNode({
-        id: node.id,
-        label: node.label,
-        fullName: node.fullName,
-        type: node.nodeData?.type || 'node',
-        level: node.level,
-        description: node.nodeData?.description
-      });
-      setManagementModalOpen(true);
-    };
+    } catch (error) {
+      console.error('Error in handleNodeClick:', error);
+      // Fallback: just select the node without changing focus
+      setSelectedNode(node);
+    }
+  };
 
-    const handleCloseManagementModal = () => {
-      setManagementModalOpen(false);
-      setManagementNode(null);
-    };
-  
-    // Generate bezier path between nodes
-    const generatePath = (fromX: number, fromY: number, toX: number, toY: number) => {
-      const midY = (fromY + toY) / 2;
-      return `M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY}`;
-    };
-  
-    // Main layout - always show with tree canvas (empty or with data)
-    return (
-      <div className="flex-1 flex flex-col min-w-0 h-full bg-slate-50">
-        {/* Header */}
-        <header className="h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md px-6 flex items-center justify-between z-10 flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <span className="text-white text-sm">🌳</span>
-            </div>
-            <h2 className="text-lg font-bold text-slate-800">Skill Tree</h2>
-            
-            {/* Back button when focused - smart navigation */}
-            {focusedBranch?.abilityId && (
-              <button 
-                onClick={() => {
-                  if (focusedBranch.skillId) {
-                    // Back from skill to ability view
-                    setFocusedBranch({ abilityId: focusedBranch.abilityId });
-                  } else {
-                    // Back from ability to all abilities
-                    setFocusedBranch(null);
-                  }
-                }}
-                className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-full text-xs font-medium text-slate-600 transition-colors"
-              >
-                ← {focusedBranch.skillId ? 'Quay lại Skills' : 'Quay lại'}
-              </button>
-            )}
-            
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-              filledCount > 0 
-                ? 'bg-indigo-100 text-indigo-700' 
-                : 'bg-slate-100 text-slate-500'
-            }`}>
-              {filledCount}/{totalCount} nodes
-            </span>
-            
-            {/* Loading indicator for lazy loading */}
-            {(treeState.loading || loadingNodeId) && (
-              <div className="flex items-center gap-2 px-3 py-1 bg-indigo-50 rounded-full">
-                <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
-                <span className="text-xs text-indigo-600 font-medium">Đang tải...</span>
-              </div>
-            )}
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'unlocked':
+        return 'from-teal-400 to-teal-600';
+      case 'available':
+        return 'from-violet-400 to-violet-600';
+      default:
+        return 'from-gray-300 to-gray-400';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'unlocked':
+        return CheckCircle2;
+      case 'available':
+        return Circle;
+      default:
+        return Lock;
+    }
+  };
+
+  return (
+    <div className="flex-1 bg-white p-8 overflow-auto">
+      {!showTree ? (
+        // Specialization Selection Screen
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-foreground mb-4">Chọn Chuyên Ngành IT</h1>
+            <p className="text-lg text-muted-foreground">
+              Khám phá lộ trình học tập chi tiết cho 5 chuyên ngành công nghệ hàng đầu
+            </p>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -445,179 +233,24 @@ export function SkillTree() {
                   {spec.name}
                 </h3>
                 
-                return (
-                  <g
-                    key={node.id}
-                    transform={`translate(${node.x}, ${node.y})`}
-                    onClick={() => handleNodeClick(node)}
-                    onMouseEnter={(e) => {
-                      setHoveredNode(node);
-                      // Calculate tooltip position from SVG coordinates
-                      const svg = e.currentTarget.closest('svg');
-                      if (svg) {
-                        const rect = svg.getBoundingClientRect();
-                        const svgWidth = svg.viewBox.baseVal.width;
-                        const svgHeight = svg.viewBox.baseVal.height;
-                        const scaleX = rect.width / svgWidth;
-                        const scaleY = rect.height / svgHeight;
-                        setTooltipPosition({
-                          x: rect.left + (node.x * scaleX),
-                          y: rect.top + (node.y * scaleY)
-                        });
-                      }
-                    }}
-                    onMouseLeave={() => {
-                      setHoveredNode(null);
-                    }}
-                    className="cursor-pointer"
-                    style={{ transition: 'all 0.3s ease' }}
-                  >
-                    {/* Loading spinner */}
-                    {isLoading && (
-                      <circle
-                        r={radius + 2}
-                        fill="none"
-                        stroke="#6366f1"
-                        strokeWidth="0.3"
-                        strokeDasharray="2,2"
-                        className="animate-spin"
-                        style={{ transformOrigin: 'center', animation: 'spin 1s linear infinite' }}
-                      />
-                    )}
-                    {/* Placeholder pulse animation */}
-                    {!isFilled && (
-                      <circle
-                        r={radius + 1}
-                        fill="none"
-                        stroke="#6366f1"
-                        strokeWidth="0.2"
-                        opacity="0.3"
-                        className="animate-pulse"
-                      />
-                    )}
-  
-                    {/* Main node */}
-                    <rect
-                      x={-radius}
-                      y={-radius}
-                      width={size}
-                      height={size}
-                      rx={size * 0.3}
-                      fill={isFilled ? '#6366f1' : '#f1f5f9'}
-                      stroke={isSelected ? '#6366f1' : isFilled ? 'transparent' : '#cbd5e1'}
-                      strokeWidth={isFilled ? '0.3' : '0.2'}
-                      strokeDasharray={isFilled ? 'none' : '0.5,0.5'}
-                      className="transition-all hover:opacity-90"
-                    />
-  
-                    {/* Node content */}
-                    <text
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill={isFilled ? 'white' : '#94a3b8'}
-                      fontSize={isFilled ? '1.5' : '2'}
-                      fontWeight="bold"
-                    >
-                      {isFilled ? (node.level === 0 ? '🧠' : '✓') : '?'}
-                    </text>
-  
-                    {/* Label */}
-                    <text
-                      y={radius + 2.5}
-                      textAnchor="middle"
-                      fill={isFilled ? '#6366f1' : '#94a3b8'}
-                      fontSize="1.5"
-                      fontWeight={isFilled ? '600' : '400'}
-                    >
-                      {node.label}
-                    </text>
-  
-                    {/* Active indicator */}
-                    {isExpanded && (
-                      <text
-                        y={radius + 4.5}
-                        textAnchor="middle"
-                        fill="#6366f1"
-                        fontSize="1"
-                        fontWeight="bold"
-                      >
-                        ▼ EXPANDED
-                      </text>
-                    )}
-                  </g>
-                );
-              })}
-  
-              {/* Gradient definitions */}
-              <defs>
-                <radialGradient id="glowGradient">
-                  <stop offset="0%" stopColor="#6366f1" stopOpacity="0.5" />
-                  <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
-                </radialGradient>
-              </defs>
-            </svg>
-              </>
-            )}
-          </div>
-  
-          {/* Floating Manage Button */}
-          {selectedNode && (
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30">
-              <button
-                onClick={(e) => handleManageClick(selectedNode, e)}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-              >
-                <Settings className="w-5 h-5" />
-                <span className="font-semibold text-lg">Manage Node</span>
+                <div className="mt-6 inline-flex items-center text-violet-600 font-semibold group-hover:text-violet-700">
+                  Khám phá skill tree
+                  <svg className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </div>
               </button>
+            ))}
+          </div>
+          
+          {loading && (
+            <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl p-8 shadow-2xl">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-violet-500 border-t-transparent mx-auto mb-4"></div>
+                <p className="text-foreground font-medium">Đang tải skill tree...</p>
+              </div>
             </div>
           )}
-
-          {/* Node Management Modal - Replaces SwapNodeModal */}
-          {managementNode && (
-             <NodeManagementModal
-              isOpen={managementModalOpen}
-              onClose={handleCloseManagementModal}
-              node={managementNode}
-              sessionId={currentSessionId || undefined}
-              onNodeUpdated={() => {
-                  if (currentSessionId) loadSessionTree(currentSessionId);
-              }}
-              treeNodes={treeState.nodes} // Pass full tree context
-            />
-          )}
-
-          {/* Node Tooltip */}
-          {hoveredNode && (
-            <NodeTooltip
-              node={hoveredNode}
-              position={tooltipPosition}
-              progress={hoveredNode.nodeData?.progress}
-            />
-          )}
-  
-          {/* Right Panel with Tabs */}
-          <RightPanel
-            selectedNode={selectedNode}
-            getNodeStatus={getNodeStatus}
-            messages={messages}
-            status={status}
-            error={error}
-            onClearError={clearError}
-            onSend={send}
-            sessions={sessions}
-            sessionsLoading={sessionsLoading}
-            hasMore={hasMore}
-            onLoadMore={loadMoreSessions}
-            loadingMore={loadingMore}
-            currentSessionId={currentSessionId}
-            onSelectSession={handleSelectSession}
-            onNewChat={handleNewChat}
-            isCollapsed={rightPanelCollapsed}
-            onToggleCollapse={() => setRightPanelCollapsed(!rightPanelCollapsed)}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
         </div>
       ) : (
         // Skill Tree View
