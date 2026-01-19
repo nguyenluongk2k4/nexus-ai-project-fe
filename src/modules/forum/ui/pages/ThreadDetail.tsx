@@ -147,6 +147,7 @@ export function ThreadDetail() {
         setComments(data.comments);
         if (data.post) {
           setLikeCount(data.post.stats.likes);
+          setIsLiked(data.post.isLiked || false);  // Initialize from server
         }
       } catch (error) {
         console.error('Failed to load thread details:', error);

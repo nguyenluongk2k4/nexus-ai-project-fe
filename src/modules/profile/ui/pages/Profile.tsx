@@ -136,6 +136,9 @@ export function Profile() {
         lastLoginAt: new Date().toISOString(),
         isActive: true,
         balance: 0,
+        subscriptionTier: 'free',
+        subscriptionTierName: 'Free',
+        subscriptionExpiresAt: null,
     };
 
     return (
@@ -329,6 +332,35 @@ export function Profile() {
                                 >
                                     <Wallet className="w-5 h-5" />
                                     Nạp tiền
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Subscription Tier Card */}
+                        <div className="bg-gradient-to-br from-violet-600 to-teal-500 rounded-xl p-6 shadow-sm text-white">
+                            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                                <Award className="w-5 h-5" />
+                                Gói đăng ký
+                            </h3>
+                            <div className="text-center py-2">
+                                <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-3">
+                                    <span className="text-xl font-bold">
+                                        {displayProfile.subscriptionTierName || 'Free'}
+                                    </span>
+                                </div>
+                                {displayProfile.subscriptionTier === 'free' ? (
+                                    <p className="text-sm text-white/80 mb-4">Nâng cấp để trải nghiệm tốt hơn</p>
+                                ) : displayProfile.subscriptionExpiresAt ? (
+                                    <p className="text-sm text-white/80 mb-4">
+                                        Hết hạn: {formatDate(displayProfile.subscriptionExpiresAt)}
+                                    </p>
+                                ) : null}
+                                <button
+                                    onClick={() => navigate('/plans')}
+                                    className="w-full bg-white text-violet-600 py-3 px-4 rounded-xl font-semibold hover:bg-violet-50 transition-all flex items-center justify-center gap-2"
+                                >
+                                    <Award className="w-5 h-5" />
+                                    {displayProfile.subscriptionTier === 'free' ? 'Nâng cấp' : 'Quản lý gói'}
                                 </button>
                             </div>
                         </div>

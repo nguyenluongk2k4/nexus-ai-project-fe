@@ -51,6 +51,9 @@ export class ProfileApiGateway implements ProfileGateway {
             lastLoginAt: data.last_login_at,
             isActive: data.is_active,
             balance: data.balance || 0,
+            subscriptionTier: data.subscription_tier || 'free',
+            subscriptionTierName: data.subscription_tier_name || 'Free',
+            subscriptionExpiresAt: data.subscription_expires_at,
         };
     }
 

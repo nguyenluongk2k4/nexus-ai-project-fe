@@ -11,6 +11,9 @@ export interface UserProfile {
     lastLoginAt: string | null;
     isActive: boolean;
     balance: number; // VND
+    subscriptionTier: string;
+    subscriptionTierName: string;
+    subscriptionExpiresAt: string | null;
 }
 
 export interface ProfileStats {

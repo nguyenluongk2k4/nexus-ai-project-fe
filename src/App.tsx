@@ -15,6 +15,7 @@ import { Timeline } from '@/modules/skill-tree/ui/pages/Timeline';
 import { Profile } from '@/modules/profile/ui/pages/Profile';
 import { Purchase } from '@/modules/purchase/ui/pages/Purchase';
 import { PurchaseSuccess } from '@/modules/purchase/ui/pages/PurchaseSuccess';
+import { Plans } from '@/modules/subscription/ui/pages/Plans';
 import { LearningProgressProvider } from '@/modules/skill-tree/ui/contexts/LearningProgressContext';
 import { AuthProvider, useAuth } from '@/modules/auth/AuthProvider';
 import { LoginPage } from '@/modules/auth/ui/LoginPage';
@@ -66,6 +67,7 @@ export default function App() {
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/purchase" element={<Purchase />} />
                         <Route path="/purchase/success" element={<PurchaseSuccess />} />
+                        <Route path="/plans" element={<Plans />} />
                         <Route path="*" element={<Navigate to="/dashboard" replace />} />
                       </Routes>
                     </main>
