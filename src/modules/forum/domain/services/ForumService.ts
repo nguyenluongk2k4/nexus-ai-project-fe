@@ -1,8 +1,8 @@
-import { ForumGateway } from '../ports/ForumGateway';
-import { ForumPost, ForumCategory, ForumStats } from '../entities/ForumEntities';
+import { ForumGateway, LikeResult } from '../ports/ForumGateway';
+import { ForumPost, ForumCategory, ForumStats, ForumComment } from '../entities/ForumEntities';
 
 export class ForumService {
-  constructor(private gateway: ForumGateway) {}
+  constructor(private gateway: ForumGateway) { }
 
   async getDashboardData(): Promise<{
     stats: ForumStats;
@@ -37,4 +37,17 @@ export class ForumService {
     ]);
     return { post, comments };
   }
+
+  async addComment(postId: number, content: string, parentId?: string): Promise<ForumComment> {
+    return this.gateway.addComment(postId, content, parentId);
+  }
+
+  async likePost(postId: number): Promise<LikeResult> {
+    return this.gateway.likePost(postId);
+  }
+
+  async createPost(post: Omit<ForumPost, 'id' | 'stats' | 'createdAt'>): Promise<ForumPost> {
+    return this.gateway.createPost(post);
+  }
 }
+

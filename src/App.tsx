@@ -10,6 +10,7 @@ import { Chat } from '@/modules/chat/ui/pages/Chat';
 import { Forum } from '@/modules/forum/ui/pages/Forum';
 import { SubForum } from '@/modules/forum/ui/pages/SubForum';
 import { ThreadDetail } from '@/modules/forum/ui/pages/ThreadDetail';
+import { CreatePost } from '@/modules/forum/ui/pages/CreatePost';
 import { Timeline } from '@/modules/skill-tree/ui/pages/Timeline';
 import { LearningProgressProvider } from '@/modules/skill-tree/ui/contexts/LearningProgressContext';
 import { AuthProvider, useAuth } from '@/modules/auth/AuthProvider';
@@ -19,11 +20,11 @@ import { RegisterPage } from '@/modules/auth/ui/RegisterPage';
 // Protected Route Wrapper
 const ProtectedRoute = () => {
   const { isAuthenticated, isLoading } = useAuth();
-  
+
   if (isLoading) {
     return <div className="flex h-screen items-center justify-center text-white">Loading...</div>;
   }
-  
+
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
@@ -37,7 +38,7 @@ export default function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            
+
             {/* Protected App Routes */}
             <Route element={<ProtectedRoute />}>
               <Route
@@ -56,6 +57,7 @@ export default function App() {
                         <Route path="/chat" element={<Chat />} />
                         <Route path="/chat/c/:sessionId" element={<Chat />} />
                         <Route path="/forum" element={<Forum />} />
+                        <Route path="/forum/new" element={<CreatePost />} />
                         <Route path="/forum/:category" element={<SubForum />} />
                         <Route path="/thread/:id" element={<ThreadDetail />} />
                         <Route path="*" element={<Navigate to="/dashboard" replace />} />

@@ -39,6 +39,7 @@ export interface ForumPost {
 export interface ForumComment {
   id: string;
   postId: number;
+  parentId?: string | null;  // For threaded replies
   author: ForumUser;
   content: string;
   likes: number;
