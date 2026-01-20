@@ -35,4 +35,16 @@ export class SkillTreeService {
   async getNodeChildren(nodeId: string) {
     return this.gateway.getNodeChildren(nodeId);
   }
+
+  async getNodeAlternatives(nodeId: string, level: number, sessionId?: string) {
+    return this.gateway.getNodeAlternatives(nodeId, level, sessionId);
+  }
+
+  async swapNode(sessionId: string, originalNodeId: string, newNode: any): Promise<{ status: string, nodes: any[] } | null> {
+    return this.gateway.swapNode(sessionId, originalNodeId, newNode);
+  }
+
+  async generateTreeStream(message: string, sessionId: string, onData: (data: any) => void) {
+    return this.gateway.generateTreeStream(message, sessionId, onData);
+  }
 }

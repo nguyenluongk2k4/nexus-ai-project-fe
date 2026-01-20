@@ -39,4 +39,81 @@ export class SkillTreeHttpGateway implements SkillTreeGateway {
       return { nodes: [], edges: [] };
     }
   }
+
+  async getNodeAlternatives(nodeId: string, level: number, sessionId?: string): Promise<any[]> {
+    try {
+      const params = new URLSearchParams({ level: level.toString() });
+      if (sessionId) params.append('session_id', sessionId);
+      
+      const url = `${apiConfig.endpoints.skillTree.nodeAlternatives(nodeId)}?${params}`;
+      return await httpClient.get<any[]>(url);
+    } catch (e) {
+      console.error("Failed to fetch node alternatives", e);
+      return [];
+    }
+  }
+
+  async swapNode(sessionId: string, originalNodeId: string, newNode: any): Promise<{ status: string, nodes: any[] } | null> {
+    try {
+      const response = await httpClient.post<{ status: string, nodes: any[] }>(
+        apiConfig.endpoints.skillTree.swapNode(sessionId),
+        { original_node_id: originalNodeId, new_node: newNode }
+      );
+      return response;
+    } catch (e) {
+      console.error("Failed to swap node", e);
+      return null;
+    }
+  }
+
+  async generateTreeStream(message: string, sessionId: string, onData: (data: any) => void): Promise<void> {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(apiConfig.getHttpUrl(apiConfig.endpoints.skillTree.generate), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        body: JSON.stringify({ message, session_id: sessionId })
+      });
+
+      if (!response.ok) throw new Error('Generation failed');
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (!reader) return;
+
+      let buffer = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (value) {
+            buffer += decoder.decode(value, { stream: true });
+        }
+        
+        if (done) break;
+        
+        const lines = buffer.split('\n\n');
+        buffer = lines.pop() || ''; // Keep incomplete part
+        
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('data: ')) {
+            try {
+              const jsonStr = trimmed.replace('data: ', '');
+              const data = JSON.parse(jsonStr);
+              onData(data);
+            } catch (e) {
+              console.error('Error parsing stream data', e);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Stream generation error", e);
+      throw e;
+    }
+  }
 }

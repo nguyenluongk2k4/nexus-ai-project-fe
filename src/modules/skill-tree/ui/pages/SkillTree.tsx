@@ -1,9 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Check, Lock, Minus, Plus, MessageSquare, Loader2 } from 'lucide-react';
 import { useSkillTree, SkillNode } from '@/modules/skill-tree/ui/hooks/useSkillTree';
 import { useChat } from '@/modules/chat/ui/hooks/useChat';
 import { RightPanel } from '../components/RightPanel';
+import { NodeManagementModal } from '../components/NodeManagementModal';
+import { NodeTooltip } from '../components/NodeTooltip';
 import { treeState$, TreeNodeData, TreeState, treeNodeService } from '../../domain/services/treeNodeService';
+import { Settings } from 'lucide-react';
 
 // Node types for different states
 type NodeStatus = 'completed' | 'in-progress' | 'locked';
@@ -16,8 +19,16 @@ export function SkillTree() {
   // Subscribe to tree state Observable
   const [treeState, setTreeState] = useState<TreeState>({ nodes: [], loading: false, error: null });
   
-    // Destructure loadSessionTree from hook
-    const { loadSessionTree } = useSkillTree();
+    // Destructure hook values
+    const { 
+      skillNodes: initialNodes,
+      selectedSpecialization,
+      selectSpecialization,
+      loadSessionTree,
+      showTree,
+      generateTree,
+      backToSelection
+    } = useSkillTree();
 
   useEffect(() => {
     const subscription = treeState$.subscribe(setTreeState);
@@ -49,13 +60,28 @@ export function SkillTree() {
     } | null>(null);
     const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
     const [activeTab, setActiveTab] = useState<'chat' | 'resource'>('chat');
-    const [loadingNodeId, setLoadingNodeId] = useState<string | null>(null); // For lazy loading indicator
+
+    // Management modal state
+    const [managementModalOpen, setManagementModalOpen] = useState(false);
+    const [managementNode, setManagementNode] = useState<{
+      id: string;
+      label: string;
+      fullName?: string;
+      type: string;
+      level: number;
+      description?: string;
+    } | null>(null);
+    
+    // Tooltip state
+    const [hoveredNode, setHoveredNode] = useState<SkillNode | null>(null);
+    const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   
     // Handle session selection - stay on SkillTree page (don't redirect to /chat)
     // Handle session selection - stay on SkillTree page (don't redirect to /chat)
     const handleSelectSession = (sessionId: string) => {
       // Manually load session messages since we're not changing URL
       selectSession(sessionId);
+      loadSessionTree(sessionId); // Load tree for history sessions
       console.log('Session selected:', sessionId);
     };
 
@@ -82,6 +108,27 @@ export function SkillTree() {
       return () => window.removeEventListener('tree-updated', handleTreeUpdated as EventListener);
     }, [currentSessionId, loadSessionTree]);
 
+    // Listen for trigger-tree-stream event from WebSocket (HTTP Streaming trigger)
+    useEffect(() => {
+      const handleTriggerStream = async (event: CustomEvent) => {
+        const { sessionId, message } = event.detail;
+        if (sessionId && message) {
+          console.log('🚀 HTTP Streaming triggered for tree generation');
+          // Flag already set in ChatWsGateway
+          try {
+            await generateTree(message, sessionId);
+          } finally {
+            // Reset flag after streaming completes
+            (window as any).__treeStreamingActive = false;
+            console.log('🏁 HTTP Streaming completed, flag reset');
+          }
+        }
+      };
+      
+      window.addEventListener('trigger-tree-stream', handleTriggerStream as unknown as EventListener);
+      return () => window.removeEventListener('trigger-tree-stream', handleTriggerStream as unknown as EventListener);
+    }, [generateTree]);
+
     // Handle new chat - clear tree and start new session
     const handleNewChat = () => {
       treeNodeService.clear();
@@ -91,41 +138,60 @@ export function SkillTree() {
     // Convert tree nodes from Observable to SkillNode format for visualization
     // Build connections from parentId relationships
     const skillNodes: SkillNode[] = useMemo(() => {
-      const nodes = treeState.nodes;
-      
-      // Build a map of parent -> children for connections
-      const childrenByParent: Record<string, string[]> = {};
-      nodes.forEach(node => {
-        const parentId = (node as any).parentId;
-        if (parentId) {
-          if (!childrenByParent[parentId]) {
-            childrenByParent[parentId] = [];
+      if (!showTree) return [];
+
+      // 1. Prioritize nodes from service (Session Tree)
+      if (treeState.nodes.length > 0) {
+        const nodes = treeState.nodes;
+        
+        // Build map for connections
+        const childrenByParent: Record<string, string[]> = {};
+        nodes.forEach(node => {
+          const parentId = (node as any).parentId;
+          if (parentId) {
+             if (!childrenByParent[parentId]) childrenByParent[parentId] = [];
+             childrenByParent[parentId].push(node.id);
           }
-          childrenByParent[parentId].push(node.id);
-        }
-      });
-      
-      return nodes.map((node) => ({
-        id: node.id,
-        label: node.filled 
-          ? (node.name.length > 15 ? node.name.substring(0, 12) + '...' : node.name)
-          : '?',
-        fullName: node.name,
-        level: node.level,
-        x: 50, // Will be repositioned
-        y: 10 + (node.level * 20),
-        status: node.filled ? 'available' as const : 'locked' as const,
-        // Build connections: either from node.connections or from childrenByParent map
-        connections: (node as any).connections || childrenByParent[node.id] || [],
-        nodeData: {
-          description: node.description,
-          difficultyLevel: node.metadata?.difficultyLevel,
-          estimatedTimeToComplete: node.metadata?.estimatedHours ? `${node.metadata.estimatedHours} giờ` : undefined,
-          filled: node.filled, // Pass filled status for rendering
-          learningResources: node.resources, // Pass resources to node details (mapped to learningResources for UI)
-        }
+        });
+
+        return nodes.map((node) => ({
+          id: node.id,
+          label: node.filled 
+            ? (node.name.length > 15 ? node.name.substring(0, 12) + '...' : node.name)
+            : '?',
+          fullName: node.name,
+          type: node.type,
+          level: node.level,
+          x: 50, // Default for session nodes (repositioned later)
+          y: 10 + (node.level * 20),
+          status: ((node.metadata as any)?.status === 'completed' || (node.metadata as any)?.status === 'unlocked') 
+            ? 'unlocked' as const 
+            : (node.filled ? 'available' as const : 'locked' as const),
+          connections: childrenByParent[node.id] || (node as any).connections || [],
+          nodeData: {
+            description: node.description,
+            difficultyLevel: node.metadata?.difficultyLevel,
+            estimatedTimeToComplete: node.metadata?.estimatedHours ? `${node.metadata.estimatedHours} giờ` : undefined,
+            filled: node.filled,
+            learningResources: node.resources,
+          }
+        }));
+      }
+
+      // 2. Fallback to initialNodes (Mock Data / 2-4-8 Layout)
+      return initialNodes.map((node) => ({
+         id: node.id,
+         label: node.label,
+         fullName: node.fullName || node.label,
+         type: node.type || 'skill',
+         level: node.level,
+         x: node.x, // Preserve Mock Layout position
+         y: node.y,
+         status: node.status,
+         connections: node.connections || [],
+         nodeData: node.nodeData
       }));
-    }, [treeState.nodes]);
+    }, [treeState.nodes, initialNodes, showTree]);
   
     // Count filled nodes
     const filledCount = treeState.nodes.filter(n => n.filled).length;
@@ -138,32 +204,80 @@ export function SkillTree() {
       return 'locked';
     };
   
-    // Get visible nodes based on focused branch (PROGRESSIVE REVEAL)
-    // Default: show level 0 + 1 only
-    // Click level 1 → show its level 2 children
-    // Click level 2 → show its level 3 children
+    // Get visible nodes - Progressive reveal with focus mode
     const visibleNodes = useMemo(() => {
       if (!skillNodes || skillNodes.length === 0) return [];
       
+      // If we have session data (generated tree), use progressive reveal with focus
+      if (treeState.nodes.length > 0) {
+        const visible: SkillNode[] = [];
+        
+        // Always show root (level 0)
+        const root = skillNodes.find(n => n.level === 0);
+        if (root) visible.push({...root});
+        
+        // Level 1 (Abilities) - focus mode
+        const abilities = skillNodes.filter(n => n.level === 1);
+        
+        if (focusedBranch?.abilityId) {
+          // FOCUS MODE: Only show the focused ability, hide siblings
+          const focusedAbility = abilities.find(a => a.id === focusedBranch.abilityId);
+          if (focusedAbility) {
+            visible.push({...focusedAbility});
+            
+            // Show its level 2 children (skills)
+            if (focusedAbility.connections && focusedAbility.connections.length > 0) {
+              const skills = skillNodes.filter(n => 
+                n.level === 2 && focusedAbility.connections!.includes(n.id)
+              );
+              
+              if (focusedBranch?.skillId) {
+                // FOCUS MODE: Only show the focused skill, hide siblings
+                const focusedSkill = skills.find(s => s.id === focusedBranch.skillId);
+                if (focusedSkill) {
+                  visible.push({...focusedSkill});
+                  
+                  // Show its level 3 children (knowledge)
+                  if (focusedSkill.connections && focusedSkill.connections.length > 0) {
+                    const knowledge = skillNodes.filter(n => 
+                      n.level === 3 && focusedSkill.connections!.includes(n.id)
+                    );
+                    console.log('👁️ [SkillTree] Focus mode - Root + Ability + Skill + Knowledge:', visible.length + knowledge.length);
+                    visible.push(...knowledge.map(n => ({...n})));
+                  }
+                }
+              } else {
+                // Show ALL skills of focused ability
+                console.log('👁️ [SkillTree] Focus mode - Root + Ability + Skills:', visible.length + skills.length);
+                visible.push(...skills.map(n => ({...n})));
+              }
+            }
+          }
+        } else {
+          // NO FOCUS: Show ALL abilities
+          visible.push(...abilities.map(n => ({...n})));
+        }
+        
+        return visible;
+      }
+      
+      // For mock data, use existing progressive reveal logic
       const visible: SkillNode[] = [];
       
       // Always show root (level 0)
       const root = skillNodes.find(n => n.level === 0);
       if (root) visible.push({...root});
       
-      // If focused on an ability, ONLY show that ability (hide siblings for cleaner UX)
+      // If focused on an ability, show that branch
       if (focusedBranch?.abilityId) {
         const ability = skillNodes.find(n => n.id === focusedBranch.abilityId);
         if (ability) {
           visible.push({...ability});
           
-          // If focused on a skill, ONLY show that skill (hide sibling skills)
           if (focusedBranch?.skillId) {
             const skill = skillNodes.find(n => n.id === focusedBranch.skillId);
             if (skill) {
               visible.push({...skill});
-              
-              // Show level 3 children (knowledge) of focused skill
               if (skill.connections && skill.connections.length > 0) {
                 const knowledge = skillNodes.filter(n => 
                   n.level === 3 && skill.connections!.includes(n.id)
@@ -172,7 +286,6 @@ export function SkillTree() {
               }
             }
           } else {
-            // No skill focused: show all level 2 skills of the focused ability
             if (ability.connections && ability.connections.length > 0) {
               const skills = skillNodes.filter(n => 
                 n.level === 2 && ability.connections!.includes(n.id)
@@ -188,30 +301,60 @@ export function SkillTree() {
       }
       
       return visible;
-    }, [skillNodes, focusedBranch]);
+    }, [skillNodes, focusedBranch, treeState.nodes.length]);
   
-    // Reposition nodes for display
+    // Reposition nodes for pyramid display with dynamic centering
     const repositionedNodes = useMemo(() => {
-      const nodes = [...visibleNodes];
-      const byLevel: Record<number, SkillNode[]> = {};
+      const nodes = visibleNodes.map(n => ({...n}));
+      if (nodes.length === 0) return [];
       
+      // Group nodes by level
+      const byLevel: Record<number, SkillNode[]> = {};
       nodes.forEach(node => {
         if (!byLevel[node.level]) byLevel[node.level] = [];
         byLevel[node.level].push(node);
       });
       
+      // Y positions for pyramid (percentage of viewBox height 0-80)
+      const levelY: Record<number, number> = {
+        0: 10,   // Root at top
+        1: 28,   // Abilities
+        2: 50,   // Skills
+        3: 72    // Knowledge at bottom
+      };
+      
+      // Calculate X positions for each level with smart centering
       Object.keys(byLevel).forEach(levelStr => {
         const level = parseInt(levelStr);
         const nodesAtLevel = byLevel[level];
         const count = nodesAtLevel.length;
         
+        // Set Y position based on level
+        nodesAtLevel.forEach(node => {
+          node.y = levelY[level] || (10 + level * 20);
+        });
+        
+        // Set X position with dynamic spacing and centering
         if (count === 1) {
+          // Single node: center it
           nodesAtLevel[0].x = 50;
+        } else if (count === 2) {
+          // Two nodes: symmetric around center
+          nodesAtLevel[0].x = 35;
+          nodesAtLevel[1].x = 65;
+        } else if (count === 3) {
+          // Three nodes: one center, two sides
+          nodesAtLevel[0].x = 25;
+          nodesAtLevel[1].x = 50;
+          nodesAtLevel[2].x = 75;
         } else {
-          const spacing = 70 / (count + 1);
-          const startX = 15;
+          // Many nodes: distribute evenly with padding
+          const totalWidth = 70; // Use 70% of viewport width
+          const startX = (100 - totalWidth) / 2; // Center the distribution
+          const spacing = totalWidth / (count - 1 || 1);
+          
           nodesAtLevel.forEach((node, idx) => {
-            node.x = startX + (spacing * (idx + 1));
+            node.x = startX + (spacing * idx);
           });
         }
       });
@@ -229,82 +372,50 @@ export function SkillTree() {
       setActiveTab('resource'); // Auto-switch to resource tab
   
       if (node.level === 1) {
+        // Level 1 (Ability): Toggle expand to show/hide level 2 children (skills)
         if (focusedBranch?.abilityId === node.id) {
-          // Toggle off
+          // Collapse: Hide children
           setFocusedBranch(null);
         } else {
-          // Expand: Set focus and lazy load children
+          // Expand: Show level 2 children
           setFocusedBranch({ abilityId: node.id });
-          
-          // Check if children already loaded (look for level 2 nodes connected to this node)
-          const existingNode = treeState.nodes.find(n => n.id === node.id);
-          const hasLoadedChildren = (existingNode as any)?.connections?.length > 0 && 
-            treeState.nodes.some(n => n.level === 2 && (existingNode as any)?.connections?.includes(n.id));
-          
-          if (!hasLoadedChildren) {
-            // Set loading state
-            setLoadingNodeId(node.id);
-            
-            try {
-              // LAZY LOADING: Call API to fetch children
-              const { getSkillTreeService } = await import('../../providers');
-              const childData = await getSkillTreeService().getNodeChildren(node.id);
-              
-              if (childData.nodes.length > 0) {
-                // Get direct children IDs (level 2)
-                const directChildIds = childData.nodes
-                  .filter((n: any) => n.level === 2)
-                  .map((n: any) => n.id);
-                
-                // Convert child nodes
-                const newNodes = childData.nodes.map((n: any) => {
-                  // Build connections for level 2 nodes (to level 3)
-                  const nodeConnections = childData.edges
-                    .filter((e: any) => e.source === n.id)
-                    .map((e: any) => e.target);
-                  
-                  return {
-                    id: n.id,
-                    name: n.label,
-                    type: n.type,
-                    level: n.level,
-                    parentId: n.level === 2 ? node.id : null,
-                    filled: true,
-                    description: n.data?.description,
-                    metadata: n.data,
-                    connections: nodeConnections
-                  };
-                });
-                
-                // Also update the parent node's connections to include direct children
-                const parentUpdate = {
-                  id: node.id,
-                  connections: directChildIds
-                };
-                
-                // Merge: first add children, then update parent connections
-                treeNodeService.updateNodes(newNodes);
-                treeNodeService.updateNodeConnections(node.id, directChildIds);
-                
-                console.log(`🌳 Lazy loaded ${newNodes.length} children for node ${node.id}`);
-              }
-            } finally {
-              setLoadingNodeId(null);
-            }
-          }
         }
       } else if (node.level === 2) {
+        // Level 2 (Skill): Toggle expand to show/hide level 3 children (knowledge)
         const parentAbility = skillNodes.find(n => 
           n.level === 1 && n.connections?.includes(node.id)
         );
         if (focusedBranch?.skillId === node.id) {
+          // Collapse: Go back to showing only skills
           setFocusedBranch({ abilityId: parentAbility?.id });
         } else {
+          // Expand: Show level 3 children
           setFocusedBranch({ abilityId: parentAbility?.id, skillId: node.id });
         }
       } else if (node.level === 0) {
+        // Root: Collapse all
         setFocusedBranch(null);
       }
+    };
+
+    // Handle Manage node button click
+    const handleManageClick = (node: SkillNode, event: React.MouseEvent) => {
+      event.stopPropagation(); // Prevent node click
+      
+      setManagementNode({
+        id: node.id,
+        label: node.label,
+        fullName: node.fullName,
+        type: node.type || 'skill', // Use type from node or default
+        level: node.level,
+        description: node.nodeData?.description
+      });
+      setManagementModalOpen(true);
+    };
+
+    const handleCloseManagementModal = () => {
+      setManagementModalOpen(false);
+      setManagementNode(null);
     };
   
     // Generate bezier path between nodes
@@ -313,6 +424,15 @@ export function SkillTree() {
       return `M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY}`;
     };
   
+    const handleChatSend = async (message: string) => {
+      // Chỉ cần gọi send() - WebSocket sẽ trigger tree_generating event
+      // Event listener sẽ tự động gọi HTTP streaming (generateTree)
+      // KHÔNG gọi generateTree trực tiếp ở đây để tránh duplicate
+      send(message);
+      
+      // Flow: send() → WS → backend → tree_generating → trigger-tree-stream event → generateTree()
+    };
+
     // Main layout - always show with tree canvas (empty or with data)
     return (
       <div className="flex-1 flex flex-col min-w-0 h-full bg-slate-50">
@@ -350,8 +470,8 @@ export function SkillTree() {
               {filledCount}/{totalCount} nodes
             </span>
             
-            {/* Loading indicator for lazy loading */}
-            {(treeState.loading || loadingNodeId) && (
+            {/* Loading indicator */}
+            {treeState.loading && (
               <div className="flex items-center gap-2 px-3 py-1 bg-indigo-50 rounded-full">
                 <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
                 <span className="text-xs text-indigo-600 font-medium">Đang tải...</span>
@@ -428,29 +548,28 @@ export function SkillTree() {
               viewBox="0 0 100 80"
               style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'center' }}
             >
-              {/* Connection Paths */}
-              {repositionedNodes.map((node) => {
+              {/* Connection Paths - Draw from parent to children */}
+              {(() => {
                 const nodeMap = new Map(repositionedNodes.map(n => [n.id, n]));
-                return node.connections?.map((targetId) => {
-                  const target = nodeMap.get(targetId);
-                  if (!target) return null;
-                  
-                  const isFilled = node.nodeData?.filled;
-                  
-                  return (
-                    <path
-                      key={`${node.id}-${targetId}`}
-                      d={generatePath(node.x, node.y, target.x, target.y)}
-                      fill="none"
-                      stroke={isFilled ? '#6366f1' : '#cbd5e1'}
-                      strokeWidth="0.4"
-                      strokeLinecap="round"
-                      strokeDasharray={isFilled ? 'none' : '1,1'}
-                      opacity={isFilled ? 0.6 : 0.3}
-                    />
-                  );
-                });
-              })}
+                return repositionedNodes.map((node) => 
+                  node.connections?.map((targetId) => {
+                    const target = nodeMap.get(targetId);
+                    if (!target) return null;
+                    
+                    return (
+                      <path
+                        key={`${node.id}-${targetId}`}
+                        d={generatePath(node.x, node.y, target.x, target.y)}
+                        fill="none"
+                        stroke="#6366f1"
+                        strokeWidth="0.5"
+                        strokeLinecap="round"
+                        opacity={0.5}
+                      />
+                    );
+                  })
+                );
+              })()}
   
               {/* Nodes */}
               {repositionedNodes.map((node) => {
@@ -458,7 +577,6 @@ export function SkillTree() {
                 const isSelected = selectedNode?.id === node.id;
                 const isExpanded = (node.level === 1 && focusedBranch?.abilityId === node.id) || 
                                   (node.level === 2 && focusedBranch?.skillId === node.id);
-                const isLoading = loadingNodeId === node.id; // Loading indicator
                 
                 // Node sizes based on level
                 const size = node.level === 0 ? 6 : node.level === 1 ? 5 : 4;
@@ -469,21 +587,15 @@ export function SkillTree() {
                     key={node.id}
                     transform={`translate(${node.x}, ${node.y})`}
                     onClick={() => handleNodeClick(node)}
+                    onMouseEnter={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setHoveredNode(node);
+                        setTooltipPosition({ x: rect.left + rect.width/2, y: rect.top });
+                    }}
+                    onMouseLeave={() => setHoveredNode(null)}
                     className="cursor-pointer"
                     style={{ transition: 'all 0.3s ease' }}
                   >
-                    {/* Loading spinner */}
-                    {isLoading && (
-                      <circle
-                        r={radius + 2}
-                        fill="none"
-                        stroke="#6366f1"
-                        strokeWidth="0.3"
-                        strokeDasharray="2,2"
-                        className="animate-spin"
-                        style={{ transformOrigin: 'center', animation: 'spin 1s linear infinite' }}
-                      />
-                    )}
                     {/* Placeholder pulse animation */}
                     {!isFilled && (
                       <circle
@@ -568,7 +680,7 @@ export function SkillTree() {
             status={status}
             error={error}
             onClearError={clearError}
-            onSend={send}
+            onSend={handleChatSend}
             sessions={sessions}
             sessionsLoading={sessionsLoading}
             hasMore={hasMore}
@@ -583,6 +695,44 @@ export function SkillTree() {
             onTabChange={setActiveTab}
           />
         </div>
+
+         {/* Floating Manage Button */}
+         {selectedNode && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+               <button
+                 onClick={(e) => handleManageClick(selectedNode, e)}
+                 className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 text-white rounded-full shadow-lg transition-transform hover:scale-105 font-semibold"
+               >
+                 <Settings className="w-5 h-5" />
+                 <span>Manage Node</span>
+               </button>
+            </div>
+         )}
+        
+        {/* Node Management Modal */}
+        {managementNode && (
+            <NodeManagementModal
+              isOpen={managementModalOpen}
+              onClose={handleCloseManagementModal}
+              node={managementNode}
+              sessionId={currentSessionId || undefined}
+              onNodeUpdated={() => {
+                  if (currentSessionId) {
+                    loadSessionTree(currentSessionId);
+                  }
+              }}
+              treeNodes={treeState.nodes}
+            />
+        )}
+
+        {/* Tooltip */}
+        {hoveredNode && (
+          <NodeTooltip
+            node={hoveredNode}
+            position={tooltipPosition}
+            progress={hoveredNode.nodeData?.progress}
+          />
+        )}
       </div>
     );
   }

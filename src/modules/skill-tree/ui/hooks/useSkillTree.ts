@@ -10,6 +10,7 @@ export interface SkillNode {
   id: string;
   label: string;
   fullName: string;
+  type?: string;
   status: 'unlocked' | 'available' | 'locked';
   level: number;
   x: number;
@@ -203,6 +204,46 @@ export function useSkillTree() {
     }
   }, []);
 
+  const generateTree = useCallback(async (message: string, sessionId: string) => {
+    setLoading(true);
+    treeNodeService.setLoading(true);
+    
+    try {
+      await service.generateTreeStream(message, sessionId, (data) => {
+          if (data.status === 'generating') {
+             console.log('Generating tree...', data.message);
+          } else if (data.status === 'done' && data.nodes) {
+             const nodes = data.nodes;
+             
+             // Map nodes to Service format
+             const serviceNodes = nodes.map((n: any) => ({
+                id: n.id,
+                name: n.name,
+                description: n.description, // Include description
+                type: n.type || 'skill',
+                level: n.level,
+                filled: true,
+                parentId: n.parentId, // Critical for building connections
+                connections: [], // Will be built from parentId in SkillTree.tsx
+                metadata: n.metadata,
+                resources: []
+             }));
+             
+             treeNodeService.setNodes(serviceNodes);
+             setShowTree(true);
+             console.log(`Generated ${nodes.length} nodes`);
+          } else if (data.status === 'error') {
+             console.error('Stream error:', data.message);
+          }
+      });
+    } catch (e) {
+      console.error('Generation Error:', e);
+    } finally {
+      setLoading(false);
+      treeNodeService.setLoading(false);
+    }
+  }, []);
+
   const backToSelection = () => {
     setShowTree(false);
     setSelectedSpecialization(null);
@@ -215,7 +256,8 @@ export function useSkillTree() {
     loading,
     showTree,
     selectSpecialization,
-    loadSessionTree, // Exposed
+    loadSessionTree,
+    generateTree, // Exposed for Chat/UI
     backToSelection,
     specializations: SPECIALIZATIONS
   };
