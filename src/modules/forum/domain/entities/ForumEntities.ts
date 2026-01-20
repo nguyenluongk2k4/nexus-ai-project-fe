@@ -34,6 +34,7 @@ export interface ForumPost {
   updatedAt?: Date;
   isPinned?: boolean;
   isHot?: boolean;
+  isLiked?: boolean;  // Whether current user has liked this post
 }
 
 export interface ForumComment {

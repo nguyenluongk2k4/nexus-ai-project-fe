@@ -41,6 +41,7 @@ interface PostResponse {
     updatedAt: string | null;
     isPinned: boolean;
     isHot: boolean;
+    isLiked: boolean;
 }
 
 interface CommentResponse {
@@ -108,6 +109,7 @@ function mapPost(post: PostResponse): ForumPost {
         updatedAt: post.updatedAt ? new Date(post.updatedAt) : undefined,
         isPinned: post.isPinned,
         isHot: post.isHot,
+        isLiked: post.isLiked || false,
     };
 }
 
@@ -213,7 +215,14 @@ export class HttpForumGateway implements ForumGateway {
                 return null;
             }
 
-            const response = await fetch(`${API_BASE}/posts/${actualUuid}`);
+            // Include auth header so backend can check if user liked the post
+            const headers: HeadersInit = {};
+            const token = localStorage.getItem('token');
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const response = await fetch(`${API_BASE}/posts/${actualUuid}`, { headers });
             if (!response.ok) {
                 return null;
             }
@@ -231,7 +240,14 @@ export class HttpForumGateway implements ForumGateway {
                 return [];
             }
 
-            const response = await fetch(`${API_BASE}/posts/${actualUuid}`);
+            // Include auth header for consistency
+            const headers: HeadersInit = {};
+            const token = localStorage.getItem('token');
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const response = await fetch(`${API_BASE}/posts/${actualUuid}`, { headers });
             if (!response.ok) {
                 return [];
             }
