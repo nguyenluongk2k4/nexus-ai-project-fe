@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { MessageSquare, Eye, User, PenSquare, Bot, Code, Database } from 'lucide-react';
 import { getForumDashboardUseCase } from '../../providers';
 import { ForumPost, ForumCategory, ForumStats } from '../../domain/entities/ForumEntities';
+import { PageLoading } from '@/shared/components/PageLoading';
 
 const ICON_MAP: Record<string, any> = {
   Bot,
@@ -11,6 +13,7 @@ const ICON_MAP: Record<string, any> = {
 };
 
 export function Forum() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [categories, setCategories] = useState<ForumCategory[]>([]);
@@ -43,11 +46,7 @@ export function Forum() {
   };
 
   if (loading) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
-      </div>
-    );
+    return <PageLoading />;
   }
 
   return (
@@ -55,11 +54,11 @@ export function Forum() {
       <div className="max-w-[1400px] mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-teal-500">
-            Diễn Đàn Công Nghệ
+          <h1 className="text-4xl font-bold mb-2 text-primary">
+            {t('forum.title')}
           </h1>
           <p className="text-muted-foreground">
-            Nơi chia sẻ kiến thức và kinh nghiệm về Công nghệ thông tin
+            {t('forum.subtitle')}
           </p>
         </div>
 
@@ -68,20 +67,20 @@ export function Forum() {
           {/* Left Column - Latest Posts Feed */}
           <div className="space-y-4">
             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-              <MessageSquare className="w-6 h-6 text-violet-600" />
-              Bài viết mới nhất
+              <MessageSquare className="w-6 h-6 text-primary" />
+              {t('forum.latestPosts')}
             </h2>
 
             <div className="space-y-4">
               {posts.map((post) => (
                 <div
                   key={post.id}
-                  className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all border border-border cursor-pointer"
+                  className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all border border-border cursor-pointer group"
                   onClick={() => onNavigateToThread(post.id)}
                 >
                   {/* Author Info */}
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-100 to-teal-100 flex items-center justify-center text-xl">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">
                       {post.author.avatar}
                     </div>
                     <div>
@@ -91,14 +90,14 @@ export function Forum() {
                       </p>
                     </div>
                     {post.categoryColor && (
-                      <span className={`ml-auto px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${post.categoryColor}`}>
+                      <span className="ml-auto px-3 py-1 rounded-full text-xs font-semibold text-white bg-primary">
                         {post.categoryName}
                       </span>
                     )}
                   </div>
 
                   {/* Post Title */}
-                  <h3 className="text-xl font-bold mb-2 hover:text-violet-600 transition-colors">
+                  <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
                     {post.title}
                   </h3>
 
@@ -111,11 +110,11 @@ export function Forum() {
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <MessageSquare className="w-4 h-4" />
-                      <span>{post.stats.comments} bình luận</span>
+                      <span>{post.stats.comments} {t('forum.comments')}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Eye className="w-4 h-4" />
-                      <span>{post.stats.views} lượt xem</span>
+                      <span>{post.stats.views} {t('forum.views')}</span>
                     </div>
                   </div>
                 </div>
@@ -128,15 +127,15 @@ export function Forum() {
             {/* Create Post Button */}
             <button
               onClick={() => navigate('/forum/new')}
-              className="w-full bg-gradient-to-r from-violet-600 to-teal-500 text-white py-3 px-4 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
+              className="w-full bg-primary text-primary-foreground py-3 px-4 rounded-xl font-semibold hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-md"
             >
               <PenSquare className="w-5 h-5" />
-              Tạo bài viết mới
+              {t('forum.createPost')}
             </button>
 
             {/* Categories Section */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
-              <h3 className="text-lg font-bold mb-4">Danh mục Diễn đàn</h3>
+              <h3 className="text-lg font-bold mb-4">{t('forum.categories')}</h3>
               <div className="space-y-3">
                 {categories.map((category) => {
                   const Icon = ICON_MAP[category.iconName] || Bot;
@@ -144,13 +143,13 @@ export function Forum() {
                     <button
                       key={category.id}
                       onClick={() => onNavigateToSubForum(category.id)}
-                      className="w-full flex items-start gap-3 p-4 rounded-lg hover:bg-accent transition-all text-left group"
+                      className="w-full flex items-start gap-3 p-4 rounded-lg hover:bg-muted transition-all text-left group"
                     >
-                      <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${category.color} flex items-center justify-center flex-shrink-0`}>
-                        <Icon className="w-5 h-5 text-white" />
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                        <Icon className="w-5 h-5 text-primary group-hover:text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm mb-1 group-hover:text-violet-600 transition-colors">
+                        <p className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors">
                           {category.name}
                         </p>
                         <p className="text-xs text-muted-foreground line-clamp-1">
@@ -165,20 +164,20 @@ export function Forum() {
 
             {/* Stats Card */}
             {stats && (
-              <div className="bg-gradient-to-br from-violet-50 to-teal-50 rounded-xl p-6 border border-violet-100">
-                <h3 className="text-lg font-bold mb-4">Thống kê diễn đàn</h3>
+              <div className="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                <h3 className="text-lg font-bold mb-4 text-primary">{t('forum.stats.title')}</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Tổng bài viết</span>
-                    <span className="font-bold text-violet-600">{stats.totalPosts}</span>
+                    <span className="text-sm text-muted-foreground">{t('forum.stats.totalPosts')}</span>
+                    <span className="font-bold text-primary">{stats.totalPosts}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Thành viên</span>
-                    <span className="font-bold text-violet-600">{stats.totalMembers}</span>
+                    <span className="text-sm text-muted-foreground">{t('forum.stats.members')}</span>
+                    <span className="font-bold text-primary">{stats.totalMembers}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Trực tuyến</span>
-                    <span className="font-bold text-teal-600">{stats.onlineMembers}</span>
+                    <span className="text-sm text-muted-foreground">{t('forum.stats.online')}</span>
+                    <span className="font-bold text-primary">{stats.onlineMembers}</span>
                   </div>
                 </div>
               </div>

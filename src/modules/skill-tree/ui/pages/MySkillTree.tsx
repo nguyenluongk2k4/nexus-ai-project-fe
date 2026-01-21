@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { GitBranch, Loader2, TreeDeciduous, Plus, Minus, BookOpen, Brain, Star, Layers, ZoomIn } from 'lucide-react';
+import { GitBranch, Loader2, TreeDeciduous, Plus, Minus, BookOpen, Brain, Star, Layers } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { skillTreeGateway } from '../../providers';
 import { useAuth } from '@/modules/auth/AuthProvider';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { PageLoading } from '@/shared/components/PageLoading';
 
 // Types for user's skill tree
 interface UserSkillNode {
@@ -50,6 +53,7 @@ const animationStyles = `
 `;
 
 export function MySkillTree() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [tree, setTree] = useState<UserSkillTree | null>(null);
@@ -89,7 +93,9 @@ export function MySkillTree() {
       const data = await skillTreeGateway.getMyTree();
       setTree(data);
     } catch (e) {
-      setError('Không thể tải skill tree của bạn');
+      const errMsg = t('mySkillTree.toasts.loadError');
+      setError(errMsg);
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }
@@ -277,11 +283,7 @@ export function MySkillTree() {
 
   // Loading state
   if (loading) {
-    return (
-      <div className="flex h-full items-center justify-center bg-slate-50">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-      </div>
-    );
+    return <PageLoading />;
   }
 
   // Error state
@@ -294,7 +296,7 @@ export function MySkillTree() {
             onClick={loadMyTree}
             className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
           >
-            Thử lại
+            {t('common.retry')}
           </button>
         </div>
       </div>
@@ -310,17 +312,18 @@ export function MySkillTree() {
             <TreeDeciduous className="w-12 h-12 text-indigo-500" />
           </div>
           <h2 className="text-2xl font-bold text-gray-800 mb-3">
-            Chưa có skill nào
+            {t('mySkillTree.emptyState.title')}
           </h2>
           <p className="text-gray-500 mb-6">
-            Hãy chat với AI để tạo skill tree và lưu vào đây nhé!
+            {t('mySkillTree.emptyState.subtitle')}
           </p>
           <button
             onClick={() => navigate('/skilltree')}
             className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-medium hover:opacity-90 transition-opacity flex items-center gap-2 mx-auto"
+            key="empty-state-button"
           >
             <GitBranch className="w-5 h-5" />
-            Tạo Skill Tree
+            {t('mySkillTree.emptyState.button')}
           </button>
         </div>
       </div>
@@ -339,7 +342,7 @@ export function MySkillTree() {
               LVL {Math.min(Math.floor(totalNodes / 5) + 1, 99)}
             </span>
             <span className="text-sm text-slate-500">
-              {completedNodes}/{totalNodes} hoàn thành
+              {completedNodes}/{totalNodes} {t('mySkillTree.completed')}
             </span>
             
             {/* Back button when focused */}
@@ -356,19 +359,19 @@ export function MySkillTree() {
                 }}
                 className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-full text-xs font-medium text-slate-600 transition-colors"
               >
-                ← Quay lại
+                ← {t('common.back')}
               </button>
             )}
           </div>
           <h1 className="text-2xl font-bold text-slate-800">
-            {tree.name || 'My Learning Path'}
+            {tree.name || t('mySkillTree.title')}
           </h1>
           <button
             onClick={() => navigate('/skilltree')}
             className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
-            Thêm Skills
+            {t('mySkillTree.addSkills')}
           </button>
         </div>
       </header>
@@ -526,7 +529,7 @@ export function MySkillTree() {
                     fontSize="0.9"
                     fontWeight="bold"
                   >
-                    + Click để mở
+                    + {t('mySkillTree.node.clickToExpand')}
                   </text>
                 )}
 
@@ -557,16 +560,16 @@ export function MySkillTree() {
             </div>
             <div>
               <div className="font-semibold text-slate-800 text-sm">{user?.fullName || 'User'}</div>
-              <div className="text-[10px] text-slate-500 uppercase">Foundational Root</div>
+              <div className="text-[10px] text-slate-500 uppercase">{t('mySkillTree.user.role')}</div>
             </div>
             <div className="flex items-center gap-3 ml-2 pl-3 border-l border-slate-200">
               <div className="text-center">
                 <div className="text-sm font-bold text-indigo-600">{completedNodes * 100}</div>
-                <div className="text-[9px] text-slate-400 uppercase">XP</div>
+                <div className="text-[9px] text-slate-400 uppercase">{t('mySkillTree.stats.xp')}</div>
               </div>
               <div className="text-center">
                 <div className="text-sm font-bold text-indigo-600">{totalNodes}</div>
-                <div className="text-[9px] text-slate-400 uppercase">Nodes</div>
+                <div className="text-[9px] text-slate-400 uppercase">{t('mySkillTree.stats.nodes')}</div>
               </div>
             </div>
           </div>
@@ -588,7 +591,7 @@ export function MySkillTree() {
                 {tab === 'abilities' && <Star className="w-4 h-4" />}
                 {tab === 'all' && <Layers className="w-4 h-4" />}
                 <span className="uppercase tracking-wider text-xs">
-                  {tab === 'all' ? 'Full Tree' : tab}
+                  {t(`mySkillTree.tabs.${tab}`)}
                 </span>
               </button>
             ))}

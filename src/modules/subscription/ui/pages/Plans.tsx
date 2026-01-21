@@ -58,13 +58,7 @@ export function Plans() {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-slate-50 to-violet-50">
-                <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
-            </div>
-        );
-    }
+
 
     return (
         <div className="flex-1 overflow-auto bg-gradient-to-br from-slate-50 via-white to-violet-50">
@@ -138,114 +132,120 @@ export function Plans() {
                 </div>
 
                 {/* Plans Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {plans.map((plan) => {
-                        const Icon = getPlanIcon(plan.id);
-                        const isCurrentPlan = currentSubscription?.tier === plan.id;
-                        const price = getPrice(plan);
+                {loading ? (
+                    <div className="flex items-center justify-center py-20">
+                        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {plans.map((plan) => {
+                            const Icon = getPlanIcon(plan.id);
+                            const isCurrentPlan = currentSubscription?.tier === plan.id;
+                            const price = getPrice(plan);
 
-                        return (
-                            <div
-                                key={plan.id}
-                                className={`relative bg-white rounded-2xl p-6 shadow-sm border-2 transition-all hover:shadow-lg ${isCurrentPlan
-                                        ? 'border-violet-500 ring-2 ring-violet-200'
-                                        : plan.isPopular
-                                            ? 'border-amber-400'
-                                            : 'border-slate-200 hover:border-violet-300'
-                                    }`}
-                            >
-                                {/* Popular Badge */}
-                                {plan.isPopular && (
-                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                                        <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                                            Phổ biến nhất
-                                        </span>
-                                    </div>
-                                )}
-
-                                {/* Current Plan Badge */}
-                                {isCurrentPlan && (
-                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                                        <span className="bg-violet-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                                            Gói hiện tại
-                                        </span>
-                                    </div>
-                                )}
-
-                                {/* Plan Header */}
-                                <div className="text-center mb-6 pt-2">
-                                    <div
-                                        className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center"
-                                        style={{ backgroundColor: `${plan.badgeColor}20` }}
-                                    >
-                                        <Icon
-                                            className="w-6 h-6"
-                                            style={{ color: plan.badgeColor }}
-                                        />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-slate-900">{plan.name}</h3>
-                                    <p className="text-sm text-slate-500 mt-1">{plan.description}</p>
-                                </div>
-
-                                {/* Price */}
-                                <div className="text-center mb-6">
-                                    <div className="flex items-baseline justify-center gap-1">
-                                        <span className="text-4xl font-bold text-slate-900">
-                                            {price === 0 ? 'Miễn phí' : formatPrice(price).replace('₫', '')}
-                                        </span>
-                                        {price > 0 && (
-                                            <span className="text-slate-500 text-sm">
-                                                đ/{billingCycle === 'monthly' ? 'tháng' : 'năm'}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Purchase Button */}
-                                <button
-                                    onClick={() => handlePurchase(plan.id)}
-                                    disabled={isCurrentPlan || purchasing || plan.id === 'free'}
-                                    className={`w-full py-3 px-4 rounded-xl font-semibold transition-all mb-6 ${isCurrentPlan
-                                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                                            : plan.id === 'free'
-                                                ? 'bg-slate-100 text-slate-500 cursor-not-allowed'
-                                                : confirmPlan === plan.id
-                                                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                                                    : 'bg-gradient-to-r from-violet-600 to-teal-500 hover:shadow-lg text-white'
+                            return (
+                                <div
+                                    key={plan.id}
+                                    className={`relative bg-white rounded-2xl p-6 shadow-sm border-2 transition-all hover:shadow-lg ${isCurrentPlan
+                                            ? 'border-violet-500 ring-2 ring-violet-200'
+                                            : plan.isPopular
+                                                ? 'border-amber-400'
+                                                : 'border-slate-200 hover:border-violet-300'
                                         }`}
                                 >
-                                    {purchasing && confirmPlan === plan.id ? (
-                                        <span className="flex items-center justify-center gap-2">
-                                            <Loader2 className="w-4 h-4 animate-spin" />
-                                            Đang xử lý...
-                                        </span>
-                                    ) : isCurrentPlan ? (
-                                        'Gói hiện tại'
-                                    ) : plan.id === 'free' ? (
-                                        'Gói mặc định'
-                                    ) : confirmPlan === plan.id ? (
-                                        'Xác nhận mua'
-                                    ) : (
-                                        `Chọn ${plan.name}`
+                                    {/* Popular Badge */}
+                                    {plan.isPopular && (
+                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                                            <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                                                Phổ biến nhất
+                                            </span>
+                                        </div>
                                     )}
-                                </button>
 
-                                {/* Features */}
-                                <ul className="space-y-3">
-                                    {plan.features.map((feature, idx) => (
-                                        <li key={idx} className="flex items-start gap-2">
-                                            <Check
-                                                className="w-5 h-5 flex-shrink-0 mt-0.5"
+                                    {/* Current Plan Badge */}
+                                    {isCurrentPlan && (
+                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                                            <span className="bg-violet-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                                                Gói hiện tại
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* Plan Header */}
+                                    <div className="text-center mb-6 pt-2">
+                                        <div
+                                            className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center"
+                                            style={{ backgroundColor: `${plan.badgeColor}20` }}
+                                        >
+                                            <Icon
+                                                className="w-6 h-6"
                                                 style={{ color: plan.badgeColor }}
                                             />
-                                            <span className="text-sm text-slate-600">{feature}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        );
-                    })}
-                </div>
+                                        </div>
+                                        <h3 className="text-xl font-bold text-slate-900">{plan.name}</h3>
+                                        <p className="text-sm text-slate-500 mt-1">{plan.description}</p>
+                                    </div>
+
+                                    {/* Price */}
+                                    <div className="text-center mb-6">
+                                        <div className="flex items-baseline justify-center gap-1">
+                                            <span className="text-4xl font-bold text-slate-900">
+                                                {price === 0 ? 'Miễn phí' : formatPrice(price).replace('₫', '')}
+                                            </span>
+                                            {price > 0 && (
+                                                <span className="text-slate-500 text-sm">
+                                                    đ/{billingCycle === 'monthly' ? 'tháng' : 'năm'}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Purchase Button */}
+                                    <button
+                                        onClick={() => handlePurchase(plan.id)}
+                                        disabled={isCurrentPlan || purchasing || plan.id === 'free'}
+                                        className={`w-full py-3 px-4 rounded-xl font-semibold transition-all mb-6 ${isCurrentPlan
+                                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                                : plan.id === 'free'
+                                                    ? 'bg-slate-100 text-slate-500 cursor-not-allowed'
+                                                    : confirmPlan === plan.id
+                                                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                                                        : 'bg-gradient-to-r from-violet-600 to-teal-500 hover:shadow-lg text-white'
+                                            }`}
+                                    >
+                                        {purchasing && confirmPlan === plan.id ? (
+                                            <span className="flex items-center justify-center gap-2">
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                Đang xử lý...
+                                            </span>
+                                        ) : isCurrentPlan ? (
+                                            'Gói hiện tại'
+                                        ) : plan.id === 'free' ? (
+                                            'Gói mặc định'
+                                        ) : confirmPlan === plan.id ? (
+                                            'Xác nhận mua'
+                                        ) : (
+                                            `Chọn ${plan.name}`
+                                        )}
+                                    </button>
+
+                                    {/* Features */}
+                                    <ul className="space-y-3">
+                                        {plan.features.map((feature, idx) => (
+                                            <li key={idx} className="flex items-start gap-2">
+                                                <Check
+                                                    className="w-5 h-5 flex-shrink-0 mt-0.5"
+                                                    style={{ color: plan.badgeColor }}
+                                                />
+                                                <span className="text-sm text-slate-600">{feature}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
 
                 {/* Footer Note */}
                 <div className="mt-12 text-center">

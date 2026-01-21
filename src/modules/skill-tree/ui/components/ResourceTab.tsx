@@ -71,56 +71,56 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
     }
   };
 
-  // Helper for rendering status dropdown
-  const renderStatusDropdown = (resourceId: string, currentStatus: string) => {
-    // Normalize for UI (dashes)
-    const uiStatus = normalizeStatus(currentStatus);
+  // // Helper for rendering status dropdown
+  // const renderStatusDropdown = (resourceId: string, currentStatus: string) => {
+  //   // Normalize for UI (dashes)
+  //   const uiStatus = normalizeStatus(currentStatus);
     
-    // If not started, show "Start Learning" primary button
-    if (uiStatus === 'not-started') {
-        return (
-            <button 
-                onClick={() => handleStatusUpdate(resourceId, 'in-progress')}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm hover:shadow-md active:scale-95"
-            >
-                <Play className="w-3.5 h-3.5 fill-current" />
-                Bắt đầu học
-            </button>
-        );
-    }
+  //   // If not started, show "Start Learning" primary button
+  //   if (uiStatus === 'not-started') {
+  //       return (
+  //           <button 
+  //               onClick={() => handleStatusUpdate(resourceId, 'in-progress')}
+  //               className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm hover:shadow-md active:scale-95"
+  //           >
+  //               <Play className="w-3.5 h-3.5 fill-current" />
+  //               Bắt đầu học
+  //           </button>
+  //       );
+  //   }
 
-    // Otherwise show status badge/dropdown
-    return (
-    <div className="flex items-center gap-2">
-      <div className="relative group">
-        <button className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 border border-slate-200 rounded text-[10px] font-medium text-slate-700 hover:bg-slate-100 transition-colors">
-          {uiStatus === 'completed' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
-          {uiStatus === 'in-progress' && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />}
+  //   // Otherwise show status badge/dropdown
+  //   return (
+  //   <div className="flex items-center gap-2">
+  //     <div className="relative group">
+  //       <button className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 border border-slate-200 rounded text-[10px] font-medium text-slate-700 hover:bg-slate-100 transition-colors">
+  //         {uiStatus === 'completed' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
+  //         {uiStatus === 'in-progress' && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />}
           
-          {uiStatus === 'completed' ? 'Đã hoàn thành' : 
-           uiStatus === 'in-progress' ? 'Đang học' : 'Chưa bắt đầu'}
-          <ChevronDown className="w-3 h-3 text-slate-400 ml-1" />
-        </button>
+  //         {uiStatus === 'completed' ? 'Đã hoàn thành' : 
+  //          uiStatus === 'in-progress' ? 'Đang học' : 'Chưa bắt đầu'}
+  //         <ChevronDown className="w-3 h-3 text-slate-400 ml-1" />
+  //       </button>
         
-        {/* Dropdown Menu */}
-        <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-lg shadow-lg border border-slate-100 py-1 hidden group-hover:block z-10">
-          {(['not-started', 'in-progress', 'completed'] as const).map((s) => (
-             <button 
-               key={s}
-               onClick={() => handleStatusUpdate(resourceId, s === 'not-started' ? 'not_started' : s)}
-               className="w-full text-left px-3 py-1.5 text-[10px] hover:bg-slate-50 flex items-center gap-2"
-             >
-                <span className={`w-1.5 h-1.5 rounded-full ${
-                  s === 'completed' ? 'bg-emerald-500' :
-                  s === 'in-progress' ? 'bg-indigo-500' : 'bg-slate-400'
-                }`} />
-                {s === 'completed' ? 'Đã hoàn thành' : s === 'in-progress' ? 'Đang học' : 'Chưa bắt đầu'}
-             </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  )};
+  //       {/* Dropdown Menu */}
+  //       <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-lg shadow-lg border border-slate-100 py-1 hidden group-hover:block z-10">
+  //         {(['not-started', 'in-progress', 'completed'] as const).map((s) => (
+  //            <button 
+  //              key={s}
+  //              onClick={() => handleStatusUpdate(resourceId, s === 'not-started' ? 'not_started' : s)}
+  //              className="w-full text-left px-3 py-1.5 text-[10px] hover:bg-slate-50 flex items-center gap-2"
+  //            >
+  //               <span className={`w-1.5 h-1.5 rounded-full ${
+  //                 s === 'completed' ? 'bg-emerald-500' :
+  //                 s === 'in-progress' ? 'bg-indigo-500' : 'bg-slate-400'
+  //               }`} />
+  //               {s === 'completed' ? 'Đã hoàn thành' : s === 'in-progress' ? 'Đang học' : 'Chưa bắt đầu'}
+  //            </button>
+  //         ))}
+  //       </div>
+  //     </div>
+  //   </div>
+  // )};
 
   return (
     <div className="p-6 h-full overflow-y-auto">
@@ -279,7 +279,7 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
                   </div>
 
                   {/* Actions Row */}
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-50">
+                  {/* <div className="flex items-center justify-between pt-3 border-t border-slate-50">
                     {renderStatusDropdown(resource.id, rawStatus)}
                     
                     <div className="flex items-center gap-1">
@@ -293,7 +293,7 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
                         <Edit3 className="w-4 h-4" />
                       </button>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               );
             })

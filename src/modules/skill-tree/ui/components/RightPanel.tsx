@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MessageSquare, BookOpen, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ChatTab } from './ChatTab';
 import { ResourceTab } from './ResourceTab';
@@ -58,6 +59,7 @@ export function RightPanel({
   activeTab: controlledTab,
   onTabChange
 }: RightPanelProps) {
+  const { t } = useTranslation();
   const [internalTab, setInternalTab] = useState<TabType>('chat');
   
   // Use controlled state if provided, otherwise internal state
@@ -110,7 +112,7 @@ export function RightPanel({
           }`}
         >
           <MessageSquare className="w-4 h-4" />
-          Chat
+          {t('skillTree.rightPanel.tabs.chat')}
         </button>
         <button
           onClick={() => handleTabChange('resource')}
@@ -121,7 +123,7 @@ export function RightPanel({
           }`}
         >
           <BookOpen className="w-4 h-4" />
-          Resource
+          {t('skillTree.rightPanel.tabs.resource')}
           {selectedNode && (
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
           )}

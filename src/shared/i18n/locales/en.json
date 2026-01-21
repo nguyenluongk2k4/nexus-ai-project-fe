@@ -1,0 +1,224 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "back": "Back",
+    "language": "Language",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "skilltree": "Skill Tree",
+    "quiz": "Quiz",
+    "jobs": "Job Matches",
+    "insights": "Insights",
+    "timeline": "Timeline",
+    "forum": "Forum"
+  },
+  "profile": {
+    "title": "My Profile",
+    "subtitle": "Manage your personal information and track your learning progress",
+    "active": "Active",
+    "fullName": {
+      "label": "Full Name",
+      "placeholder": "Enter full name"
+    },
+    "username": {
+      "label": "Username",
+      "hint": "Username cannot be changed"
+    },
+    "email": {
+      "label": "Email",
+      "placeholder": "Enter email"
+    },
+    "joined": "Joined Date",
+    "save": "Save Changes",
+    "changePassword": "Change Password",
+    "success": "Changes saved successfully!",
+    "error": "Could not save changes",
+    "stats": {
+      "title": "My Statistics",
+      "learningHours": "Learning Hours",
+      "skillsCompleted": "Skills Completed",
+      "streak": "Streak Days",
+      "forumPosts": "Forum Posts"
+    },
+    "balance": {
+      "title": "Account Balance",
+      "current": "Current Balance",
+      "deposit": "Deposit"
+    },
+    "subscription": {
+      "title": "Subscription Plan",
+      "upgrade": "Upgrade",
+      "manage": "Manage Plan",
+      "expires": "Expires: ",
+      "freeHint": "Upgrade for better experience"
+    },
+    "activity": {
+      "title": "Activity History"
+    }
+  },
+  "purchase": {
+    "title": "Deposit Funds",
+    "subtitle": "Scan QR code for quick and secure deposit",
+    "back": "Back to Profile",
+    "selectAmount": "Select Amount",
+    "orCustom": "Or enter custom amount",
+    "placeholder": "Enter amount...",
+    "youWillDeposit": "You will deposit:",
+    "generateQR": "Generate Payment QR",
+    "generating": "Generating QR...",
+    "bankInfo": {
+      "title": "Bank Account Info",
+      "bank": "Bank",
+      "account": "Account Number",
+      "owner": "Account Owner"
+    },
+    "qrTitle": "Payment QR Code",
+    "transferContent": "Transfer Content:",
+    "instructions": {
+      "title": "Instructions:",
+      "step1": "Open banking app",
+      "step2": "Select Scan QR",
+      "step3": "Scan the QR code above",
+      "step4": "Check info and confirm",
+      "step5": "Money will be added within 5 minutes"
+    },
+    "history": {
+      "title": "Deposit History",
+      "empty": "No transactions yet",
+      "pending": "Pending",
+      "completed": "Success",
+      "failed": "Failed",
+      "waiting": "Waiting for payment...",
+      "prompt": "Please complete transfer",
+      "successTitle": "Deposit Successful!",
+      "successDesc": "Balance updated",
+      "resume": "Tap to continue"
+    }
+  },
+  "forum": {
+    "title": "Tech Forum",
+    "subtitle": "Share knowledge and experience about Information Technology",
+    "latestPosts": "Latest Posts",
+    "comments": "comments",
+    "views": "views",
+    "createPost": "Create New Post",
+    "categories": "Forum Categories",
+    "stats": {
+      "title": "Forum Statistics",
+      "totalPosts": "Total Posts",
+      "members": "Members",
+      "online": "Online"
+    }
+  },
+  "mySkillTree": {
+    "title": "My Learning Path",
+    "completed": "completed",
+    "addSkills": "Add Skills",
+    "emptyState": {
+      "title": "No skills yet",
+      "subtitle": "Chat with AI to create your skill tree and save it here!",
+      "button": "Create Skill Tree"
+    },
+    "node": {
+      "clickToExpand": "Click to expand"
+    },
+    "tabs": {
+      "all": "Full Tree",
+      "knowledge": "Knowledge",
+      "skills": "Skills",
+      "abilities": "Abilities"
+    },
+    "user": {
+      "role": "Foundational Root"
+    },
+    "stats": {
+        "xp": "XP",
+        "nodes": "Nodes"
+    },
+
+    "toasts": {
+        "loadError": "Could not load your skill tree"
+    }
+  },
+  "skillTree": {
+      "manageNode": "Manage Node",
+      "rightPanel": {
+        "tabs": {
+            "chat": "Chat",
+            "resource": "Resources"
+        }
+      }
+  },
+  "auth": {
+    "login": {
+        "title": "Welcome back",
+        "subtitle": "Log in to continue growing your mind.",
+        "emailLabel": "Email address",
+        "passwordLabel": "Password",
+        "forgotPassword": "Forgot your password?",
+        "rememberMe": "Remember me",
+        "signInButton": "Sign in",
+        "signingIn": "Signing in...",
+        "orContinueWith": "Or continue with",
+        "dontHaveAccount": "Don't have an account yet?",
+        "signUpLink": "Sign up for free",
+        "backToLanding": "Back to Home"
+    },
+    "register": {
+        "title": "Create your account",
+        "subtitle": "Join AI Skill Tree to start mapping your future.",
+        "usernameLabel": "Username",
+        "fullNameLabel": "Full Name",
+        "emailLabel": "Email address",
+        "passwordLabel": "Password",
+        "confirmPasswordLabel": "Confirm Password",
+        "termsAgreement": "I agree to the",
+        "terms": "Terms",
+        "and": "and",
+        "privacy": "Privacy Policy",
+        "signUpButton": "Sign Up",
+        "creatingAccount": "Creating Account...",
+        "orContinueWith": "Or continue with",
+        "alreadyHaveAccount": "Already have an account?",
+        "signInLink": "Sign in here",
+        "backToLanding": "Back to Home",
+        "passwordsDoNotMatch": "Passwords do not match!"
+    }
+  },
+  "landing": {
+    "nav": {
+      "signIn": "Sign In",
+      "getStarted": "Get Started"
+    },
+    "hero": {
+      "badge": "Learn smarter with AI",
+      "title": {
+        "line1": "Grow your skills,",
+        "line2": "Shape your future"
+      },
+      "description": "Build a personalized learning path driven by AI. Track progress, unlock new capabilities, and discover career opportunities tailored to you.",
+      "startFree": "Start for Free",
+      "learnMore": "Learn more",
+      "trustedBy": "Trusted by 10,000+ learners"
+    },
+    "features": {
+      "personalized": {
+        "title": "Personalized AI Roadmap",
+        "description": "Create a unique learning path based on your interests, goals, and skill history."
+      },
+      "tracking": {
+        "title": "Visual Tracking",
+        "description": "Watch your skill tree grow daily as you unlock new knowledge and capabilities."
+      },
+      "career": {
+        "title": "Career Guidance",
+        "description": "Discover career opportunities that best match your current skill set and potential."
+      }
+    }
+  }
+}

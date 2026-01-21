@@ -1,56 +1,78 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
 import { ArrowRight, TreeDeciduous, Brain, Target } from 'lucide-react';
+import { LanguageSwitcher } from '@/shared/components/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 export function Landing() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="border-b border-border bg-white/80 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <TreeDeciduous className="w-6 h-6 text-violet-600" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-teal-500 font-bold text-lg">
+            <TreeDeciduous className="w-6 h-6 text-primary" />
+            <span className="text-xl font-bold bg-clip-text text-transparent bg-primary">
               AI Skill Tree
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => navigate('/dashboard')}>
-              Sign In
+            <LanguageSwitcher variant="minimal" />
+            <div className="h-6 w-px bg-slate-200 hidden sm:block"></div>
+            <Button variant="ghost" onClick={() => navigate('/login')} className="hidden sm:inline-flex text-slate-600 hover:text-primary hover:bg-slate-50">
+              {t('landing.nav.signIn')}
             </Button>
-            <Button onClick={() => navigate('/dashboard')} className="bg-gradient-to-r from-violet-600 to-teal-500 text-white hover:opacity-90">
-              Get Started
+            <Button onClick={() => navigate('/register')} className="bg-primary hover:bg-primary/90 text-white rounded-lg shadow-lg shadow-primary/25">
+              {t('landing.nav.getStarted')}
             </Button>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-8 py-24">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+      <main className="max-w-7xl mx-auto px-6 pt-32 pb-24">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div>
-            <h1 className="mb-6 text-4xl font-extrabold text-foreground leading-tight">
-              Grow Your Mind,<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-teal-500">
-                Branch by Branch
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6 animate-fade-in">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+              {t('landing.hero.badge')}
+            </div>
+            <h1 className="mb-6 text-5xl font-bold text-slate-900 leading-tight tracking-tight">
+              {t('landing.hero.title.line1')}<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">
+                {t('landing.hero.title.line2')}
               </span>
             </h1>
-            <p className="text-muted-foreground mb-8 text-lg max-w-lg">
-              Build personalized learning roadmaps powered by AI. Track your progress,
-              unlock new skills, and discover career opportunities tailored to your journey.
+            <p className="text-slate-600 mb-8 text-lg max-w-lg leading-relaxed">
+              {t('landing.hero.description')}
             </p>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button 
-                onClick={() => navigate('/dashboard')}
-                className="bg-gradient-to-r from-violet-600 to-teal-500 text-white hover:opacity-90 px-8 h-12 rounded-xl text-base font-semibold"
+                onClick={() => navigate('/login')}
+                className="bg-primary hover:bg-primary/90 text-white px-8 h-12 rounded-xl text-base font-semibold shadow-lg shadow-primary/25 transition-all hover:scale-105"
               >
-                Start Learning <ArrowRight className="w-5 h-5 ml-2" />
+                {t('landing.hero.startFree')} <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-              <Button variant="outline" className="px-8 h-12 rounded-xl text-base font-semibold">
-                Learn More
+              <Button variant="outline" className="px-8 h-12 rounded-xl text-base font-semibold border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-primary hover:border-slate-300">
+                {t('landing.hero.learnMore')}
               </Button>
+            </div>
+            
+            <div className="mt-12 flex items-center gap-6 text-sm text-slate-500">
+              <div className="flex -space-x-3">
+                 {[1,2,3,4].map(i => (
+                    <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-xs font-medium text-slate-600">
+                        {String.fromCharCode(64 + i)}
+                    </div>
+                 ))}
+              </div>
+              <p>{t('landing.hero.trustedBy')}</p>
             </div>
           </div>
 
@@ -77,8 +99,8 @@ export function Landing() {
                 <circle cx="200" cy="200" r="16" fill="#8b5cf6" opacity="0.9" />
                 <circle cx="100" cy="100" r="14" fill="#14b8a6" opacity="0.9" />
                 <circle cx="300" cy="100" r="14" fill="#14b8a6" opacity="0.9" />
-                <circle cx="150" cy="150" r="12" fill="#8b5cf6" opacity="0.8" />
-                <circle cx="250" cy="150" r="12" fill="#8b5cf6" opacity="0.8" />
+                    <circle cx="150" cy="150" r="12" fill="#8b5cf6" opacity="0.8" />
+                    <circle cx="250" cy="150" r="12" fill="#8b5cf6" opacity="0.8" />
                 <circle cx="50" cy="50" r="10" fill="#0891b2" opacity="0.8" />
                 <circle cx="120" cy="40" r="10" fill="#0891b2" opacity="0.8" />
                 <circle cx="350" cy="50" r="10" fill="#0891b2" opacity="0.8" />
@@ -101,34 +123,34 @@ export function Landing() {
         </div>
 
         {/* Features */}
-        <div className="grid md:grid-cols-3 gap-8 mt-24">
-          <div className="bg-white rounded-xl p-8 border border-border shadow-sm">
-            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-violet-100 to-violet-50 flex items-center justify-center mb-4">
-              <Brain className="w-6 h-6 text-violet-600" />
+        <div className="grid md:grid-cols-3 gap-8 mt-32">
+          <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
+              <Brain className="w-6 h-6 text-primary" />
             </div>
-            <h3 className="mb-2">AI-Powered Roadmaps</h3>
-            <p className="text-muted-foreground">
-              Personalized learning paths generated from your interests and skill history.
+            <h3 className="mb-3 text-xl font-bold text-slate-900">{t('landing.features.personalized.title')}</h3>
+            <p className="text-slate-600 leading-relaxed">
+              {t('landing.features.personalized.description')}
             </p>
           </div>
           
-          <div className="bg-white rounded-xl p-8 border border-border shadow-sm">
-            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-teal-100 to-teal-50 flex items-center justify-center mb-4">
-              <TreeDeciduous className="w-6 h-6 text-teal-600" />
+          <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+            <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mb-6">
+              <TreeDeciduous className="w-6 h-6 text-purple-600" />
             </div>
-            <h3 className="mb-2">Visual Progress Tracking</h3>
-            <p className="text-muted-foreground">
-              Watch your skill tree grow as you unlock new capabilities and knowledge.
+            <h3 className="mb-3 text-xl font-bold text-slate-900">{t('landing.features.tracking.title')}</h3>
+            <p className="text-slate-600 leading-relaxed">
+              {t('landing.features.tracking.description')}
             </p>
           </div>
           
-          <div className="bg-white rounded-xl p-8 border border-border shadow-sm">
-            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-violet-100 to-teal-50 flex items-center justify-center mb-4">
-              <Target className="w-6 h-6 text-violet-600" />
+          <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+            <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center mb-6">
+              <Target className="w-6 h-6 text-indigo-600" />
             </div>
-            <h3 className="mb-2">Career Alignment</h3>
-            <p className="text-muted-foreground">
-              Discover job opportunities that match your growing skill set.
+            <h3 className="mb-3 text-xl font-bold text-slate-900">{t('landing.features.career.title')}</h3>
+            <p className="text-slate-600 leading-relaxed">
+              {t('landing.features.career.description')}
             </p>
           </div>
         </div>

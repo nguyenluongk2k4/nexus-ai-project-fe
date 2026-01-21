@@ -1,6 +1,7 @@
 // Purchase Page
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
     Wallet,
@@ -17,26 +18,31 @@ import {
     Building2
 } from 'lucide-react';
 import { usePurchase } from '../hooks/usePurchase';
+import { PageLoading } from '@/shared/components/PageLoading';
 
-const STATUS_CONFIG = {
+
+// Status config moved inside component or use translation keys directly
+// For simplicity, we'll keep structure but keys will come from hook
+const STATUS_CONFIG_KEYS = {
     pending: {
         icon: Clock,
         color: 'text-yellow-600 bg-yellow-50 border-yellow-200',
-        label: 'Đang chờ',
+        labelKey: 'purchase.history.pending',
     },
     completed: {
         icon: CheckCircle,
         color: 'text-green-600 bg-green-50 border-green-200',
-        label: 'Thành công',
+        labelKey: 'purchase.history.completed',
     },
     failed: {
         icon: XCircle,
         color: 'text-red-600 bg-red-50 border-red-200',
-        label: 'Thất bại',
+        labelKey: 'purchase.history.failed',
     },
 };
 
 export function Purchase() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const {
         presetAmounts,
@@ -83,6 +89,10 @@ export function Purchase() {
         return 0;
     };
 
+    if (loading && !history.length) {
+      return <PageLoading />;
+    }
+
     return (
         <div className="flex-1 overflow-auto bg-gradient-to-br from-background via-background to-accent/20">
             <div className="max-w-[1400px] mx-auto p-6">
@@ -93,21 +103,21 @@ export function Purchase() {
                         className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 transition-colors"
                     >
                         <ArrowLeft className="w-4 h-4" />
-                        Quay lại hồ sơ
+                        {t('purchase.back')}
                     </button>
-                    <h1 className="text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-teal-500">
-                        Nạp Tiền Vào Tài Khoản
+                    <h1 className="text-4xl font-bold mb-2 text-primary">
+                        {t('purchase.title')}
                     </h1>
                     <p className="text-muted-foreground">
-                        Quét mã QR để nạp tiền nhanh chóng và an toàn
+                        {t('purchase.subtitle')}
                     </p>
                 </div>
 
                 {/* Error Display */}
                 {error && (
-                    <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3">
-                        <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                        <p className="text-red-700">{error}</p>
+                    <div className="mb-6 p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center gap-3">
+                        <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
+                        <p className="text-destructive">{error}</p>
                     </div>
                 )}
 
@@ -118,8 +128,8 @@ export function Purchase() {
                         {/* Amount Selection Card */}
                         <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
                             <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                                <CreditCard className="w-5 h-5 text-violet-600" />
-                                Chọn số tiền nạp
+                                <CreditCard className="w-5 h-5 text-primary" />
+                                {t('purchase.selectAmount')}
                             </h3>
 
                             {/* Preset Amounts Grid */}
@@ -129,8 +139,8 @@ export function Purchase() {
                                         key={amount}
                                         onClick={() => selectAmount(amount)}
                                         className={`py-4 px-4 rounded-xl font-semibold transition-all border-2 ${selectedAmount === amount
-                                            ? 'border-violet-500 bg-violet-50 text-violet-700'
-                                            : 'border-border hover:border-violet-300 hover:bg-violet-50/50'
+                                            ? 'border-primary bg-primary/5 text-primary'
+                                            : 'border-border hover:border-primary/50 hover:bg-primary/5'
                                             }`}
                                     >
                                         {formatCurrency(amount)}
@@ -141,15 +151,15 @@ export function Purchase() {
                             {/* Custom Amount */}
                             <div className="mb-6">
                                 <label className="block text-sm font-medium text-muted-foreground mb-2">
-                                    Hoặc nhập số tiền khác
+                                    {t('purchase.orCustom')}
                                 </label>
                                 <div className="relative">
                                     <input
                                         type="text"
                                         value={customAmount}
                                         onChange={(e) => setCustomAmount(e.target.value)}
-                                        placeholder="Nhập số tiền..."
-                                        className={`w-full px-4 py-3 pr-16 rounded-lg border-2 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all ${customAmount && !selectedAmount ? 'border-violet-500 bg-violet-50' : 'border-border'
+                                        placeholder={t('purchase.placeholder')}
+                                        className={`w-full px-4 py-3 pr-16 rounded-lg border-2 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all ${customAmount && !selectedAmount ? 'border-primary bg-primary/5' : 'border-border'
                                             }`}
                                     />
                                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
@@ -160,9 +170,9 @@ export function Purchase() {
 
                             {/* Amount Display */}
                             {getEffectiveAmount() > 0 && (
-                                <div className="p-4 rounded-xl bg-gradient-to-r from-violet-50 to-teal-50 mb-6">
-                                    <p className="text-sm text-muted-foreground mb-1">Bạn sẽ nạp:</p>
-                                    <p className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-teal-500">
+                                <div className="p-4 rounded-xl bg-primary/5 mb-6">
+                                    <p className="text-sm text-muted-foreground mb-1">{t('purchase.youWillDeposit')}</p>
+                                    <p className="text-3xl font-bold text-primary">
                                         {formatCurrency(getEffectiveAmount())}
                                     </p>
                                 </div>
@@ -172,40 +182,40 @@ export function Purchase() {
                             <button
                                 onClick={generateQR}
                                 disabled={getEffectiveAmount() <= 0 || qrLoading}
-                                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-teal-500 text-white py-4 px-6 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-4 px-6 rounded-xl font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {qrLoading ? (
                                     <>
                                         <Loader2 className="w-5 h-5 animate-spin" />
-                                        Đang tạo mã QR...
+                                        {t('purchase.generating')}
                                     </>
                                 ) : (
                                     <>
                                         <QrCode className="w-5 h-5" />
-                                        Tạo mã QR thanh toán
+                                        {t('purchase.generateQR')}
                                     </>
                                 )}
                             </button>
                         </div>
 
                         {/* Bank Info Card */}
-                        <div className="bg-gradient-to-br from-violet-50 to-teal-50 rounded-xl p-6 border border-violet-100">
+                        <div className="bg-primary/5 rounded-xl p-6 border border-primary/10">
                             <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                                <Building2 className="w-5 h-5 text-violet-600" />
-                                Thông tin tài khoản nhận
+                                <Building2 className="w-5 h-5 text-primary" />
+                                {t('purchase.bankInfo.title')}
                             </h3>
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-sm text-muted-foreground">Ngân hàng</span>
+                                    <span className="text-sm text-muted-foreground">{t('purchase.bankInfo.bank')}</span>
                                     <span className="font-semibold">MB Bank</span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-sm text-muted-foreground">Số tài khoản</span>
+                                    <span className="text-sm text-muted-foreground">{t('purchase.bankInfo.account')}</span>
                                     <div className="flex items-center gap-2">
                                         <span className="font-semibold font-mono">0123456789</span>
                                         <button
                                             onClick={() => copyToClipboard('0123456789', 'account')}
-                                            className="p-1 hover:bg-violet-100 rounded transition-colors"
+                                            className="p-1 hover:bg-background rounded transition-colors"
                                         >
                                             {copiedField === 'account' ? (
                                                 <Check className="w-4 h-4 text-green-600" />
@@ -216,12 +226,12 @@ export function Purchase() {
                                     </div>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-sm text-muted-foreground">Chủ tài khoản</span>
+                                    <span className="text-sm text-muted-foreground">{t('purchase.bankInfo.owner')}</span>
                                     <div className="flex items-center gap-2">
                                         <span className="font-semibold">NEXUS AI PLATFORM</span>
                                         <button
                                             onClick={() => copyToClipboard('NEXUS AI PLATFORM', 'name')}
-                                            className="p-1 hover:bg-violet-100 rounded transition-colors"
+                                            className="p-1 hover:bg-background rounded transition-colors"
                                         >
                                             {copiedField === 'name' ? (
                                                 <Check className="w-4 h-4 text-green-600" />
@@ -249,8 +259,8 @@ export function Purchase() {
                                                 <Clock className="w-5 h-5 text-yellow-600 animate-pulse" />
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-yellow-700">Đang chờ thanh toán...</p>
-                                                <p className="text-sm text-yellow-600">Vui lòng hoàn tất chuyển khoản</p>
+                                                <p className="font-semibold text-yellow-700">{t('purchase.history.waiting')}</p>
+                                                <p className="text-sm text-yellow-600">{t('purchase.history.prompt')}</p>
                                             </div>
                                         </>
                                     )}
@@ -260,8 +270,8 @@ export function Purchase() {
                                                 <CheckCircle className="w-5 h-5 text-green-600" />
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-green-700">Nạp tiền thành công!</p>
-                                                <p className="text-sm text-green-600">Số dư đã được cập nhật</p>
+                                                <p className="font-semibold text-green-700">{t('purchase.history.successTitle')}</p>
+                                                <p className="text-sm text-green-600">{t('purchase.history.successDesc')}</p>
                                             </div>
                                         </>
                                     )}
@@ -274,7 +284,7 @@ export function Purchase() {
                     <div className="space-y-6">
                         {/* QR Code Display */}
                         <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
-                            <h3 className="text-lg font-bold mb-4 text-center">Mã QR Thanh Toán</h3>
+                            <h3 className="text-lg font-bold mb-4 text-center">{t('purchase.qrTitle')}</h3>
 
                             {qrInfo ? (
                                 <div className="text-center">
@@ -293,9 +303,9 @@ export function Purchase() {
 
                                     {/* Transfer Content */}
                                     <div className="mb-4">
-                                        <p className="text-sm text-muted-foreground mb-1">Nội dung chuyển khoản:</p>
+                                        <p className="text-sm text-muted-foreground mb-1">{t('purchase.transferContent')}</p>
                                         <div className="flex items-center justify-center gap-2 bg-slate-100 rounded-lg px-4 py-2">
-                                            <code className="font-mono font-bold text-violet-700">{qrInfo.transferContent}</code>
+                                            <code className="font-mono font-bold text-primary">{qrInfo.transferContent}</code>
                                             <button
                                                 onClick={() => copyToClipboard(qrInfo.transferContent, 'content')}
                                                 className="p-1 hover:bg-slate-200 rounded transition-colors"
@@ -311,13 +321,13 @@ export function Purchase() {
 
                                     {/* Instructions */}
                                     <div className="text-left bg-slate-50 rounded-lg p-4">
-                                        <p className="text-sm font-semibold mb-2">Hướng dẫn:</p>
+                                        <p className="text-sm font-semibold mb-2">{t('purchase.instructions.title')}</p>
                                         <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-                                            <li>Mở ứng dụng ngân hàng</li>
-                                            <li>Chọn quét mã QR</li>
-                                            <li>Quét mã QR phía trên</li>
-                                            <li>Kiểm tra thông tin và xác nhận</li>
-                                            <li>Tiền sẽ được cộng trong vòng 5 phút</li>
+                                            <li>{t('purchase.instructions.step1')}</li>
+                                            <li>{t('purchase.instructions.step2')}</li>
+                                            <li>{t('purchase.instructions.step3')}</li>
+                                            <li>{t('purchase.instructions.step4')}</li>
+                                            <li>{t('purchase.instructions.step5')}</li>
                                         </ol>
                                     </div>
                                 </div>
@@ -336,22 +346,22 @@ export function Purchase() {
                         {/* Transaction History */}
                         <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
                             <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                                <Clock className="w-5 h-5 text-violet-600" />
-                                Lịch sử nạp tiền
+                                <Clock className="w-5 h-5 text-primary" />
+                                {t('purchase.history.title')}
                             </h3>
 
                             {loading ? (
                                 <div className="flex items-center justify-center py-8">
-                                    <Loader2 className="w-6 h-6 animate-spin text-violet-600" />
+                                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
                                 </div>
                             ) : history.length === 0 ? (
                                 <p className="text-center text-muted-foreground py-8">
-                                    Chưa có giao dịch nào
+                                    {t('purchase.history.empty')}
                                 </p>
                             ) : (
                                 <div className="space-y-3 max-h-80 overflow-y-auto">
                                     {history.map((item) => {
-                                        const statusConfig = STATUS_CONFIG[item.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
+                                        const statusConfig = STATUS_CONFIG_KEYS[item.status as keyof typeof STATUS_CONFIG_KEYS] || STATUS_CONFIG_KEYS.pending;
                                         const StatusIcon = statusConfig.icon;
                                         const isPending = item.status === 'pending';
 
@@ -360,7 +370,7 @@ export function Purchase() {
                                                 key={item.id}
                                                 onClick={() => isPending && item.transactionCode && resumePendingTransaction(item.transactionCode)}
                                                 className={`p-4 rounded-lg border ${statusConfig.color} ${isPending ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
-                                                title={isPending ? 'Nhấn để tiếp tục thanh toán' : ''}
+                                                title={isPending ? t('purchase.history.resume') : ''}
                                             >
                                                 <div className="flex items-center justify-between mb-2">
                                                     <span className="font-bold text-lg">
@@ -368,9 +378,9 @@ export function Purchase() {
                                                     </span>
                                                     <div className="flex items-center gap-1">
                                                         <StatusIcon className="w-4 h-4" />
-                                                        <span className="text-sm font-medium">{statusConfig.label}</span>
+                                                        <span className="text-sm font-medium">{t(statusConfig.labelKey)}</span>
                                                         {isPending && (
-                                                            <span className="text-xs ml-1">→ Nhấn để tiếp tục</span>
+                                                            <span className="text-xs ml-1">→ {t('purchase.history.resume')}</span>
                                                         )}
                                                     </div>
                                                 </div>

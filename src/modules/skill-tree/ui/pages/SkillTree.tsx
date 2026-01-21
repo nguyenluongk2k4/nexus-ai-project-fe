@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check, Lock, Minus, Plus, MessageSquare, Loader2, Save, CheckCircle } from 'lucide-react';
 import { useSkillTree, SkillNode } from '@/modules/skill-tree/ui/hooks/useSkillTree';
 import { useChat } from '@/modules/chat/ui/hooks/useChat';
@@ -19,6 +20,7 @@ interface TreeNode extends SkillNode {
 export function SkillTree() {
   // Subscribe to tree state Observable
   const [treeState, setTreeState] = useState<TreeState>({ nodes: [], loading: false, error: null });
+  const { t } = useTranslation();
   
     // Destructure hook values
     const { 
@@ -761,7 +763,7 @@ export function SkillTree() {
                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 text-white rounded-full shadow-lg transition-transform hover:scale-105 font-semibold"
                >
                  <Settings className="w-5 h-5" />
-                 <span>Manage Node</span>
+                 <span>{t('skillTree.manageNode')}</span>
                </button>
             </div>
          )}

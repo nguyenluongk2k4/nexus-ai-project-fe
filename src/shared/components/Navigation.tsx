@@ -1,28 +1,35 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
-import { Home, GitBranch, FileQuestion, Briefcase, TrendingUp, LogOut, MessageSquare, Users, Calendar, User, ChevronDown, TreeDeciduous } from 'lucide-react';
+import { Home, GitBranch, FileQuestion, Briefcase, TrendingUp, LogOut, MessageSquare, Users, Calendar, User, ChevronDown, TreeDeciduous, Languages } from 'lucide-react';
 import { useAuth } from '@/modules/auth/AuthProvider';
+import { useTranslation } from 'react-i18next';
 
 export function Navigation() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
-    { id: 'skilltree', label: 'Skill Tree', icon: GitBranch, path: '/skilltree' },
-    { id: 'quiz', label: 'Quiz', icon: FileQuestion, path: '/quiz' },
-    { id: 'jobs', label: 'Job Matches', icon: Briefcase, path: '/jobs' },
-    { id: 'insights', label: 'Insights', icon: TrendingUp, path: '/insights' },
-    { id: 'timeline', label: 'Lịch Học', icon: Calendar, path: '/timeline' },
+    { id: 'dashboard', label: t('nav.dashboard'), icon: Home, path: '/dashboard' },
+    { id: 'skilltree', label: t('nav.skilltree'), icon: GitBranch, path: '/skilltree' },
+    { id: 'quiz', label: t('nav.quiz'), icon: FileQuestion, path: '/quiz' },
+    { id: 'jobs', label: t('nav.jobs'), icon: Briefcase, path: '/jobs' },
+    { id: 'insights', label: t('nav.insights'), icon: TrendingUp, path: '/insights' },
+    { id: 'timeline', label: t('nav.timeline'), icon: Calendar, path: '/timeline' },
     // { id: 'chat', label: 'Chat', icon: MessageSquare, path: '/chat' },
-    { id: 'forum', label: 'Diễn Đàn', icon: Users, path: '/forum' },
+    { id: 'forum', label: t('nav.forum'), icon: Users, path: '/forum' },
   ];
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const changeLanguage = (lng: 'en' | 'vi') => {
+    i18n.changeLanguage(lng);
+    setIsDropdownOpen(false);
   };
 
   // Close dropdown when clicking outside
@@ -96,22 +103,45 @@ export function Navigation() {
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 <User className="w-4 h-4" />
-                Profile
+                {t('common.profile')}
               </button>
               <button
                 onClick={() => { navigate('/my-skills'); setIsDropdownOpen(false); }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 <TreeDeciduous className="w-4 h-4" />
-                My Skill Tree
+                {t('nav.skilltree')}
               </button>
+              
               <div className="my-1 border-t border-gray-100" />
+              
+              {/* Language Switcher */}
+              <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                {t('common.language')}
+              </div>
+              <button
+                onClick={() => changeLanguage('vi')}
+                className={`w-full flex items-center gap-3 px-4 py-2 text-sm transition-colors ${i18n.language === 'vi' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-700 hover:bg-gray-50'}`}
+              >
+                <img src="https://flagcdn.com/w20/vn.png" alt="VN" className="w-5 h-auto rounded-sm" />
+                Tiếng Việt
+              </button>
+               <button
+                onClick={() => changeLanguage('en')}
+                className={`w-full flex items-center gap-3 px-4 py-2 text-sm transition-colors ${i18n.language === 'en' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-700 hover:bg-gray-50'}`}
+              >
+                <img src="https://flagcdn.com/w20/gb.png" alt="EN" className="w-5 h-auto rounded-sm" />
+                English
+              </button>
+
+              <div className="my-1 border-t border-gray-100" />
+              
               <button
                 onClick={() => { handleLogout(); setIsDropdownOpen(false); }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
               >
                 <LogOut className="w-4 h-4" />
-                Đăng xuất
+                {t('common.logout')}
               </button>
             </div>
           )}
