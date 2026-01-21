@@ -1,7 +1,6 @@
-// Profile Page
+// Profile Page - Modern Bento Design
 
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     User,
@@ -19,12 +18,12 @@ import {
     LogIn,
     BookOpen,
     PenSquare,
-    Loader2
+    Loader2,
+    AtSign,
+    Diamond,
 } from 'lucide-react';
 import { useProfile } from '../hooks/useProfile';
 import { useAuth } from '@/modules/auth/AuthProvider';
-import { ActivityItem } from '../../domain/entities/ProfileEntities';
-import { PageLoading } from '@/shared/components/PageLoading';
 
 const ACTIVITY_ICONS: Record<string, any> = {
     login: LogIn,
@@ -35,15 +34,14 @@ const ACTIVITY_ICONS: Record<string, any> = {
 };
 
 const ACTIVITY_COLORS: Record<string, string> = {
-    login: 'text-blue-500 bg-blue-50',
-    skill_complete: 'text-green-500 bg-green-50',
-    purchase: 'text-violet-500 bg-violet-50',
-    forum_post: 'text-teal-500 bg-teal-50',
-    learning: 'text-orange-500 bg-orange-50',
+    login: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400',
+    skill_complete: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400',
+    purchase: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400',
+    forum_post: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400',
+    learning: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400',
 };
 
 export function Profile() {
-    const { t } = useTranslation();
     const navigate = useNavigate();
     const { user } = useAuth();
     const { profile, stats, activities, loading, error, updateProfile } = useProfile();
@@ -55,15 +53,15 @@ export function Profile() {
     const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
     // Initialize form when profile loads
-    useState(() => {
+    useEffect(() => {
         if (profile) {
             setFullName(profile.fullName || '');
             setEmail(profile.email);
         }
-    });
+    }, [profile]);
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+        return new Intl.NumberFormat('vi-VN').format(amount);
     };
 
     const formatDate = (dateStr: string) => {
@@ -92,27 +90,31 @@ export function Profile() {
                 fullName: fullName || undefined,
                 email: email || undefined,
             });
-            setSaveMessage(t('profile.success'));
+            setSaveMessage('Đã lưu thay đổi thành công!');
             setTimeout(() => setSaveMessage(null), 3000);
         } catch (err: any) {
-            setSaveMessage(err.message || t('profile.error'));
+            setSaveMessage(err.message || 'Không thể lưu thay đổi');
         } finally {
             setIsSaving(false);
         }
     };
 
     if (loading) {
-        return <PageLoading message={`${t('common.loading')}...`} />;
+        return (
+            <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+            </div>
+        );
     }
 
     if (error) {
         return (
-            <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/20">
+            <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50">
                 <div className="text-center">
                     <p className="text-red-500 mb-4">{error}</p>
                     <button
                         onClick={() => window.location.reload()}
-                        className="px-4 py-2 bg-violet-600 text-white rounded-lg"
+                        className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors"
                     >
                         Thử lại
                     </button>
@@ -138,245 +140,181 @@ export function Profile() {
     };
 
     return (
-        <div className="flex-1 overflow-auto bg-gradient-to-br from-background via-background to-accent/20">
-            <div className="max-w-[1400px] mx-auto p-6">
+        <div className="flex-1 overflow-auto min-h-screen bg-slate-50 relative">
+            {/* Subtle animated background blobs */}
+            <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+                <div className="absolute top-0 left-[20%] w-[400px] h-[400px] bg-violet-200/30 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-pulse"></div>
+                <div className="absolute bottom-0 right-[10%] w-[350px] h-[350px] bg-cyan-200/30 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-pulse" style={{ animationDelay: '2s' }}></div>
+            </div>
+
+            <div className="max-w-7xl mx-auto p-4 md:p-8 relative z-10">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold mb-2 text-primary">
-                        {t('profile.title')}
-                    </h1>
-                    <p className="text-muted-foreground">
-                        {t('profile.subtitle')}
-                    </p>
+                    <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">Hồ Sơ Cá Nhân</h1>
                 </div>
 
-                {/* Main Layout - 2 Columns */}
-                <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-6">
-                    {/* Left Column - Profile Form */}
-                    <div className="space-y-6">
-                        {/* Profile Card */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
+                {/* Bento Grid Layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    {/* Left Column - Main Form */}
+                    <div className="lg:col-span-8 flex flex-col gap-6">
+                        {/* Profile Card with Avatar and Form */}
+                        <div className="bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-slate-100">
                             {/* Avatar Section */}
-                            <div className="flex items-center gap-6 mb-8">
-                                <div className="relative">
-                                    <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-4xl font-bold shadow-lg">
-                                        {displayProfile.fullName?.charAt(0)?.toUpperCase() || displayProfile.username?.charAt(0)?.toUpperCase() || 'U'}
+                            <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-10 pb-8 border-b border-slate-100">
+                                <div className="relative group cursor-pointer">
+                                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 p-1">
+                                        <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-4xl font-bold text-violet-600 overflow-hidden">
+                                            {displayProfile.fullName?.charAt(0)?.toUpperCase() || displayProfile.username?.charAt(0)?.toUpperCase() || 'U'}
+                                        </div>
                                     </div>
-                                    <button className="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-muted transition-colors border border-border">
-                                        <Camera className="w-4 h-4 text-primary" />
+                                    <button className="absolute bottom-1 right-1 bg-white text-slate-600 p-2 rounded-full shadow-lg border border-slate-100 hover:scale-105 transition-transform">
+                                        <Camera className="w-4 h-4" />
                                     </button>
                                 </div>
-                                <div>
-                                    <h2 className="text-2xl font-bold text-foreground">{displayProfile.fullName || displayProfile.username}</h2>
-                                    <p className="text-muted-foreground">@{displayProfile.username}</p>
-                                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 mt-2">
-                                        <CheckCircle className="w-3 h-3" />
-                                        {t('profile.active')}
-                                    </span>
+                                <div className="flex-1">
+                                    <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2">
+                                        <h2 className="text-2xl md:text-3xl font-bold text-slate-900">
+                                            {displayProfile.fullName || displayProfile.username}
+                                        </h2>
+                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-2 animate-pulse"></span>
+                                            Đang hoạt động
+                                        </span>
+                                    </div>
+                                    <p className="text-slate-500 text-lg mb-4">@{displayProfile.username}</p>
                                 </div>
                             </div>
 
                             {/* Form Fields */}
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-2">
-                                        <User className="w-4 h-4 inline mr-2" />
-                                        {t('profile.fullName.label')}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={fullName || displayProfile.fullName || ''}
-                                        onChange={(e) => setFullName(e.target.value)}
-                                        className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-                                        placeholder={t('profile.fullName.placeholder')}
-                                    />
-                                </div>
+                            <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Full Name */}
+                                    <div className="space-y-2">
+                                        <label htmlFor="fullname" className="text-sm font-semibold text-slate-700">
+                                            Tên đầy đủ
+                                        </label>
+                                        <div className="relative">
+                                            <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                                            <input
+                                                id="fullname"
+                                                type="text"
+                                                value={fullName || displayProfile.fullName || ''}
+                                                onChange={(e) => setFullName(e.target.value)}
+                                                placeholder="Nhập tên của bạn"
+                                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border-none rounded-xl text-slate-900 focus:ring-2 focus:ring-violet-500 transition-all placeholder:text-slate-400"
+                                            />
+                                        </div>
+                                    </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-2">
-                                        <span className="text-muted-foreground">@</span> {t('profile.username.label')}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={displayProfile.username}
-                                        disabled
-                                        className="w-full px-4 py-3 rounded-lg border border-border bg-muted text-muted-foreground cursor-not-allowed"
-                                    />
-                                    <p className="text-xs text-muted-foreground mt-1">{t('profile.username.hint')}</p>
-                                </div>
+                                    {/* Username */}
+                                    <div className="space-y-2">
+                                        <label htmlFor="username" className="text-sm font-semibold text-slate-700">
+                                            Username
+                                        </label>
+                                        <div className="relative">
+                                            <AtSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                                            <input
+                                                id="username"
+                                                type="text"
+                                                value={displayProfile.username}
+                                                disabled
+                                                className="w-full pl-11 pr-4 py-3 bg-slate-100 border-none rounded-xl text-slate-500 cursor-not-allowed select-none"
+                                            />
+                                        </div>
+                                        <p className="text-xs text-slate-400 mt-1">Username không thể thay đổi</p>
+                                    </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-2">
-                                        <Mail className="w-4 h-4 inline mr-2" />
-                                        {t('profile.email.label')}
-                                    </label>
-                                    <input
-                                        type="email"
-                                        value={email || displayProfile.email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-                                        placeholder={t('profile.email.placeholder')}
-                                    />
-                                </div>
+                                    {/* Email */}
+                                    <div className="space-y-2 md:col-span-2">
+                                        <label htmlFor="email" className="text-sm font-semibold text-slate-700">
+                                            Email
+                                        </label>
+                                        <div className="relative">
+                                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                                            <input
+                                                id="email"
+                                                type="email"
+                                                value={email || displayProfile.email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border-none rounded-xl text-slate-900 focus:ring-2 focus:ring-violet-500 transition-all placeholder:text-slate-400"
+                                            />
+                                        </div>
+                                    </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-2">
-                                        <Calendar className="w-4 h-4 inline mr-2" />
-                                        {t('profile.joined')}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formatDate(displayProfile.createdAt)}
-                                        disabled
-                                        className="w-full px-4 py-3 rounded-lg border border-border bg-muted text-muted-foreground cursor-not-allowed"
-                                    />
+                                    {/* Join Date */}
+                                    <div className="space-y-2 md:col-span-2">
+                                        <label htmlFor="join_date" className="text-sm font-semibold text-slate-700">
+                                            Ngày tham gia
+                                        </label>
+                                        <div className="relative">
+                                            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                                            <input
+                                                id="join_date"
+                                                type="text"
+                                                value={formatDate(displayProfile.createdAt)}
+                                                disabled
+                                                className="w-full pl-11 pr-4 py-3 bg-slate-100 border-none rounded-xl text-slate-500 cursor-not-allowed"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Success Message */}
                                 {saveMessage && (
-                                    <div className="p-3 rounded-lg bg-green-50 text-green-700 text-sm font-medium flex items-center gap-2">
-                                        <CheckCircle className="w-4 h-4" />
-                                        {saveMessage}
+                                    <div className="p-4 rounded-xl bg-green-50 border border-green-200 flex items-center gap-3">
+                                        <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                                        <p className="text-green-700">{saveMessage}</p>
                                     </div>
                                 )}
 
                                 {/* Action Buttons */}
-                                <div className="flex gap-4 pt-4">
+                                <div className="pt-6 flex flex-col sm:flex-row items-center gap-4">
                                     <button
+                                        type="button"
                                         onClick={handleSave}
                                         disabled={isSaving}
-                                        className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 px-4 rounded-xl font-semibold hover:opacity-90 transition-all disabled:opacity-50"
+                                        className="w-full sm:w-auto flex-1 bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 text-white font-semibold py-3.5 px-6 rounded-xl shadow-lg shadow-violet-500/30 transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
                                     >
                                         {isSaving ? (
                                             <Loader2 className="w-5 h-5 animate-spin" />
                                         ) : (
-                                            <Save className="w-5 h-5" />
+                                            <Save className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" />
                                         )}
-                                        {t('profile.save')}
+                                        Lưu thay đổi
                                     </button>
-                                    <button className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold border border-border hover:bg-muted transition-all">
+                                    <button
+                                        type="button"
+                                        className="w-full sm:w-auto flex-1 bg-white border-2 border-slate-200 text-slate-700 font-semibold py-3.5 px-6 rounded-xl hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+                                    >
                                         <Key className="w-5 h-5" />
-                                        {t('profile.changePassword')}
+                                        Đổi mật khẩu
                                     </button>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right Column - Stats & Activity */}
-                    <div className="space-y-6">
-                        {/* Quick Stats */}
-                        <div className="bg-primary/5 rounded-xl p-6 border border-primary/10">
-                            <h3 className="text-lg font-bold mb-4 text-primary">{t('profile.stats.title')}</h3>
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                                            <Clock className="w-5 h-5 text-primary" />
-                                        </div>
-                                        <span className="text-sm text-muted-foreground">{t('profile.stats.learningHours')}</span>
-                                    </div>
-                                    <span className="font-bold text-lg text-primary">{stats?.learningHours || 0}h</span>
-                                </div>
-
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                                            <Award className="w-5 h-5 text-primary" />
-                                        </div>
-                                        <span className="text-sm text-muted-foreground">{t('profile.stats.skillsCompleted')}</span>
-                                    </div>
-                                    <span className="font-bold text-lg text-primary">{stats?.skillsCompleted || 0}</span>
-                                </div>
-
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                                            <Flame className="w-5 h-5 text-primary" />
-                                        </div>
-                                        <span className="text-sm text-muted-foreground">{t('profile.stats.streak')}</span>
-                                    </div>
-                                    <span className="font-bold text-lg text-primary">{stats?.streakDays || 0}</span>
-                                </div>
-
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                                            <MessageSquare className="w-5 h-5 text-primary" />
-                                        </div>
-                                        <span className="text-sm text-muted-foreground">{t('profile.stats.forumPosts')}</span>
-                                    </div>
-                                    <span className="font-bold text-lg text-primary">{stats?.forumPosts || 0}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Balance Card */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
-                            <h3 className="text-lg font-bold mb-4 text-primary">{t('profile.balance.title')}</h3>
-                            <div className="text-center py-4">
-                                <div className="flex items-center justify-center gap-2 mb-2">
-                                    <Wallet className="w-8 h-8 text-primary" />
-                                    <span className="text-3xl font-bold text-primary">
-                                        {formatCurrency(displayProfile.balance)}
-                                    </span>
-                                </div>
-                                <p className="text-sm text-muted-foreground mb-4">{t('profile.balance.current')}</p>
-                                <button
-                                    onClick={() => navigate('/purchase')}
-                                    className="w-full bg-primary text-primary-foreground py-3 px-4 rounded-xl font-semibold hover:opacity-90 transition-all flex items-center justify-center gap-2"
-                                >
-                                    <Wallet className="w-5 h-5" />
-                                    {t('profile.balance.deposit')}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Subscription Tier Card */}
-                        <div className="bg-primary rounded-xl p-6 shadow-sm text-primary-foreground">
-                            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                                <Award className="w-5 h-5" />
-                                {t('profile.subscription.title')}
-                            </h3>
-                            <div className="text-center py-2">
-                                <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-3">
-                                    <span className="text-xl font-bold">
-                                        {displayProfile.subscriptionTierName || 'Free'}
-                                    </span>
-                                </div>
-                                {displayProfile.subscriptionTier === 'free' ? (
-                                    <p className="text-sm text-primary-foreground/80 mb-4">{t('profile.subscription.freeHint')}</p>
-                                ) : displayProfile.subscriptionExpiresAt ? (
-                                    <p className="text-sm text-primary-foreground/80 mb-4">
-                                        {t('profile.subscription.expires')}{formatDate(displayProfile.subscriptionExpiresAt)}
-                                    </p>
-                                ) : null}
-                                <button
-                                    onClick={() => navigate('/plans')}
-                                    className="w-full bg-background text-primary py-3 px-4 rounded-xl font-semibold hover:bg-background/90 transition-all flex items-center justify-center gap-2"
-                                >
-                                    <Award className="w-5 h-5" />
-                                    {displayProfile.subscriptionTier === 'free' ? t('profile.subscription.upgrade') : t('profile.subscription.manage')}
-                                </button>
-                            </div>
+                            </form>
                         </div>
 
                         {/* Activity History */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
-                            <h3 className="text-lg font-bold mb-4">{t('profile.activity.title')}</h3>
-                            <div className="space-y-3 max-h-80 overflow-y-auto">
-                                {activities.map((activity) => {
+                        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100">
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-xl font-bold text-slate-900">Lịch sử hoạt động</h3>
+                                <button className="text-sm font-medium text-violet-600 hover:underline">Xem tất cả</button>
+                            </div>
+                            <div className="space-y-4">
+                                {activities.slice(0, 3).map((activity) => {
                                     const Icon = ACTIVITY_ICONS[activity.type] || CheckCircle;
-                                    const colorClass = ACTIVITY_COLORS[activity.type] || 'text-gray-500 bg-gray-50';
+                                    const colorClass = ACTIVITY_COLORS[activity.type] || 'bg-gray-100 text-gray-600';
 
                                     return (
-                                        <div key={activity.id} className="flex items-start gap-3 py-2 border-b border-border last:border-0">
-                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${colorClass}`}>
-                                                <Icon className="w-4 h-4" />
+                                        <div
+                                            key={activity.id}
+                                            className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors"
+                                        >
+                                            <div className={`p-2 rounded-xl ${colorClass} shrink-0`}>
+                                                <Icon className="w-5 h-5" />
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm text-foreground truncate">{activity.description}</p>
-                                                <p className="text-xs text-muted-foreground">{formatDateTime(activity.timestamp)}</p>
+                                            <div>
+                                                <p className="text-slate-800 font-medium">{activity.description}</p>
+                                                <p className="text-sm text-slate-500 mt-1">{formatDateTime(activity.timestamp)}</p>
                                             </div>
                                         </div>
                                     );
@@ -384,7 +322,122 @@ export function Profile() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Right Column - Stats & Cards */}
+                    <div className="lg:col-span-4 space-y-6">
+                        {/* Stats Card */}
+                        <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+                            <h3 className="text-xl font-bold text-slate-900 mb-6">Thống kê của tôi</h3>
+                            <div className="space-y-5">
+                                <div className="flex items-center justify-between group">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2.5 rounded-xl bg-violet-100 text-violet-600">
+                                            <Clock className="w-5 h-5" />
+                                        </div>
+                                        <span className="font-medium text-slate-600">Số giờ học</span>
+                                    </div>
+                                    <span className="font-bold text-violet-600 text-lg">{stats?.learningHours || 0}h</span>
+                                </div>
+
+                                <div className="flex items-center justify-between group">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2.5 rounded-xl bg-teal-100 text-teal-600">
+                                            <Award className="w-5 h-5" />
+                                        </div>
+                                        <span className="font-medium text-slate-600">Skills hoàn thành</span>
+                                    </div>
+                                    <span className="font-bold text-teal-600 text-lg">{stats?.skillsCompleted || 0}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between group">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2.5 rounded-xl bg-orange-100 text-orange-600">
+                                            <Flame className="w-5 h-5" />
+                                        </div>
+                                        <span className="font-medium text-slate-600">Streak days</span>
+                                    </div>
+                                    <span className="font-bold text-orange-600 text-lg">{stats?.streakDays || 0}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between group">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2.5 rounded-xl bg-blue-100 text-blue-600">
+                                            <MessageSquare className="w-5 h-5" />
+                                        </div>
+                                        <span className="font-medium text-slate-600">Bài viết forum</span>
+                                    </div>
+                                    <span className="font-bold text-blue-600 text-lg">{stats?.forumPosts || 0}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Balance Card with Glass Effect */}
+                        <div className="relative overflow-hidden rounded-3xl p-6 shadow-sm bg-white/70 backdrop-blur-md border border-white">
+                            <div className="absolute -top-10 -right-10 w-32 h-32 bg-cyan-400/20 rounded-full blur-3xl"></div>
+                            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-violet-400/20 rounded-full blur-3xl"></div>
+                            <h3 className="relative z-10 text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <Wallet className="text-violet-600" />
+                                Số dư tài khoản
+                            </h3>
+                            <div className="relative z-10 text-center py-4">
+                                <div className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-cyan-500 mb-1">
+                                    {formatCurrency(displayProfile.balance)} ₫
+                                </div>
+                                <p className="text-sm text-slate-500">Số dư hiện tại</p>
+                            </div>
+                            <button
+                                onClick={() => navigate('/purchase')}
+                                className="relative z-10 w-full mt-4 bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-cyan-500/20 hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                            >
+                                <Wallet className="w-5 h-5" />
+                                Nạp tiền
+                            </button>
+                        </div>
+
+                        {/* Subscription Tier Card */}
+                        <div className="relative overflow-hidden rounded-3xl p-6 shadow-lg text-white bg-gradient-to-br from-violet-600 to-cyan-500">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-8 -mt-8 blur-2xl"></div>
+                            <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full -ml-8 -mb-8 blur-xl"></div>
+                            <div className="relative z-10 flex items-start justify-between mb-8">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <Diamond className="text-yellow-300" />
+                                        <h3 className="text-lg font-bold">Gói đăng ký</h3>
+                                    </div>
+                                    {displayProfile.subscriptionTier === 'free' ? (
+                                        <p className="text-white/80 text-sm">Nâng cấp để trải nghiệm tốt hơn</p>
+                                    ) : displayProfile.subscriptionExpiresAt ? (
+                                        <p className="text-white/80 text-sm">
+                                            Hết hạn: {formatDate(displayProfile.subscriptionExpiresAt)}
+                                        </p>
+                                    ) : null}
+                                </div>
+                                <div className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-lg border border-white/20 shadow-sm">
+                                    <span className="font-bold tracking-wide">
+                                        {displayProfile.subscriptionTierName?.toUpperCase() || 'FREE'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="relative z-10">
+                                <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm border border-white/10 shadow-inner">
+                                    <Diamond className="w-10 h-10" />
+                                </div>
+                                <button
+                                    onClick={() => navigate('/plans')}
+                                    className="w-full bg-white text-violet-600 font-bold py-3 px-4 rounded-xl hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 shadow-lg"
+                                >
+                                    <Award className="w-5 h-5" />
+                                    {displayProfile.subscriptionTier === 'free' ? 'Nâng cấp' : 'Quản lý gói'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                {/* Footer */}
+                <footer className="text-center text-slate-400 py-8 text-sm mt-12">
+                    © 2026 Learning Platform. All rights reserved.
+                </footer>
             </div>
         </div>
     );

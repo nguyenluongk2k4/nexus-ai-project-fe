@@ -1,6 +1,6 @@
 import { LearningService } from './domain/services/LearningService';
 import { SkillTreeService } from './domain/services/SkillTreeService';
-import { LocalStorageLearningGateway } from './infrastructure/gateway/LocalStorageLearningGateway';
+import { HttpLearningGateway } from './infrastructure/gateway/HttpLearningGateway';
 import { InitializeLearningDataUseCase } from './usecases/InitializeLearningDataUseCase';
 import { SyncLearningDataUseCase } from './usecases/SyncLearningDataUseCase';
 import { CalculateStatsUseCase } from './usecases/CalculateStatsUseCase';
@@ -23,3 +23,4 @@ export const calculateStatsUseCase = new CalculateStatsUseCase(learningService);
 // Expose for hooks
 export const getSkillTreeService = () => skillTreeService;
 export const getLearningService = () => learningService;
+export { learningGateway };
