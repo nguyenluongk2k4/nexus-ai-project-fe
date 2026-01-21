@@ -9,7 +9,7 @@ import { SkillTreeHttpGateway } from './infrastructure/gateway/SkillTreeHttpGate
 
 // Gateways (Infrastructure)
 const learningGateway = new LocalStorageLearningGateway();
-const skillTreeGateway = new SkillTreeHttpGateway();
+export const skillTreeGateway = new SkillTreeHttpGateway();
 
 // Services (Domain)
 const learningService = new LearningService(learningGateway);

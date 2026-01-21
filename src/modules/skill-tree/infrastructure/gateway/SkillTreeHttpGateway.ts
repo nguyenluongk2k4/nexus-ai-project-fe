@@ -116,4 +116,37 @@ export class SkillTreeHttpGateway implements SkillTreeGateway {
       throw e;
     }
   }
+
+  // =============== My Skill Tree Methods ===============
+
+  async getMyTree(): Promise<any> {
+    try {
+      return await httpClient.get<any>(apiConfig.endpoints.skillTree.myTree);
+    } catch (e) {
+      console.error("Failed to fetch my tree", e);
+      return null;
+    }
+  }
+
+  async saveToMyTree(sessionId: string, nodeIds: string[]): Promise<any> {
+    try {
+      return await httpClient.post<any>(apiConfig.endpoints.skillTree.saveToMyTree, {
+        session_id: sessionId,
+        node_ids: nodeIds
+      });
+    } catch (e) {
+      console.error("Failed to save to my tree", e);
+      throw e;
+    }
+  }
+
+  async removeFromMyTree(nodeId: string): Promise<boolean> {
+    try {
+      await httpClient.delete(apiConfig.endpoints.skillTree.removeFromMyTree(nodeId));
+      return true;
+    } catch (e) {
+      console.error("Failed to remove from my tree", e);
+      return false;
+    }
+  }
 }

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Check, Lock, Minus, Plus, MessageSquare, Loader2 } from 'lucide-react';
+import { Check, Lock, Minus, Plus, MessageSquare, Loader2, Save, CheckCircle } from 'lucide-react';
 import { useSkillTree, SkillNode } from '@/modules/skill-tree/ui/hooks/useSkillTree';
 import { useChat } from '@/modules/chat/ui/hooks/useChat';
 import { RightPanel } from '../components/RightPanel';
 import { NodeManagementModal } from '../components/NodeManagementModal';
 import { NodeTooltip } from '../components/NodeTooltip';
 import { treeState$, TreeNodeData, TreeState, treeNodeService } from '../../domain/services/treeNodeService';
+import { skillTreeGateway } from '../../providers';
 import { Settings } from 'lucide-react';
 
 // Node types for different states
@@ -75,6 +76,10 @@ export function SkillTree() {
     // Tooltip state
     const [hoveredNode, setHoveredNode] = useState<SkillNode | null>(null);
     const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+    
+    // Save to My Tree state
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveSuccess, setSaveSuccess] = useState(false);
   
     // Handle session selection - stay on SkillTree page (don't redirect to /chat)
     // Handle session selection - stay on SkillTree page (don't redirect to /chat)
@@ -133,6 +138,26 @@ export function SkillTree() {
     const handleNewChat = () => {
       treeNodeService.clear();
       startNewChat();
+      setSaveSuccess(false); // Reset save status for new chat
+    };
+
+    // Handle Save to My Tree
+    const handleSaveToMyTree = async () => {
+      if (!currentSessionId || treeState.nodes.length === 0) return;
+      
+      setIsSaving(true);
+      try {
+        const nodeIds = treeState.nodes.map(n => n.id);
+        await skillTreeGateway.saveToMyTree(currentSessionId, nodeIds);
+        setSaveSuccess(true);
+        // Reset success after 3 seconds
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } catch (error) {
+        console.error('Failed to save to My Tree:', error);
+        // Could add error toast here
+      } finally {
+        setIsSaving(false);
+      }
     };
   
     // Convert tree nodes from Observable to SkillNode format for visualization
@@ -479,6 +504,38 @@ export function SkillTree() {
             )}
           </div>
           <div className="flex items-center gap-3">
+            {/* Save to My Tree button - only show when tree has nodes */}
+            {treeState.nodes.length > 0 && currentSessionId && (
+              <button
+                onClick={handleSaveToMyTree}
+                disabled={isSaving || saveSuccess}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                  saveSuccess 
+                    ? 'bg-green-100 text-green-700 cursor-default'
+                    : isSaving 
+                      ? 'bg-slate-100 text-slate-400 cursor-wait'
+                      : 'bg-gradient-to-r from-violet-500 to-indigo-500 text-white hover:opacity-90'
+                }`}
+              >
+                {saveSuccess ? (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Đã lưu!</span>
+                  </>
+                ) : isSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Đang lưu...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    <span>Lưu vào My Tree</span>
+                  </>
+                )}
+              </button>
+            )}
+            
             <div className="flex items-center bg-slate-100 rounded-full px-3 py-1 gap-2">
               <span className="text-[11px] font-bold text-slate-500">ZOOM</span>
               <button 

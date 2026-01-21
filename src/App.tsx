@@ -3,6 +3,7 @@ import { Navigation } from '@/shared/components/Navigation';
 import { Landing } from '@/modules/home/ui/pages/Landing';
 import { Dashboard } from '@/modules/home/ui/pages/Dashboard';
 import { SkillTree } from '@/modules/skill-tree/ui/pages/SkillTree';
+import { MySkillTree } from '@/modules/skill-tree/ui/pages/MySkillTree';
 import { Quiz } from '@/modules/skill-tree/ui/pages/Quiz';
 import { JobRecommendation } from '@/modules/jobs/ui/pages/JobRecommendation';
 import { LearningInsights } from '@/modules/skill-tree/ui/pages/LearningInsights';
@@ -54,6 +55,7 @@ export default function App() {
                       <Routes>
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/skilltree" element={<SkillTree />} />
+                        <Route path="/my-skills" element={<MySkillTree />} />
                         <Route path="/quiz" element={<Quiz />} />
                         <Route path="/jobs" element={<JobRecommendation />} />
                         <Route path="/insights" element={<LearningInsights />} />

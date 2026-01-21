@@ -6,4 +6,8 @@ export interface SkillTreeGateway {
   getNodeAlternatives(nodeId: string, level: number, sessionId?: string): Promise<any[]>;
   swapNode(sessionId: string, originalNodeId: string, newNode: any): Promise<{ status: string, nodes: any[] } | null>;
   generateTreeStream(message: string, sessionId: string, onData: (data: any) => void): Promise<void>;
+  // My Skill Tree methods
+  getMyTree(): Promise<any>;
+  saveToMyTree(sessionId: string, nodeIds: string[]): Promise<any>;
+  removeFromMyTree(nodeId: string): Promise<boolean>;
 }
