@@ -188,6 +188,9 @@
         "signInLink": "Đăng nhập tại đây",
         "backToLanding": "Về trang chủ",
         "passwordsDoNotMatch": "Mật khẩu không khớp!"
+    },
+    "logout": {
+        "success": "Đăng xuất thành công"
     }
   },
   "landing": {

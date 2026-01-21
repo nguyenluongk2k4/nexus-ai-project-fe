@@ -3,6 +3,8 @@ import { useState, useRef, useEffect } from 'react';
 import { Home, GitBranch, FileQuestion, Briefcase, TrendingUp, LogOut, MessageSquare, Users, Calendar, User, ChevronDown, TreeDeciduous, Languages } from 'lucide-react';
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { ToastWithProgress } from './ToastWithProgress';
 
 export function Navigation() {
   const { t, i18n } = useTranslation();
@@ -23,8 +25,19 @@ export function Navigation() {
   ];
 
   const handleLogout = () => {
-    logout();
-    navigate('/login');
+    navigate('/');
+    // Defer logout to ensure navigation to public route completes first
+    setTimeout(() => {
+      logout();
+      toast.custom(() => (
+        <ToastWithProgress 
+          title={t('auth.logout.success')}
+          message="See you next time!"
+          type="success"
+          duration={2000}
+        />
+      ), { duration: 2000 });
+    }, 0);
   };
 
   const changeLanguage = (lng: 'en' | 'vi') => {
@@ -150,4 +163,3 @@ export function Navigation() {
     </nav>
   );
 }
-

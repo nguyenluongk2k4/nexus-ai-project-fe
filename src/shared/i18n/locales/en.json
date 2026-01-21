@@ -188,6 +188,9 @@
         "signInLink": "Sign in here",
         "backToLanding": "Back to Home",
         "passwordsDoNotMatch": "Passwords do not match!"
+    },
+    "logout": {
+        "success": "Logged out successfully"
     }
   },
   "landing": {
