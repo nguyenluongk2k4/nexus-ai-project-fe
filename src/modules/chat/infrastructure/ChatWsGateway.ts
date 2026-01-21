@@ -38,18 +38,80 @@ export class ChatWsGateway implements ChatGateway {
             onStatusChange(data.status as ConnectionStatus);
             break;
           case 'bot_message':
-            onMessage({
-              id: crypto.randomUUID(),
-              role: 'bot',
-              text: data.text,
-              timestamp: new Date().toISOString()
-            });
+            // Check if bot message contains tree data
+            let isTreeData = false;
+            try {
+              const possibleTreeData = JSON.parse(data.text);
+              if (possibleTreeData.status === 'done' && Array.isArray(possibleTreeData.nodes) && possibleTreeData.nodes.length > 0) {
+                isTreeData = true;
+                console.log(`🌳 [WS] Tree data received (${possibleTreeData.nodes.length} nodes)`);
+                
+                // Update tree nodes - this will also reset loading
+                treeNodeService.setNodes(possibleTreeData.nodes as TreeNodeData[]);
+                
+                // Add a user-friendly message instead of JSON
+                onMessage({
+                  id: crypto.randomUUID(),
+                  role: 'bot',
+                  text: `✅ ${possibleTreeData.message || 'Đã tạo skill tree thành công!'} (${possibleTreeData.nodes.length} nodes)`,
+                  timestamp: new Date().toISOString()
+                });
+              } else if (possibleTreeData.status === 'error') {
+                // Error response, reset loading
+                treeNodeService.setLoading(false);
+              }
+              // Note: Don't reset loading for other JSON responses - might be intermediate
+            } catch (e) {
+              // Not JSON - this is a normal text chat message
+              // Reset loading since this is just text chat, not tree generation
+              treeNodeService.setLoading(false);
+            }
+            
+            // Only add normal text messages to chat (skip tree JSON)
+            if (!isTreeData) {
+              onMessage({
+                id: crypto.randomUUID(),
+                role: 'bot',
+                text: data.text,
+                timestamp: new Date().toISOString()
+              });
+            }
+            break;
+          case 'tree_loading':
+            treeNodeService.setLoading(true);
+            break;
+          case 'tree_generating':
+            // SET FLAG IMMEDIATELY to block tree_nodes from socket
+            (window as any).__treeStreamingActive = true;
+            
+            // Backend thông báo sẽ generate tree -> Frontend dùng HTTP streaming thay vì socket
+            console.log(`🌳 [WS] tree_generating received, setting streaming flag and triggering HTTP...`);
+            treeNodeService.setLoading(true);
+            
+            // Clear any existing nodes to prevent duplicates
+            treeNodeService.clear();
+            
+            // Dispatch event để SkillTree component gọi HTTP streaming
+            window.dispatchEvent(new CustomEvent('trigger-tree-stream', { 
+              detail: { 
+                sessionId: data.session_id, 
+                message: data.message 
+              }
+            }));
             break;
           case 'tree_nodes':
-            // Replace tree with generated nodes from chat
+            // IGNORE socket tree_nodes nếu đang dùng HTTP streaming
+            // Chỉ dùng làm fallback nếu HTTP streaming fail
+            console.log(`🌳 [WS] tree_nodes received (may be ignored if HTTP streaming active)`);
             if (data.nodes && Array.isArray(data.nodes)) {
-              treeNodeService.setNodes(data.nodes as TreeNodeData[]);
-              console.log(`🌳 [WS] Tree replaced with ${data.nodes.length} generated nodes`);
+              // Check if HTTP streaming is not active
+              const isStreaming = (window as any).__treeStreamingActive;
+              if (!isStreaming) {
+                treeNodeService.setNodes(data.nodes as TreeNodeData[]);
+                console.log(`🌳 [WS] Tree replaced with ${data.nodes.length} generated nodes (fallback)`);
+              } else {
+                console.log(`🌳 [WS] Ignoring socket tree_nodes - HTTP streaming is active`);
+              }
             }
             break;
           case 'tree_resources':
@@ -57,9 +119,6 @@ export class ChatWsGateway implements ChatGateway {
             if (data.resources && typeof data.resources === 'object') {
               treeNodeService.setResources(data.resources as any);
             }
-            break;
-          case 'tree_loading':
-            treeNodeService.setLoading(true);
             break;
           case 'tree_update':
             // Tree was generated/updated - trigger refetch via API
@@ -92,6 +151,9 @@ export class ChatWsGateway implements ChatGateway {
 
   sendMessage(text: string, sessionId: string | null): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      // Set tree loading IMMEDIATELY when user sends message
+      treeNodeService.setLoading(true);
+      
       const token = localStorage.getItem('token');
       this.ws.send(JSON.stringify({
         type: 'user_message',

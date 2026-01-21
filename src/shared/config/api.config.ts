@@ -67,6 +67,13 @@ export const apiConfig = {
       nodeChildren: (nodeId: string) => `/skill-tree/nodes/${nodeId}/children`,
       resourceProgress: (resourceId: string) => `/skill-tree/resources/${resourceId}/progress`,
       treeBySession: (sessionId: string) => `/skill-tree/session/${sessionId}`,
+      generate: '/skill-tree/generate',
+      nodeAlternatives: (nodeId: string) => `/skill-tree/nodes/${encodeURIComponent(nodeId)}/alternatives`,
+      swapNode: (sessionId: string) => `/skill-tree/session/${sessionId}/swap`,
+      // My Skill Tree (User's saved tree)
+      myTree: '/skill-tree/my-tree',
+      saveToMyTree: '/skill-tree/my-tree/save',
+      removeFromMyTree: (nodeId: string) => `/skill-tree/my-tree/nodes/${nodeId}`,
     },
     
     // Learning Module (placeholders for future)

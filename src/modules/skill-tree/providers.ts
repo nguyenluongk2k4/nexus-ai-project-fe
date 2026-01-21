@@ -8,8 +8,8 @@ import { CalculateStatsUseCase } from './usecases/CalculateStatsUseCase';
 import { SkillTreeHttpGateway } from './infrastructure/gateway/SkillTreeHttpGateway';
 
 // Gateways (Infrastructure)
-const learningGateway = new HttpLearningGateway();
-const skillTreeGateway = new SkillTreeHttpGateway();
+const learningGateway = new LocalStorageLearningGateway();
+export const skillTreeGateway = new SkillTreeHttpGateway();
 
 // Services (Domain)
 const learningService = new LearningService(learningGateway);
