@@ -8,7 +8,7 @@ import {
 import { motion } from 'framer-motion';
 import { LanguageSwitcher } from '@/shared/components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
-
+import logo from '@/assets/logo.svg';
 export const RegisterPage = () => {
   const [formData, setFormData] = useState({
     username: '',
@@ -51,12 +51,9 @@ export const RegisterPage = () => {
        {/* Header from Landing */}
        <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-[#0f172a]/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <TreeDeciduous className="w-6 h-6 text-primary" />
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-primary">
-              AI Skill Tree
-            </span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="AI Skill Tree" className="h-12" />
+          </div>
           <div className="flex items-center gap-4">
             <LanguageSwitcher variant="minimal" />
           </div>

@@ -167,7 +167,8 @@
         "orContinueWith": "Hoặc tiếp tục với",
         "dontHaveAccount": "Chưa có tài khoản?",
         "signUpLink": "Đăng ký miễn phí",
-        "backToLanding": "Về trang chủ"
+        "backToLanding": "Về trang chủ",
+        "success": "Đăng nhập thành công"
     },
     "register": {
         "title": "Tạo tài khoản mới",

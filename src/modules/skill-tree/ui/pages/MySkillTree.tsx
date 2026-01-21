@@ -150,22 +150,41 @@ export function MySkillTree() {
       }
     } else if (node.level === 1) {
       // Ability: Toggle expand to show/hide skills
+      // Fix: Also focus parent Root if not already focused
+      const parentRoot = tree?.nodes.find(n => 
+        n.level === 0 && tree.edges.some(e => e.source === n.id && e.target === node.id)
+      );
+
       if (focusedBranch?.abilityId === node.id && focusedBranch?.skillId) {
         setFocusedBranch({ abilityId: node.id }); // Collapse skills
       } else if (focusedBranch?.abilityId === node.id) {
         setFocusedBranch(null); // Collapse ability
       } else {
         setFocusedBranch({ abilityId: node.id });
+        // Auto-focus parent root to hide other roots
+        if (parentRoot) {
+          setFocusedRootId(parentRoot.id);
+        }
       }
     } else if (node.level === 2) {
       // Skill: Toggle expand to show/hide knowledge
       const parentAbility = tree?.nodes.find(n => 
         n.level === 1 && tree.edges.some(e => e.source === n.id && e.target === node.id)
       );
+      
+      // Fix: Also focus grandparent Root
+      const parentRoot = parentAbility ? tree?.nodes.find(n => 
+        n.level === 0 && tree.edges.some(e => e.source === n.id && e.target === parentAbility.id)
+      ) : null;
+
       if (focusedBranch?.skillId === node.id) {
         setFocusedBranch({ abilityId: parentAbility?.id }); // Collapse knowledge
       } else {
         setFocusedBranch({ abilityId: parentAbility?.id, skillId: node.id });
+        // Auto-focus parent root
+        if (parentRoot) {
+          setFocusedRootId(parentRoot.id);
+        }
       }
     }
   };

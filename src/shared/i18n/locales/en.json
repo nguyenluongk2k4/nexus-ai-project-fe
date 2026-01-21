@@ -167,7 +167,8 @@
         "orContinueWith": "Or continue with",
         "dontHaveAccount": "Don't have an account yet?",
         "signUpLink": "Sign up for free",
-        "backToLanding": "Back to Home"
+        "backToLanding": "Back to Home",
+        "success": "Logged in successfully"
     },
     "register": {
         "title": "Create your account",

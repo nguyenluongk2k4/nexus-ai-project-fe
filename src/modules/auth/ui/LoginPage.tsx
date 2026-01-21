@@ -6,7 +6,9 @@ import { Mail, Lock, ArrowRight, TreeDeciduous, Github as GithubIcon, Chrome as 
 import { LanguageSwitcher } from '@/shared/components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/components/ui/button';
-
+import { toast } from 'sonner';
+import { ToastWithProgress } from '@/shared/components/ToastWithProgress';
+import logo from '@/assets/logo.svg';
 export const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,7 +20,15 @@ export const LoginPage = () => {
     e.preventDefault();
     try {
       await login({ email, password });
-      navigate('/dashboard');
+      navigate('/skilltree');
+      toast.custom(() => (
+        <ToastWithProgress 
+          title={t('auth.login.success')}
+          message="Welcome to Nexus Ai"
+          type="success"
+          duration={2000}
+        />
+      ), { duration: 2000 });
     } catch (err) {
       // Error handled by AuthProvider
     }
@@ -29,12 +39,9 @@ export const LoginPage = () => {
        {/* Header from Landing */}
        <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-[#0f172a]/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <TreeDeciduous className="w-6 h-6 text-primary" />
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-primary">
-              AI Skill Tree
-            </span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="AI Skill Tree" className="h-12" />
+          </div>
           <div className="flex items-center gap-4">
             <LanguageSwitcher variant="minimal" />
           </div>

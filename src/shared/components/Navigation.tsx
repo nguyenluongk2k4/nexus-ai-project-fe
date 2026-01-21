@@ -5,7 +5,7 @@ import { useAuth } from '@/modules/auth/AuthProvider';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { ToastWithProgress } from './ToastWithProgress';
-
+import logo from '@/assets/logo.svg';
 export function Navigation() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -14,12 +14,12 @@ export function Navigation() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const navItems = [
-    { id: 'dashboard', label: t('nav.dashboard'), icon: Home, path: '/dashboard' },
     { id: 'skilltree', label: t('nav.skilltree'), icon: GitBranch, path: '/skilltree' },
-    { id: 'quiz', label: t('nav.quiz'), icon: FileQuestion, path: '/quiz' },
-    { id: 'jobs', label: t('nav.jobs'), icon: Briefcase, path: '/jobs' },
-    { id: 'insights', label: t('nav.insights'), icon: TrendingUp, path: '/insights' },
-    { id: 'timeline', label: t('nav.timeline'), icon: Calendar, path: '/timeline' },
+    { id: 'dashboard', label: t('nav.dashboard'), icon: Home, path: '/dashboard' },
+    // { id: 'quiz', label: t('nav.quiz'), icon: FileQuestion, path: '/quiz' },
+    // { id: 'jobs', label: t('nav.jobs'), icon: Briefcase, path: '/jobs' },
+    // { id: 'insights', label: t('nav.insights'), icon: TrendingUp, path: '/insights' },
+    // { id: 'timeline', label: t('nav.timeline'), icon: Calendar, path: '/timeline' },
     // { id: 'chat', label: 'Chat', icon: MessageSquare, path: '/chat' },
     { id: 'forum', label: t('nav.forum'), icon: Users, path: '/forum' },
   ];
@@ -59,10 +59,9 @@ export function Navigation() {
   return (
     <nav className="w-64 bg-white border-r border-border min-h-screen p-6 flex flex-col">
       <div className="mb-8">
-        <h1 className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-teal-500 font-bold text-xl">
-          AI Skill Tree
-        </h1>
-        <p className="text-muted-foreground mt-1 text-sm">Learn & Grow</p>
+        <div className="flex items-center gap-2">
+            <img src={logo} alt="AI Skill Tree" className="h-13" />
+          </div>
       </div>
 
       <div className="flex-1 space-y-1">

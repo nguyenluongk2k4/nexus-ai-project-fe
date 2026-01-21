@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
-import { ArrowRight, TreeDeciduous, Brain, Target } from 'lucide-react';
+import { ArrowRight, Brain, Target, TreeDeciduous } from 'lucide-react';
 import { LanguageSwitcher } from '@/shared/components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
+import logo from '@/assets/logo.svg';
 
 export function Landing() {
   const navigate = useNavigate();
@@ -14,10 +15,7 @@ export function Landing() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <TreeDeciduous className="w-6 h-6 text-primary" />
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-primary">
-              AI Skill Tree
-            </span>
+            <img src={logo} alt="AI Skill Tree" className="h-12" />
           </div>
           <div className="flex items-center gap-4">
             <LanguageSwitcher variant="minimal" />

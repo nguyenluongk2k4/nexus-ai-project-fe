@@ -210,7 +210,7 @@ export function Plans() {
                                                     ? 'bg-slate-100 text-slate-500 cursor-not-allowed'
                                                     : confirmPlan === plan.id
                                                         ? 'bg-green-600 hover:bg-green-700 text-white'
-                                                        : 'bg-gradient-to-r from-violet-600 to-teal-500 hover:shadow-lg text-white'
+                                                        : 'bg-primary hover:bg-primary/90 hover:shadow-lg text-white'
                                             }`}
                                     >
                                         {purchasing && confirmPlan === plan.id ? (

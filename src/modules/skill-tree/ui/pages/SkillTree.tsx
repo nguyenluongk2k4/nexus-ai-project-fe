@@ -466,10 +466,7 @@ export function SkillTree() {
         {/* Header */}
         <header className="h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md px-6 flex items-center justify-between z-10 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <span className="text-white text-sm">🌳</span>
-            </div>
-            <h2 className="text-lg font-bold text-slate-800">Skill Tree</h2>
+            <h2 className="text-lg font-bold text-slate-800">{t('nav.skilltree')}</h2>
             
             {/* Back button when focused - smart navigation */}
             {focusedBranch?.abilityId && (
