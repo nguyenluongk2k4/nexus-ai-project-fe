@@ -35,6 +35,7 @@ import {
   X,
   Bell,
   BellOff,
+  LayoutGrid,
 } from 'lucide-react';
 import { useLearningProgress } from '@/modules/skill-tree/ui/contexts/LearningProgressContext';
 import { TimelineItem, LearningStatus } from '@/modules/skill-tree/domain/types/learning';
@@ -284,7 +285,7 @@ export function Timeline() {
     }
   };
 
-  const renderTimelineCard = (item: TimelineItem) => {
+  const renderTimelineCard = (item: TimelineItem, barColor: string) => {
     const priorityColors = {
       high: { bg: 'bg-destructive/10', text: 'text-destructive', label: 'Cao' },
       medium: { bg: 'bg-amber-500/10', text: 'text-amber-500', label: 'Trung bình' },
@@ -292,11 +293,11 @@ export function Timeline() {
     };
     const priority = priorityColors[item.priority];
 
-    return <DraggableCard key={item.id} item={item} priority={priority} onStatusChange={handleStatusChange} onDelete={handleDelete} />;
+    return <DraggableCard key={item.id} item={item} priority={priority} barColor={barColor} onStatusChange={handleStatusChange} onDelete={handleDelete} />;
   };
 
   // Draggable Card Component
-  const DraggableCard = ({ item, priority, onStatusChange, onDelete }: any) => {
+  const DraggableCard = ({ item, priority, barColor, onStatusChange, onDelete }: any) => {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
       id: item.id,
     });
@@ -304,7 +305,8 @@ export function Timeline() {
     const style = transform
       ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-        opacity: isDragging ? 0.5 : 1,
+        opacity: isDragging ? 0.8 : 1,
+        zIndex: isDragging ? 50 : 1,
       }
       : undefined;
 
@@ -315,82 +317,63 @@ export function Timeline() {
         {...listeners}
         {...attributes}
         className={`
-          bg-card/80 backdrop-blur-sm border border-border
-          p-4 rounded-xl relative group cursor-grab active:cursor-grabbing
-          shadow-sm hover:shadow-md transition-all duration-300
-          hover:-translate-y-0.5 hover:border-primary/30
-          ${item.status === 'completed' ? 'opacity-60' : ''}
-          ${item.status === 'in_progress' ? 'ring-1 ring-primary/30' : ''}
+          bg-card p-5 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 relative border border-transparent hover:border-border group cursor-grab active:cursor-grabbing
+          ${item.status === 'completed' ? 'opacity-60 grayscale' : ''}
         `}
       >
         {/* Color bar */}
-        <div className="absolute left-0 top-4 bottom-4 w-1 bg-primary rounded-r-full" />
+        <div className={`absolute left-0 top-6 bottom-6 w-1 rounded-r-full ${barColor}`} />
 
-        {/* Header */}
-        <div className="flex justify-between items-start mb-2 pl-3">
-          <span className={`text-xs font-semibold ${priority.text} ${priority.bg} px-2 py-0.5 rounded-md`}>
-            {priority.label}
+        {/* Header: Priority & Actions */}
+        <div className="flex justify-between items-start mb-3 pl-3">
+          <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide ${priority.badge || priority.bg + ' ' + priority.text}`}>
+            {item.priority === 'high' ? 'Cao' : item.priority === 'medium' ? 'Trung bình' : 'Thấp'}
           </span>
+
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
-              onClick={() => setEditingItem(item)}
-              className="p-1 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded transition-colors"
+              onClick={(e) => { e.stopPropagation(); setEditingItem(item); }}
+              className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
             >
-              <Edit3 className="w-3.5 h-3.5" />
+              <Edit3 className="w-4 h-4" />
             </button>
             <button
-              onClick={() => handleDelete(item)}
+              onClick={(e) => { e.stopPropagation(); handleDelete(item); }}
               className="p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Title */}
-        <h3 className="text-sm font-semibold text-foreground pl-3 group-hover:text-primary transition-colors line-clamp-2 mb-1">
-          {item.resourceName}
-        </h3>
-
-        {/* Node name */}
-        <p className="text-xs text-muted-foreground pl-3 mb-2 flex items-center gap-1">
-          <BookOpen className="w-3 h-3" />
-          {item.nodeName}
-        </p>
-
-        {/* Time & Deadline */}
-        <div className="flex flex-wrap gap-2 pl-3 text-xs text-muted-foreground mb-2">
-          {item.scheduledTime && (
-            <span className="flex items-center gap-1 bg-muted/50 px-1.5 py-0.5 rounded">
-              <Clock className="w-3 h-3" />
-              {item.scheduledTime}
-            </span>
-          )}
-          {item.deadline && (
-            <span className="flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              DL: {item.deadline.toLocaleDateString('vi-VN')}
-            </span>
-          )}
-        </div>
+        {/* Content */}
+        <h3 className="font-bold text-foreground pl-3 text-lg leading-tight mb-2 line-clamp-2">{item.resourceName}</h3>
+        <p className="text-sm text-muted-foreground pl-3 leading-relaxed mb-5 line-clamp-2">{item.nodeName}</p>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pl-3 mt-3 pt-2 border-t border-border">
+        <div className="pt-4 border-t border-border/50 flex items-center justify-between pl-3">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <Clock className="w-4 h-4" />
+            <span className="text-xs font-medium">{item.scheduledTime || '08:00'}</span>
+          </div>
+
           <button
-            onClick={() => handleStatusChange(item)}
-            className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full transition-colors ${item.status === 'completed'
-              ? 'bg-secondary/20 text-secondary'
-              : item.status === 'in_progress'
-                ? 'bg-primary/20 text-primary'
-                : 'bg-muted text-muted-foreground'
-              }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onStatusChange(item);
+            }}
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors"
           >
             {item.status === 'completed' ? (
-              <CheckCircle2 className="w-3 h-3" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            ) : item.status === 'in_progress' ? (
+              <Circle className="w-4 h-4 text-primary fill-current" />
             ) : (
-              <Circle className={`w-3 h-3 ${item.status === 'in_progress' ? 'fill-current' : ''}`} />
+              <Circle className="w-4 h-4" />
             )}
-            {item.status === 'completed' ? 'Hoàn thành' : item.status === 'in_progress' ? 'Đang học' : 'Chưa bắt đầu'}
+            <span className={`text-xs font-medium ${item.status === 'completed' ? 'text-emerald-500' : ''}`}>
+              {item.status === 'completed' ? 'Hoàn thành' : item.status === 'in_progress' ? 'Đang học' : 'Chưa bắt đầu'}
+            </span>
           </button>
         </div>
       </div>
@@ -400,56 +383,55 @@ export function Timeline() {
   const renderTimePeriodColumn = (period: TimePeriod) => {
     const config = TIME_PERIODS[period];
     const items = groupedItems[period];
-    const IconComponent = config.icon;
 
-    const periodStyles = {
-      morning: { gradient: 'from-primary/20 to-primary/5', iconBg: 'bg-primary/10', iconColor: 'text-primary' },
-      afternoon: { gradient: 'from-secondary/20 to-secondary/5', iconBg: 'bg-secondary/10', iconColor: 'text-secondary' },
-      evening: { gradient: 'from-violet-500/20 to-violet-500/5', iconBg: 'bg-violet-500/10', iconColor: 'text-violet-400' },
+    // Accents matching the Elite design
+    const accents = {
+      morning: { dot: 'bg-orange-500', text: 'text-orange-500', bg: 'bg-orange-500/10' },
+      afternoon: { dot: 'bg-blue-500', text: 'text-blue-500', bg: 'bg-blue-500/10' },
+      evening: { dot: 'bg-purple-600', text: 'text-purple-600', bg: 'bg-purple-600/10' },
     };
-    const style = periodStyles[period];
+    const accent = accents[period];
 
     return (
-      <div className="flex flex-col h-full rounded-xl bg-card/50 backdrop-blur-sm border border-border overflow-hidden">
+      <div className="flex flex-col h-full bg-transparent">
         {/* Header */}
-        <div className={`px-4 py-3 border-b border-border flex justify-between items-center bg-gradient-to-r ${style.gradient}`}>
+        <div className="flex items-center justify-between px-1 py-3 mb-2">
           <div className="flex items-center gap-2">
-            <div className={`p-1.5 rounded-lg ${style.iconBg}`}>
-              <IconComponent className={`w-4 h-4 ${style.iconColor}`} />
-            </div>
-            <div>
-              <h2 className="font-semibold text-foreground text-sm">{config.label}</h2>
-              <span className="text-[10px] text-muted-foreground">{config.range}</span>
-            </div>
+            <div className={`w-2.5 h-2.5 rounded-full ${accent.dot}`} />
+            <h2 className="font-bold text-lg text-foreground">{config.label}</h2>
           </div>
-          <span className="bg-muted text-muted-foreground text-xs px-2 py-0.5 rounded-full font-medium">
-            {items.length}
+
+          <span className="text-xs font-medium text-muted-foreground bg-card border border-border px-2.5 py-1 rounded">
+            {config.range}
           </span>
         </div>
 
-        {/* Items - Droppable Zone */}
+        {/* Droppable Zone */}
         <DroppableZone id={`${period}-${selectedDate.toDateString()}`}>
-          <div className="flex-1 overflow-y-auto p-3 space-y-3">
-            {items.length > 0 ? (
-              items.map(item => renderTimelineCard(item))
-            ) : (
-              <div
-                onClick={() => setShowAddDialog(true)}
-                className="h-24 border border-dashed border-border rounded-xl flex flex-col justify-center items-center text-muted-foreground group hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer"
-              >
-                <span className="text-xs font-medium group-hover:text-primary">Chưa có hoạt động</span>
-                <span className="text-[10px] group-hover:text-primary/70">Nhấn để thêm mới</span>
+          <div className="flex-1 space-y-4 min-h-[150px] pb-4">
+            {items.map(item => renderTimelineCard(item, accent.dot))}
+
+            {items.length === 0 && (
+              <div className="bg-card rounded-xl border border-border h-64 flex flex-col justify-center items-center text-center p-6">
+                <div className={`w-16 h-16 ${accent.bg} rounded-2xl flex items-center justify-center mb-4 ${accent.text}`}>
+                  <config.icon className="w-8 h-8" />
+                </div>
+                <h3 className="text-sm font-bold text-foreground mb-1">Chưa có hoạt động</h3>
+                <span className="text-xs text-muted-foreground max-w-[200px]">
+                  Khoảng thời gian trống để nghỉ ngơi!
+                </span>
               </div>
             )}
           </div>
         </DroppableZone>
 
-        {/* Add button */}
+        {/* Add Button (Bottom) */}
         <button
           onClick={() => setShowAddDialog(true)}
-          className="m-3 py-2.5 border border-dashed border-border rounded-lg text-muted-foreground text-xs font-medium hover:bg-primary/5 hover:text-primary hover:border-primary/50 transition-all flex justify-center items-center gap-1.5 group"
+          className="mt-2 w-full py-3 border border-dashed border-border rounded-xl text-muted-foreground text-sm font-medium
+                      hover:bg-card hover:text-primary hover:border-primary transition-all flex items-center justify-center gap-2 group"
         >
-          <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
+          <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
           Thêm hoạt động
         </button>
       </div>
@@ -583,131 +565,86 @@ export function Timeline() {
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <div className="h-full flex flex-col bg-background overflow-hidden">
+      <div className="h-full flex flex-col bg-background overflow-hidden relative">
         {/* Header */}
-        <header className="bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-20">
-          <div className="px-6 py-5 flex justify-between items-center">
-            {/* Title & Navigation */}
-            <div className="flex items-center gap-6">
-              <div>
-                <span className="text-xs font-semibold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-1 rounded">
-                  Lịch học
-                </span>
-                <h1 className="text-2xl font-bold text-foreground mt-2">Lịch Học Cá Nhân</h1>
+        <header className="bg-card z-10 shadow-sm border-b border-border">
+          <div className="px-8 py-5 flex justify-between items-center border-b border-border/50">
+            {/* Left: Title */}
+            <div className="flex flex-col">
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">Lịch Học Cá Nhân</h1>
+              <p className="text-sm text-muted-foreground font-medium mt-0.5">Quản lý tiến độ học tập</p>
+            </div>
+
+            {/* Center: Horizontal Stats */}
+            <div className="hidden xl:flex items-center divide-x divide-border/60">
+              <div className="px-8 text-center">
+                <div className="text-3xl font-bold text-foreground">{stats.total}</div>
+                <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mt-1">Tổng số</div>
+              </div>
+              <div className="px-8 text-center">
+                <div className="text-3xl font-bold text-primary">{stats.inProgress}</div>
+                <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mt-1">Đang học</div>
+              </div>
+              <div className="px-8 text-center">
+                <div className="text-3xl font-bold text-emerald-500">{stats.completed}</div>
+                <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mt-1">Hoàn thành</div>
+              </div>
+            </div>
+
+            {/* Right: Actions & Nav */}
+            <div className="flex items-center gap-3">
+              {/* View Mode Toggle */}
+              <div className="flex items-center bg-muted/50 p-1 rounded-lg border border-border/50">
+                <button
+                  onClick={() => setViewMode('week')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === 'week'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                >
+                  Tuần
+                </button>
+                <button
+                  onClick={() => setViewMode('month')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === 'month'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                >
+                  Tháng
+                </button>
               </div>
 
-              {/* Week/Month Navigation */}
-              <div className="flex items-center gap-3 ml-6">
-                <button
-                  onClick={goToPreviousWeek}
-                  className="p-2 hover:bg-muted rounded-lg transition-colors"
-                  title="Tuần trước"
-                >
-                  <ChevronLeft className="w-5 h-5 text-muted-foreground" />
-                </button>
+              <button
+                onClick={goToToday}
+                className="px-3 py-2 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors"
+              >
+                Hôm nay
+              </button>
 
+              {/* Date Nav */}
+              <div className="flex items-center bg-background border border-border rounded-lg p-1 shadow-sm">
+                <button
+                  onClick={viewMode === 'week' ? goToPreviousWeek : goToPreviousMonth}
+                  className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground transition-colors"
+                  title={viewMode === 'week' ? 'Tuần trước' : 'Tháng trước'}
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
                 <button
                   onClick={() => setShowMonthPicker(!showMonthPicker)}
-                  className="flex items-center gap-2 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-3 py-1 text-sm font-medium text-foreground"
                 >
-                  <CalendarDays className="w-5 h-5 text-primary" />
-                  <span className="text-base font-semibold text-foreground">{currentMonthYear}</span>
+                  <CalendarDays className="w-5 h-5 text-muted-foreground" />
+                  <span>{currentMonthYear}</span>
                 </button>
-
-                {/* View Mode Toggle */}
-                <div className="flex items-center gap-1 ml-2 bg-muted p-1 rounded-lg">
-                  <button
-                    onClick={() => setViewMode('week')}
-                    className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${viewMode === 'week'
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                  >
-                    Tuần
-                  </button>
-                  <button
-                    onClick={() => setViewMode('month')}
-                    className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${viewMode === 'month'
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                  >
-                    Tháng
-                  </button>
-                </div>
-
                 <button
-                  onClick={goToNextWeek}
-                  className="p-2 hover:bg-muted rounded-lg transition-colors"
-                  title="Tuần sau"
+                  onClick={viewMode === 'week' ? goToNextWeek : goToNextMonth}
+                  className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground transition-colors"
+                  title={viewMode === 'week' ? 'Tuần sau' : 'Tháng sau'}
                 >
-                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                  <ChevronRight className="w-5 h-5" />
                 </button>
-
-                <button
-                  onClick={goToToday}
-                  className="ml-3 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/10 rounded-lg transition-colors"
-                >
-                  Hôm nay
-                </button>
-              </div>
-            </div>
-
-            {/* Daily Progress Bar */}
-            <div className="flex flex-col items-center gap-1.5 min-w-[200px]">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>Tiến độ hôm nay</span>
-                <span className="font-semibold text-foreground">
-                  {itemsForSelectedDate.filter(i => i.status === 'completed').length}/{itemsForSelectedDate.length}
-                </span>
-              </div>
-              <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-500 rounded-full"
-                  style={{
-                    width: `${itemsForSelectedDate.length > 0
-                      ? (itemsForSelectedDate.filter(i => i.status === 'completed').length / itemsForSelectedDate.length * 100)
-                      : 0}%`
-                  }}
-                />
-              </div>
-              <span className="text-[10px] font-medium text-muted-foreground">
-                {itemsForSelectedDate.length > 0
-                  ? `${Math.round(itemsForSelectedDate.filter(i => i.status === 'completed').length / itemsForSelectedDate.length * 100)}%`
-                  : '0%'} hoàn thành
-              </span>
-            </div>
-
-            {/* Stats */}
-            <div className="flex items-center gap-8">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-foreground">{stats.total}</p>
-                <p className="text-xs text-muted-foreground">Tổng số</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-primary">{stats.inProgress}</p>
-                <p className="text-xs text-muted-foreground">Đang học</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-secondary">{stats.completed}</p>
-                <p className="text-xs text-muted-foreground">Hoàn thành</p>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-3">
-              <div className="relative">
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value as LearningStatus | 'all')}
-                  className="appearance-none px-4 py-2 bg-card border border-border rounded-lg text-sm font-medium text-foreground pr-8 cursor-pointer hover:border-primary/50 transition-colors focus:outline-none focus:ring-1 focus:ring-primary"
-                >
-                  <option value="all">Tất cả</option>
-                  <option value="not_started">Chưa bắt đầu</option>
-                  <option value="in_progress">Đang học</option>
-                  <option value="completed">Hoàn thành</option>
-                </select>
-                <Filter className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
               </div>
 
               {/* Notification Toggle */}
@@ -719,97 +656,79 @@ export function Timeline() {
                     setNotificationsEnabled(!notificationsEnabled);
                   }
                 }}
-                className={`p-2 rounded-lg transition-colors ${notificationsEnabled && permission === 'granted'
+                className={`p-2.5 rounded-lg border border-transparent transition-colors ${notificationsEnabled && permission === 'granted'
                   ? 'bg-primary/10 text-primary'
-                  : 'bg-muted text-muted-foreground hover:text-foreground'
+                  : 'bg-muted/50 text-muted-foreground hover:text-foreground hover:border-border'
                   }`}
-                title={
-                  permission === 'denied'
-                    ? 'Thông báo bị chặn'
-                    : notificationsEnabled
-                      ? 'Tắt nhắc nhở'
-                      : 'Bật nhắc nhở'
-                }
+                title={notificationsEnabled ? 'Tắt nhắc nhở' : 'Bật nhắc nhở'}
               >
                 {notificationsEnabled && permission === 'granted' ? (
-                  <Bell className="w-4 h-4" />
+                  <Bell className="w-5 h-5" />
                 ) : (
-                  <BellOff className="w-4 h-4" />
+                  <BellOff className="w-5 h-5" />
                 )}
               </button>
 
+              {/* Add Button */}
               <button
                 onClick={() => setShowAddDialog(true)}
-                className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all text-sm font-medium shadow-sm"
+                className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all shadow-md hover:shadow-lg font-medium"
               >
-                <Plus className="w-4 h-4" />
-                Thêm vào lịch
+                <Plus className="w-5 h-5" />
+                Thêm lịch
               </button>
             </div>
           </div>
 
-          {/* Notification Permission Banner */}
-          {permission === 'default' && (
-            <div className="px-6 py-3 bg-amber-500/10 border-b border-amber-500/20 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Bell className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                <p className="text-sm text-amber-800 dark:text-amber-200">
-                  Bật thông báo để nhận nhắc nhở trước giờ học 15 phút
-                </p>
-              </div>
-              <button
-                onClick={requestPermission}
-                className="px-3 py-1 text-xs font-medium bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-              >
-                Cho phép
-              </button>
-            </div>
-          )}
-
-          {/* Active Notifications */}
-          {notifications.length > 0 && (
-            <div className="px-6 py-3 bg-primary/10 border-b border-primary/20">
-              <div className="flex items-center gap-2">
-                <Bell className="w-4 h-4 text-primary animate-pulse" />
-                <p className="text-sm font-medium text-primary">
-                  {notifications.map(n => n.item.resourceName).join(', ')} sắp bắt đầu!
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Day tabs - Only show in week view */}
+          {/* Week View: Floating Cards */}
           {viewMode === 'week' && (
-            <div className="px-6 pb-0 overflow-x-auto scrollbar-hide border-t border-border">
-              <div className="flex">
+            <div className="px-8 py-6 overflow-x-auto border-b border-border bg-muted/20">
+              <div className="flex justify-between min-w-[800px] items-end">
                 {weekDates.map((date) => {
                   const { dayName, dayNumber } = formatDate(date);
                   const selected = isSelected(date);
                   const today = isToday(date);
-                  const itemCount = itemCountByDate[date.toDateString()] || 0;
+                  const taskCount = itemCountByDate[date.toDateString()] || 0;
 
+                  // Active Day Card
+                  if (selected) {
+                    return (
+                      <div key={date.toISOString()} className="relative flex flex-col items-center cursor-pointer -mt-2 z-10">
+                        <div className="bg-card rounded-xl shadow-lg border-t-4 border-primary px-10 py-4 transform -translate-y-2 min-w-[140px] flex flex-col items-center">
+                          {today && (
+                            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-card px-3">
+                              <span className="text-[10px] font-bold text-primary uppercase tracking-widest whitespace-nowrap">Hôm nay</span>
+                            </div>
+                          )}
+                          <div className="text-center mt-4">
+                            <span className="block text-4xl font-bold text-foreground">{dayNumber}</span>
+                            <span className="inline-block mt-2 bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full">
+                              {taskCount} Tasks
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // Inactive Day Item
                   return (
-                    <button
+                    <div
                       key={date.toISOString()}
                       onClick={() => setSelectedDate(date)}
-                      className={`flex-shrink-0 relative py-4 px-6 cursor-pointer transition-all ${selected ? '' : 'opacity-50 hover:opacity-80'
-                        }`}
+                      className="flex flex-col items-center group cursor-pointer pb-2 hover:-translate-y-1 transition-transform"
                     >
-                      <span className={`text-xs font-semibold uppercase tracking-wide block mb-1 ${selected ? 'text-primary' : 'text-muted-foreground'
-                        }`}>
-                        {today ? 'Hôm nay' : dayName}
+                      <span className="text-xs font-semibold text-muted-foreground mb-2 uppercase">{dayName}</span>
+                      <span className={`text-2xl font-medium ${today ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'} transition-colors`}>
+                        {dayNumber}
                       </span>
-                      <span className="text-xl font-bold text-foreground flex items-center gap-2">
-                        Ngày {dayNumber}
-                        {itemCount > 0 && (
-                          <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-semibold">
-                            {itemCount}
-                          </span>
-                        )}
-                      </span>
-                      <div className={`absolute bottom-0 left-0 w-full h-1 rounded-t-full transition-colors ${selected ? 'bg-primary' : 'bg-transparent'
-                        }`} />
-                    </button>
+                      {today && <span className="w-1.5 h-1.5 rounded-full bg-primary/40 mt-1"></span>}
+                      {taskCount > 0 && !today && (
+                        <span className="mt-1 px-1.5 py-0.5 rounded-full bg-muted text-[10px] font-bold text-muted-foreground">
+                          {taskCount}
+                        </span>
+                      )}
+                    </div>
                   );
                 })}
               </div>
@@ -818,9 +737,9 @@ export function Timeline() {
         </header>
 
         {/* Main content - Conditional rendering based on view mode */}
-        <div className="flex-1 overflow-x-auto overflow-y-hidden p-6">
+        <div className="flex-1 overflow-x-auto overflow-y-auto p-6 lg:p-8">
           {viewMode === 'week' ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full min-w-[800px]">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full min-w-[1000px]">
               {renderTimePeriodColumn('morning')}
               {renderTimePeriodColumn('afternoon')}
               {renderTimePeriodColumn('evening')}
@@ -841,7 +760,7 @@ export function Timeline() {
         {/* Floating add button for mobile */}
         <button
           onClick={() => setShowAddDialog(true)}
-          className="md:hidden fixed bottom-6 right-6 w-12 h-12 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center hover:bg-primary/90 transition-all z-50 active:scale-95"
+          className="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center hover:bg-primary/90 transition-all z-50 active:scale-95"
         >
           <Plus className="w-6 h-6" />
         </button>
@@ -859,3 +778,4 @@ export function Timeline() {
     </DndContext>
   );
 }
+// End of Timeline component

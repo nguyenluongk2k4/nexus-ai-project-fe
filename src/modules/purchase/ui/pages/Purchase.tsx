@@ -1,4 +1,4 @@
-// Purchase Page
+// Purchase Page - Premium Vibrant Purple Design
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -13,25 +13,38 @@ import {
     ArrowLeft,
     Loader2,
     AlertCircle,
-    CreditCard,
-    Building2
+    Building2,
+    History,
+    ChevronRight
 } from 'lucide-react';
 import { usePurchase } from '../hooks/usePurchase';
 
 const STATUS_CONFIG = {
     pending: {
         icon: Clock,
-        color: 'text-yellow-600 bg-yellow-50 border-yellow-200',
+        bgColor: 'bg-amber-50',
+        borderColor: 'border-amber-200',
+        textColor: 'text-amber-700',
+        badgeColor: 'text-amber-600 bg-white/60 border-amber-100',
+        accentColor: 'bg-amber-400',
         label: 'Đang chờ',
     },
     completed: {
         icon: CheckCircle,
-        color: 'text-green-600 bg-green-50 border-green-200',
+        bgColor: 'bg-emerald-50',
+        borderColor: 'border-emerald-100',
+        textColor: 'text-emerald-700',
+        badgeColor: 'text-emerald-600 bg-white/60 border-emerald-100',
+        accentColor: 'bg-emerald-400',
         label: 'Thành công',
     },
     failed: {
         icon: XCircle,
-        color: 'text-red-600 bg-red-50 border-red-200',
+        bgColor: 'bg-red-50',
+        borderColor: 'border-red-200',
+        textColor: 'text-red-700',
+        badgeColor: 'text-red-600 bg-white/60 border-red-100',
+        accentColor: 'bg-red-400',
         label: 'Thất bại',
     },
 };
@@ -84,53 +97,60 @@ export function Purchase() {
     };
 
     return (
-        <div className="flex-1 overflow-auto bg-gradient-to-br from-background via-background to-accent/20">
-            <div className="max-w-[1400px] mx-auto p-6">
+        <div
+            className="flex-1 overflow-auto min-h-screen p-4 md:p-8"
+            style={{
+                backgroundColor: '#faf5ff',
+                backgroundImage: 'radial-gradient(#e9d5ff 1px, transparent 1px)',
+                backgroundSize: '24px 24px'
+            }}
+        >
+            <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header */}
-                <div className="mb-8">
+                <div className="flex flex-col gap-2">
                     <button
                         onClick={() => navigate('/profile')}
-                        className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 transition-colors"
+                        className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-purple-600 transition-colors gap-1 mb-2"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         Quay lại hồ sơ
                     </button>
-                    <h1 className="text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-teal-500">
+                    <h1 className="text-3xl md:text-4xl font-extrabold text-purple-600 tracking-tight">
                         Nạp Tiền Vào Tài Khoản
                     </h1>
-                    <p className="text-muted-foreground">
+                    <p className="text-slate-600 text-lg font-medium">
                         Quét mã QR để nạp tiền nhanh chóng và an toàn
                     </p>
                 </div>
 
                 {/* Error Display */}
                 {error && (
-                    <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3">
+                    <div className="p-4 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3">
                         <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
                         <p className="text-red-700">{error}</p>
                     </div>
                 )}
 
-                {/* Main Layout - 2 Columns */}
-                <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
-                    {/* Left Column - Amount Selection & QR */}
-                    <div className="space-y-6">
+                {/* Main Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Left Column */}
+                    <div className="lg:col-span-8 flex flex-col gap-8">
                         {/* Amount Selection Card */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
-                            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                                <CreditCard className="w-5 h-5 text-violet-600" />
-                                Chọn số tiền nạp
-                            </h3>
+                        <div className="bg-white rounded-2xl p-8 shadow-lg border border-purple-100/50">
+                            <div className="flex items-center gap-2 mb-6">
+                                <Wallet className="w-5 h-5 text-purple-600" />
+                                <h3 className="text-xl font-bold text-slate-900">Chọn số tiền nạp</h3>
+                            </div>
 
                             {/* Preset Amounts Grid */}
-                            <div className="grid grid-cols-3 gap-3 mb-6">
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                                 {presetAmounts.map((amount) => (
                                     <button
                                         key={amount}
                                         onClick={() => selectAmount(amount)}
-                                        className={`py-4 px-4 rounded-xl font-semibold transition-all border-2 ${selectedAmount === amount
-                                            ? 'border-violet-500 bg-violet-50 text-violet-700'
-                                            : 'border-border hover:border-violet-300 hover:bg-violet-50/50'
+                                        className={`py-4 px-2 rounded-xl font-bold transition-all shadow-sm ${selectedAmount === amount
+                                                ? 'border-2 border-purple-600 bg-purple-50 text-purple-700'
+                                                : 'border border-slate-200 bg-white hover:border-purple-400 hover:bg-purple-50 hover:text-purple-700 text-slate-700'
                                             }`}
                                     >
                                         {formatCurrency(amount)}
@@ -139,8 +159,8 @@ export function Purchase() {
                             </div>
 
                             {/* Custom Amount */}
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium text-muted-foreground mb-2">
+                            <div className="space-y-3">
+                                <label className="text-sm font-semibold text-slate-500">
                                     Hoặc nhập số tiền khác
                                 </label>
                                 <div className="relative">
@@ -149,30 +169,20 @@ export function Purchase() {
                                         value={customAmount}
                                         onChange={(e) => setCustomAmount(e.target.value)}
                                         placeholder="Nhập số tiền..."
-                                        className={`w-full px-4 py-3 pr-16 rounded-lg border-2 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all ${customAmount && !selectedAmount ? 'border-violet-500 bg-violet-50' : 'border-border'
+                                        className={`w-full pl-5 pr-16 py-3.5 bg-white border rounded-xl text-slate-900 font-semibold focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all placeholder:text-slate-400 shadow-sm outline-none ${customAmount && !selectedAmount ? 'border-purple-500 bg-purple-50' : 'border-slate-200'
                                             }`}
                                     />
-                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                                    <span className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 font-bold">
                                         VNĐ
                                     </span>
                                 </div>
                             </div>
 
-                            {/* Amount Display */}
-                            {getEffectiveAmount() > 0 && (
-                                <div className="p-4 rounded-xl bg-gradient-to-r from-violet-50 to-teal-50 mb-6">
-                                    <p className="text-sm text-muted-foreground mb-1">Bạn sẽ nạp:</p>
-                                    <p className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-teal-500">
-                                        {formatCurrency(getEffectiveAmount())}
-                                    </p>
-                                </div>
-                            )}
-
                             {/* Generate QR Button */}
                             <button
                                 onClick={generateQR}
                                 disabled={getEffectiveAmount() <= 0 || qrLoading}
-                                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-teal-500 text-white py-4 px-6 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full mt-8 bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-purple-200 hover:shadow-purple-300 transition-all flex items-center justify-center gap-2 transform active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {qrLoading ? (
                                     <>
@@ -181,7 +191,7 @@ export function Purchase() {
                                     </>
                                 ) : (
                                     <>
-                                        <QrCode className="w-5 h-5" />
+                                        <QrCode className="w-5 h-5 group-hover:animate-pulse" />
                                         Tạo mã QR thanh toán
                                     </>
                                 )}
@@ -189,44 +199,44 @@ export function Purchase() {
                         </div>
 
                         {/* Bank Info Card */}
-                        <div className="bg-gradient-to-br from-violet-50 to-teal-50 rounded-xl p-6 border border-violet-100">
-                            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                                <Building2 className="w-5 h-5 text-violet-600" />
-                                Thông tin tài khoản nhận
-                            </h3>
+                        <div className="bg-white rounded-2xl p-8 shadow-lg border border-purple-100/50">
+                            <div className="flex items-center gap-2 mb-6 text-purple-800">
+                                <Building2 className="w-5 h-5" />
+                                <h3 className="text-lg font-bold">Thông tin tài khoản nhận</h3>
+                            </div>
                             <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm text-muted-foreground">Ngân hàng</span>
-                                    <span className="font-semibold">MB Bank</span>
+                                <div className="flex items-center justify-between p-4 bg-purple-50/50 rounded-xl border border-purple-100">
+                                    <span className="text-slate-500 font-medium">Ngân hàng</span>
+                                    <span className="font-bold text-slate-900">MB Bank</span>
                                 </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm text-muted-foreground">Số tài khoản</span>
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-semibold font-mono">0123456789</span>
+                                <div className="flex items-center justify-between p-4 bg-purple-50/50 rounded-xl border border-purple-100 group">
+                                    <span className="text-slate-500 font-medium">Số tài khoản</span>
+                                    <div className="flex items-center gap-3">
+                                        <span className="font-bold text-slate-900 font-mono text-lg tracking-wide">0123456789</span>
                                         <button
                                             onClick={() => copyToClipboard('0123456789', 'account')}
-                                            className="p-1 hover:bg-violet-100 rounded transition-colors"
+                                            className="text-purple-400 hover:text-purple-600 transition-colors p-1 rounded hover:bg-purple-100"
                                         >
                                             {copiedField === 'account' ? (
                                                 <Check className="w-4 h-4 text-green-600" />
                                             ) : (
-                                                <Copy className="w-4 h-4 text-muted-foreground" />
+                                                <Copy className="w-4 h-4" />
                                             )}
                                         </button>
                                     </div>
                                 </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm text-muted-foreground">Chủ tài khoản</span>
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-semibold">NEXUS AI PLATFORM</span>
+                                <div className="flex items-center justify-between p-4 bg-purple-50/50 rounded-xl border border-purple-100 group">
+                                    <span className="text-slate-500 font-medium">Chủ tài khoản</span>
+                                    <div className="flex items-center gap-3">
+                                        <span className="font-bold text-slate-900 uppercase">NEXUS AI PLATFORM</span>
                                         <button
                                             onClick={() => copyToClipboard('NEXUS AI PLATFORM', 'name')}
-                                            className="p-1 hover:bg-violet-100 rounded transition-colors"
+                                            className="text-purple-400 hover:text-purple-600 transition-colors p-1 rounded hover:bg-purple-100"
                                         >
                                             {copiedField === 'name' ? (
                                                 <Check className="w-4 h-4 text-green-600" />
                                             ) : (
-                                                <Copy className="w-4 h-4 text-muted-foreground" />
+                                                <Copy className="w-4 h-4" />
                                             )}
                                         </button>
                                     </div>
@@ -237,10 +247,10 @@ export function Purchase() {
                         {/* Payment Status Card */}
                         {paymentStatus !== 'idle' && (
                             <div className={`rounded-xl p-6 border ${paymentStatus === 'pending'
-                                ? 'bg-yellow-50 border-yellow-200'
-                                : paymentStatus === 'completed'
-                                    ? 'bg-green-50 border-green-200'
-                                    : 'bg-red-50 border-red-200'
+                                    ? 'bg-yellow-50 border-yellow-200'
+                                    : paymentStatus === 'completed'
+                                        ? 'bg-green-50 border-green-200'
+                                        : 'bg-red-50 border-red-200'
                                 }`}>
                                 <div className="flex items-center gap-3">
                                     {paymentStatus === 'pending' && (
@@ -270,32 +280,33 @@ export function Purchase() {
                         )}
                     </div>
 
-                    {/* Right Column - QR Code & History */}
-                    <div className="space-y-6">
+                    {/* Right Column */}
+                    <div className="lg:col-span-4 space-y-8">
                         {/* QR Code Display */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
-                            <h3 className="text-lg font-bold mb-4 text-center">Mã QR Thanh Toán</h3>
+                        <div className="bg-white rounded-2xl p-8 shadow-lg border border-purple-100/50 flex flex-col items-center text-center h-fit">
+                            <h3 className="text-lg font-bold text-slate-900 mb-8 w-full text-left border-b border-purple-50 pb-4">
+                                Mã QR Thanh Toán
+                            </h3>
 
                             {qrInfo ? (
-                                <div className="text-center">
+                                <div className="text-center w-full">
                                     {/* QR Image */}
-                                    <div className="bg-white p-4 rounded-xl inline-block mb-4 shadow-inner border border-slate-100">
+                                    <div className="bg-white p-2 rounded-2xl inline-block mb-6 shadow-inner border border-slate-100">
                                         <img
                                             src={qrInfo.qrDataUrl}
                                             alt="Payment QR Code"
-                                            className="w-64 h-64 mx-auto"
+                                            className="w-48 h-48 mx-auto"
                                             onError={(e) => {
-                                                // Fallback if image fails
-                                                (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><rect fill="%23f1f5f9" width="256" height="256"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" font-family="system-ui" font-size="14" fill="%2364748b">QR Code</text></svg>';
+                                                (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192"><rect fill="%23f1f5f9" width="192" height="192"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" font-family="system-ui" font-size="14" fill="%2364748b">QR Code</text></svg>';
                                             }}
                                         />
                                     </div>
 
                                     {/* Transfer Content */}
                                     <div className="mb-4">
-                                        <p className="text-sm text-muted-foreground mb-1">Nội dung chuyển khoản:</p>
+                                        <p className="text-sm text-slate-500 mb-2">Nội dung chuyển khoản:</p>
                                         <div className="flex items-center justify-center gap-2 bg-slate-100 rounded-lg px-4 py-2">
-                                            <code className="font-mono font-bold text-violet-700">{qrInfo.transferContent}</code>
+                                            <code className="font-mono font-bold text-purple-700">{qrInfo.transferContent}</code>
                                             <button
                                                 onClick={() => copyToClipboard(qrInfo.transferContent, 'content')}
                                                 className="p-1 hover:bg-slate-200 rounded transition-colors"
@@ -303,7 +314,7 @@ export function Purchase() {
                                                 {copiedField === 'content' ? (
                                                     <Check className="w-4 h-4 text-green-600" />
                                                 ) : (
-                                                    <Copy className="w-4 h-4 text-muted-foreground" />
+                                                    <Copy className="w-4 h-4 text-slate-500" />
                                                 )}
                                             </button>
                                         </div>
@@ -312,7 +323,7 @@ export function Purchase() {
                                     {/* Instructions */}
                                     <div className="text-left bg-slate-50 rounded-lg p-4">
                                         <p className="text-sm font-semibold mb-2">Hướng dẫn:</p>
-                                        <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                                        <ol className="text-sm text-slate-500 space-y-1 list-decimal list-inside">
                                             <li>Mở ứng dụng ngân hàng</li>
                                             <li>Chọn quét mã QR</li>
                                             <li>Quét mã QR phía trên</li>
@@ -322,34 +333,34 @@ export function Purchase() {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="text-center py-12">
-                                    <div className="w-24 h-24 mx-auto bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
-                                        <QrCode className="w-12 h-12 text-slate-400" />
+                                <>
+                                    <div className="bg-slate-100 border-2 border-dashed border-slate-300 rounded-2xl w-48 h-48 flex items-center justify-center mb-6">
+                                        <QrCode className="w-16 h-16 text-slate-300" />
                                     </div>
-                                    <p className="text-muted-foreground">
-                                        Chọn số tiền và nhấn "Tạo mã QR" để hiển thị mã thanh toán
+                                    <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
+                                        Chọn số tiền và nhấn <span className="font-bold text-purple-700">"Tạo mã QR"</span> để hiển thị mã thanh toán tương ứng.
                                     </p>
-                                </div>
+                                </>
                             )}
                         </div>
 
                         {/* Transaction History */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
-                            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                                <Clock className="w-5 h-5 text-violet-600" />
-                                Lịch sử nạp tiền
-                            </h3>
+                        <div className="bg-white rounded-2xl p-6 shadow-lg border border-purple-100/50 h-[480px] flex flex-col">
+                            <div className="flex items-center gap-2 mb-6 pb-4 border-b border-purple-50">
+                                <History className="w-5 h-5 text-purple-600" />
+                                <h3 className="text-lg font-bold text-slate-900">Lịch sử nạp tiền</h3>
+                            </div>
 
                             {loading ? (
-                                <div className="flex items-center justify-center py-8">
-                                    <Loader2 className="w-6 h-6 animate-spin text-violet-600" />
+                                <div className="flex-1 flex items-center justify-center">
+                                    <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
                                 </div>
                             ) : history.length === 0 ? (
-                                <p className="text-center text-muted-foreground py-8">
-                                    Chưa có giao dịch nào
-                                </p>
+                                <div className="flex-1 flex items-center justify-center">
+                                    <p className="text-slate-400 text-center">Chưa có giao dịch nào</p>
+                                </div>
                             ) : (
-                                <div className="space-y-3 max-h-80 overflow-y-auto">
+                                <div className="flex-1 overflow-y-auto pr-2 space-y-3">
                                     {history.map((item) => {
                                         const statusConfig = STATUS_CONFIG[item.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
                                         const StatusIcon = statusConfig.icon;
@@ -359,29 +370,32 @@ export function Purchase() {
                                             <div
                                                 key={item.id}
                                                 onClick={() => isPending && item.transactionCode && resumePendingTransaction(item.transactionCode)}
-                                                className={`p-4 rounded-lg border ${statusConfig.color} ${isPending ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
-                                                title={isPending ? 'Nhấn để tiếp tục thanh toán' : ''}
+                                                className={`p-4 rounded-xl border ${statusConfig.bgColor} ${statusConfig.borderColor} hover:shadow-md transition-all relative overflow-hidden ${isPending ? 'cursor-pointer' : ''} group`}
                                             >
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="font-bold text-lg">
+                                                {/* Accent bar */}
+                                                <div className={`absolute top-0 right-0 w-1 h-full ${statusConfig.accentColor}`}></div>
+
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <span className={`${statusConfig.textColor} font-extrabold text-lg`}>
                                                         +{formatCurrency(item.amount)}
                                                     </span>
-                                                    <div className="flex items-center gap-1">
-                                                        <StatusIcon className="w-4 h-4" />
-                                                        <span className="text-sm font-medium">{statusConfig.label}</span>
-                                                        {isPending && (
-                                                            <span className="text-xs ml-1">→ Nhấn để tiếp tục</span>
-                                                        )}
+                                                    <span className={`flex items-center gap-1 text-xs font-bold ${statusConfig.badgeColor} px-2 py-1 rounded-full border`}>
+                                                        <StatusIcon className="w-3 h-3" />
+                                                        {statusConfig.label}
+                                                    </span>
+                                                </div>
+                                                <div className={`flex justify-between items-end text-xs ${statusConfig.textColor} opacity-70 font-medium mt-3`}>
+                                                    {item.transactionCode && (
+                                                        <span className="font-mono opacity-80">{item.transactionCode}</span>
+                                                    )}
+                                                    <span>{formatDate(item.createdAt)}</span>
+                                                </div>
+                                                {isPending && (
+                                                    <div className={`mt-2 pt-2 border-t ${statusConfig.borderColor} flex items-center ${statusConfig.textColor} text-xs font-semibold gap-1`}>
+                                                        <ChevronRight className="w-4 h-4" />
+                                                        Nhấn để tiếp tục
                                                     </div>
-                                                </div>
-                                                <div className="flex items-center justify-between text-sm">
-                                                    <span className="text-muted-foreground font-mono">
-                                                        {item.transactionCode}
-                                                    </span>
-                                                    <span className="text-muted-foreground">
-                                                        {formatDate(item.createdAt)}
-                                                    </span>
-                                                </div>
+                                                )}
                                             </div>
                                         );
                                     })}
@@ -390,6 +404,11 @@ export function Purchase() {
                         </div>
                     </div>
                 </div>
+
+                {/* Footer */}
+                <footer className="text-center text-slate-400 py-8 text-sm font-medium">
+                    © 2026 Learning Platform. All rights reserved.
+                </footer>
             </div>
         </div>
     );
