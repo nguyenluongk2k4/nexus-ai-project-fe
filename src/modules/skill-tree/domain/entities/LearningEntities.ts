@@ -54,12 +54,12 @@ export interface TimelineItem {
   nodeId: string;
   nodeName: string;
   scheduledDate: Date;
+  scheduledTime?: string; // HH:mm format for time period assignment
   deadline?: Date;
   status: LearningStatus;
   priority: 'low' | 'medium' | 'high';
   estimatedTime?: string;
 }
-
 export interface LearningStats {
   totalResources: number;
   notStarted: number;

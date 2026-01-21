@@ -55,11 +55,43 @@
       "upgrade": "Upgrade",
       "manage": "Manage Plan",
       "expires": "Expires: ",
-      "freeHint": "Upgrade for better experience"
+      "freeHint": "Upgrade for better experience",
+      "features": "Features",
+      "pricing": "Pricing",
+      "titleNew": "Plans for Modern Teams",
+      "subtitleNew": "Choose the perfect plan for you. Transparent pricing, no hidden fees.",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "savePercent": "Save 17%",
+      "mostPopular": "Most Popular",
+      "currentPlan": "Current Plan",
+      "faq": {
+        "title": "Frequently Asked Questions",
+        "changePlan": {
+          "q": "Can I change my plan later?",
+          "a": "Yes, you can upgrade or downgrade at any time. Changes are prorated."
+        },
+        "freeTrial": {
+          "q": "Is there a free trial?",
+          "a": "We offer a Free tier to experience basic features. You can upgrade anytime."
+        },
+        "payment": {
+          "q": "What payment methods are accepted?",
+          "a": "Payment is deducted from your account balance. You can deposit via bank transfer or card."
+        },
+        "security": {
+          "q": "Is my data safe?",
+          "a": "Security is our top priority. We use AES-256 encryption."
+        }
+      },
+      "trustedBy": "Trusted by industry leaders",
+      "footerNote": "Payment is deducted from account balance."
     },
     "activity": {
-      "title": "Activity History"
-    }
+      "title": "Activity History",
+      "viewAll": "View all"
+    },
+    "activeStatus": "Active"
   },
   "purchase": {
     "title": "Deposit Funds",
@@ -113,6 +145,24 @@
       "totalPosts": "Total Posts",
       "members": "Members",
       "online": "Online"
+    },
+    "featured": "Featured Discussions",
+    "featuredSubtitle": "Most popular topics right now",
+    "hotTopics": "Hot Topics",
+    "topMembers": "Top Members",
+    "readMore": "Read more",
+    "loadMore": "Load older posts",
+    "gotQuestions": "Got a question?",
+    "communityConnect": "Connect with thousands of tech experts and get answers instantly.",
+    "cta": {
+      "ask": "Create New Post",
+      "join": "Join Discussion"
+    },
+    "sidebar": {
+      "categories": "Categories",
+      "stats": "Statistics",
+      "topMembers": "Top Contributors",
+      "hotTags": "Hot Tags"
     }
   },
   "mySkillTree": {

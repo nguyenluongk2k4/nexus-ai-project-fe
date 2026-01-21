@@ -55,11 +55,43 @@
       "upgrade": "Nâng cấp",
       "manage": "Quản lý gói",
       "expires": "Hết hạn: ",
-      "freeHint": "Nâng cấp để trải nghiệm tốt hơn"
+      "freeHint": "Nâng cấp để trải nghiệm tốt hơn",
+      "features": "Tính năng",
+      "pricing": "Bảng giá",
+      "titleNew": "Gói dịch vụ dành cho đội ngũ hiện đại",
+      "subtitleNew": "Chọn gói phù hợp với quy mô của bạn. Giá cả minh bạch, không phí ẩn.",
+      "monthly": "Theo tháng",
+      "yearly": "Theo năm",
+      "savePercent": "Giảm 17%",
+      "mostPopular": "Phổ biến nhất",
+      "currentPlan": "Gói hiện tại",
+      "faq": {
+        "title": "Câu hỏi thường gặp",
+        "changePlan": {
+          "q": "Tôi có thể đổi gói sau không?",
+          "a": "Có, bạn có thể nâng cấp hoặc hạ cấp gói bất cứ lúc nào. Thay đổi sẽ được tính theo tỷ lệ."
+        },
+        "freeTrial": {
+          "q": "Có dùng thử miễn phí không?",
+          "a": "Chúng tôi cung cấp gói Free để trải nghiệm. Bạn có thể nâng cấp bất cứ lúc nào."
+        },
+        "payment": {
+          "q": "Chấp nhận phương thức thanh toán nào?",
+          "a": "Thanh toán được trừ từ số dư tài khoản. Bạn có thể nạp tiền qua ngân hàng hoặc ví điện tử."
+        },
+        "security": {
+          "q": "Dữ liệu của tôi có an toàn không?",
+          "a": "Bảo mật là ưu tiên hàng đầu. Chúng tôi sử dụng mã hóa AES-256."
+        }
+      },
+      "trustedBy": "Được tin dùng bởi các tổ chức hàng đầu",
+      "footerNote": "Thanh toán được trừ từ số dư tài khoản."
     },
     "activity": {
-      "title": "Lịch sử hoạt động"
-    }
+      "title": "Lịch sử hoạt động",
+      "viewAll": "Xem tất cả"
+    },
+    "activeStatus": "Đang hoạt động"
   },
   "purchase": {
     "title": "Nạp Tiền Vào Tài Khoản",
@@ -113,6 +145,24 @@
       "totalPosts": "Tổng bài viết",
       "members": "Thành viên",
       "online": "Trực tuyến"
+    },
+    "featured": "Thảo luận nổi bật",
+    "featuredSubtitle": "Những bài viết đang được quan tâm nhất",
+    "hotTopics": "Chủ đề nóng",
+    "topMembers": "Thành viên ưu tú",
+    "readMore": "Đọc chi tiết",
+    "loadMore": "Xem thêm bài viết cũ hơn",
+    "gotQuestions": "Bạn có câu hỏi?",
+    "communityConnect": "Kết nối cùng hàng ngàn chuyên gia công nghệ và nhận giải đáp ngay lập tức.",
+    "cta": {
+      "ask": "Tạo bài viết mới",
+      "join": "Tham gia thảo luận"
+    },
+    "sidebar": {
+      "categories": "Danh mục",
+      "stats": "Thống kê",
+      "topMembers": "Thành viên ưu tú",
+      "hotTags": "Chủ đề nóng"
     }
   },
   "mySkillTree": {

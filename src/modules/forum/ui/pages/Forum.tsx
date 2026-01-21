@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   MessageSquare,
   Eye,
@@ -42,6 +43,7 @@ const MOCK_TOP_MEMBERS = [
 const MOCK_HOT_TAGS = ['#ReactJS', '#ChatGPT', '#Python', '#MachineLearning', '#Startup', '#Tuyendung'];
 
 export function Forum() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [categories, setCategories] = useState<ForumCategory[]>([]);
@@ -118,8 +120,8 @@ export function Forum() {
                 <Sparkles className="w-8 h-8 text-violet-600" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Thảo luận nổi bật</h2>
-                <p className="text-sm text-slate-500">Những bài viết đang được quan tâm nhất</p>
+                <h2 className="text-3xl font-bold text-slate-900 tracking-tight">{t('forum.featured')}</h2>
+                <p className="text-sm text-slate-500">{t('forum.featuredSubtitle')}</p>
               </div>
             </div>
 
@@ -178,15 +180,15 @@ export function Forum() {
                       <div className="flex gap-6 text-sm font-medium text-slate-500">
                         <div className="flex items-center gap-2 hover:text-violet-600 transition-colors px-2 py-1 rounded-lg hover:bg-slate-100/50">
                           <MessageSquare className="w-5 h-5" />
-                          <span>{post.stats.comments} thảo luận</span>
+                          <span>{post.stats.comments} {t('forum.comments')}</span>
                         </div>
                         <div className="flex items-center gap-2 px-2 py-1">
                           <Eye className="w-5 h-5" />
-                          <span>{post.stats.views} lượt xem</span>
+                          <span>{post.stats.views} {t('forum.views')}</span>
                         </div>
                       </div>
                       <button className="text-sm font-bold text-violet-600 hover:text-violet-700 flex items-center gap-1.5 transition-all group-hover:translate-x-1 bg-violet-50 hover:bg-violet-100 px-4 py-2 rounded-full">
-                        Đọc chi tiết <ArrowRight className="w-4 h-4" />
+                        {t('forum.readMore')} <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -197,7 +199,7 @@ export function Forum() {
             {/* Load More Button */}
             <div className="flex justify-center mt-12 pb-4">
               <button className="px-8 py-3.5 rounded-full border border-slate-200/60 bg-white/50 backdrop-blur-md text-slate-600 hover:bg-white hover:text-violet-600 hover:shadow-lg hover:shadow-violet-500/10 transition-all font-semibold text-sm">
-                Xem thêm bài viết cũ hơn
+                {t('forum.loadMore')}
               </button>
             </div>
           </div>
@@ -215,16 +217,16 @@ export function Forum() {
                 <div className="mb-4 bg-white/20 p-4 rounded-full backdrop-blur-md shadow-inner border border-white/30 hover:scale-110 transition-transform duration-300">
                   <PenSquare className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-white font-extrabold text-2xl mb-2">Bạn có câu hỏi?</h3>
+                <h3 className="text-white font-extrabold text-2xl mb-2">{t('forum.gotQuestions')}</h3>
                 <p className="text-white/90 text-sm mb-6 font-medium leading-relaxed">
-                  Kết nối cùng hàng ngàn chuyên gia công nghệ và nhận giải đáp ngay lập tức.
+                  {t('forum.communityConnect')}
                 </p>
                 <button
                   onClick={() => navigate('/forum/new')}
                   className="w-full bg-white text-cyan-600 font-bold py-3.5 px-4 rounded-xl shadow-lg hover:shadow-xl hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 group"
                 >
                   <PenSquare className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                  Tạo bài viết mới
+                  {t('forum.cta.ask')}
                 </button>
               </div>
             </div>
@@ -235,7 +237,7 @@ export function Forum() {
                 <span className="p-2 bg-purple-100 rounded-lg text-purple-600">
                   <TrendingUp className="w-5 h-5" />
                 </span>
-                <h3 className="font-bold text-lg text-slate-800">Danh mục</h3>
+                <h3 className="font-bold text-lg text-slate-800">{t('forum.sidebar.categories')}</h3>
               </div>
               <div className="space-y-4">
                 {categories.map((category) => {
@@ -273,23 +275,23 @@ export function Forum() {
                   <span className="p-2 bg-blue-100 rounded-lg text-blue-600">
                     <Activity className="w-5 h-5" />
                   </span>
-                  <h3 className="font-bold text-lg text-slate-800">Thống kê</h3>
+                  <h3 className="font-bold text-lg text-slate-800">{t('forum.sidebar.stats')}</h3>
                 </div>
                 <ul className="space-y-4 mb-6">
                   <li className="flex justify-between items-center text-sm">
-                    <span className="text-slate-500 font-medium">Tổng bài viết</span>
+                    <span className="text-slate-500 font-medium">{t('forum.stats.totalPosts')}</span>
                     <span className="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded text-xs">
                       {stats.totalPosts.toLocaleString()}
                     </span>
                   </li>
                   <li className="flex justify-between items-center text-sm">
-                    <span className="text-slate-500 font-medium">Thành viên</span>
+                    <span className="text-slate-500 font-medium">{t('forum.stats.members')}</span>
                     <span className="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded text-xs">
                       {stats.totalMembers.toLocaleString()}
                     </span>
                   </li>
                   <li className="flex justify-between items-center text-sm">
-                    <span className="text-slate-500 font-medium">Trực tuyến</span>
+                    <span className="text-slate-500 font-medium">{t('forum.stats.online')}</span>
                     <div className="flex items-center gap-2">
                       <span className="relative flex h-2.5 w-2.5">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -308,7 +310,7 @@ export function Forum() {
                 <span className="p-2 bg-yellow-100 rounded-lg text-yellow-600">
                   <Award className="w-5 h-5" />
                 </span>
-                <h3 className="font-bold text-lg text-slate-800">Thành viên ưu tú</h3>
+                <h3 className="font-bold text-lg text-slate-800">{t('forum.sidebar.topMembers')}</h3>
               </div>
               <div className="grid grid-cols-5 gap-4">
                 {MOCK_TOP_MEMBERS.map((member) => (
@@ -336,7 +338,7 @@ export function Forum() {
                 <span className="p-2 bg-pink-100 rounded-lg text-pink-600">
                   <Tag className="w-5 h-5" />
                 </span>
-                <h3 className="font-bold text-lg text-slate-800">Chủ đề nóng</h3>
+                <h3 className="font-bold text-lg text-slate-800">{t('forum.sidebar.hotTags')}</h3>
               </div>
               <div className="flex flex-wrap gap-2.5">
                 {MOCK_HOT_TAGS.map((tag, idx) => (
