@@ -93,9 +93,17 @@ export function Navigation() {
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="w-full flex items-center gap-3 px-4 py-2 rounded-xl transition-all hover:bg-accent"
           >
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-teal-400 flex items-center justify-center text-white font-semibold">
-              {user.fullName?.charAt(0)?.toUpperCase() || user.username?.charAt(0)?.toUpperCase() || 'U'}
-            </div>
+            {user.avatarUrl ? (
+              <img 
+                src={user.avatarUrl} 
+                alt={user.fullName || user.username} 
+                className="w-10 h-10 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-teal-400 flex items-center justify-center text-white font-semibold">
+                {user.fullName?.charAt(0)?.toUpperCase() || user.username?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+            )}
             <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-medium text-foreground truncate">
                 {user.fullName || user.username}

@@ -165,9 +165,17 @@ export function Profile() {
                             <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-10 pb-8 border-b border-slate-100">
                                 <div className="relative group cursor-pointer">
                                     <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 p-1">
-                                        <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-4xl font-bold text-violet-600 overflow-hidden">
-                                            {displayProfile.fullName?.charAt(0)?.toUpperCase() || displayProfile.username?.charAt(0)?.toUpperCase() || 'U'}
-                                        </div>
+                                        {displayProfile.avatarUrl ? (
+                                            <img 
+                                                src={displayProfile.avatarUrl} 
+                                                alt={displayProfile.fullName || displayProfile.username} 
+                                                className="w-full h-full rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-4xl font-bold text-violet-600 overflow-hidden">
+                                                {displayProfile.fullName?.charAt(0)?.toUpperCase() || displayProfile.username?.charAt(0)?.toUpperCase() || 'U'}
+                                            </div>
+                                        )}
                                     </div>
                                     <button className="absolute bottom-1 right-1 bg-white text-slate-600 p-2 rounded-full shadow-lg border border-slate-100 hover:scale-105 transition-transform">
                                         <Camera className="w-4 h-4" />

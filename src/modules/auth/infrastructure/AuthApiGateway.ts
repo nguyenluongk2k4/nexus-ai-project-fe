@@ -29,13 +29,28 @@ export class AuthApiGateway implements AuthGateway {
   }
 
   async login(request: LoginRequest): Promise<AuthResponse> {
-    const data = await this.request<AuthResponse>("/login", {
+    const data = await this.request<any>("/login", {
       method: "POST",
       body: JSON.stringify(request),
     });
     
     this.saveToken(data.access_token);
-    return data;
+    
+    // Transform user object from snake_case to camelCase
+    return {
+      access_token: data.access_token,
+      token_type: data.token_type,
+      user: {
+        id: data.user.id,
+        email: data.user.email,
+        username: data.user.username,
+        fullName: data.user.full_name,
+        avatarUrl: data.user.avatar_url,
+        isActive: data.user.is_active,
+        createdAt: data.user.created_at,
+        lastLoginAt: data.user.last_login_at,
+      }
+    };
   }
 
   async register(request: RegisterRequest): Promise<AuthResponse> {
@@ -47,17 +62,44 @@ export class AuthApiGateway implements AuthGateway {
       full_name: request.fullName,
     };
     
-    const data = await this.request<AuthResponse>("/register", {
+    const data = await this.request<any>("/register", {
       method: "POST",
       body: JSON.stringify(payload),
     });
     
     this.saveToken(data.access_token);
-    return data;
+    
+    // Transform user object from snake_case to camelCase
+    return {
+      access_token: data.access_token,
+      token_type: data.token_type,
+      user: {
+        id: data.user.id,
+        email: data.user.email,
+        username: data.user.username,
+        fullName: data.user.full_name,
+        avatarUrl: data.user.avatar_url,
+        isActive: data.user.is_active,
+        createdAt: data.user.created_at,
+        lastLoginAt: data.user.last_login_at,
+      }
+    };
   }
 
   async me(): Promise<User> {
-    return this.request<any>("/me"); // Fix: endpoint returns UserResponse directly
+    const response = await this.request<any>("/me");
+    
+    // Transform snake_case from backend to camelCase for frontend
+    return {
+      id: response.id,
+      email: response.email,
+      username: response.username,
+      fullName: response.full_name,
+      avatarUrl: response.avatar_url,
+      isActive: response.is_active,
+      createdAt: response.created_at,
+      lastLoginAt: response.last_login_at,
+    };
   }
 
   logout(): void {
