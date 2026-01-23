@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     Wallet,
     QrCode,
@@ -50,6 +51,7 @@ const STATUS_CONFIG = {
 };
 
 export function Purchase() {
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const {
         presetAmounts,
@@ -81,7 +83,7 @@ export function Purchase() {
     };
 
     const formatDate = (dateStr: string) => {
-        return new Date(dateStr).toLocaleDateString('vi-VN', {
+        return new Date(dateStr).toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'vi-VN', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
@@ -113,13 +115,13 @@ export function Purchase() {
                         className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-purple-600 transition-colors gap-1 mb-2"
                     >
                         <ArrowLeft className="w-4 h-4" />
-                        Quay lại hồ sơ
+                        {t('purchase.back')}
                     </button>
                     <h1 className="text-3xl md:text-4xl font-extrabold text-purple-600 tracking-tight">
-                        Nạp Tiền Vào Tài Khoản
+                        {t('purchase.title')}
                     </h1>
                     <p className="text-slate-600 text-lg font-medium">
-                        Quét mã QR để nạp tiền nhanh chóng và an toàn
+                        {t('purchase.subtitle')}
                     </p>
                 </div>
 
@@ -139,7 +141,7 @@ export function Purchase() {
                         <div className="bg-white rounded-2xl p-8 shadow-lg border border-purple-100/50">
                             <div className="flex items-center gap-2 mb-6">
                                 <Wallet className="w-5 h-5 text-purple-600" />
-                                <h3 className="text-xl font-bold text-slate-900">Chọn số tiền nạp</h3>
+                                <h3 className="text-xl font-bold text-slate-900">{t('purchase.selectAmount')}</h3>
                             </div>
 
                             {/* Preset Amounts Grid */}
@@ -161,19 +163,19 @@ export function Purchase() {
                             {/* Custom Amount */}
                             <div className="space-y-3">
                                 <label className="text-sm font-semibold text-slate-500">
-                                    Hoặc nhập số tiền khác
+                                    {t('purchase.orCustom')}
                                 </label>
                                 <div className="relative">
                                     <input
                                         type="text"
                                         value={customAmount}
                                         onChange={(e) => setCustomAmount(e.target.value)}
-                                        placeholder="Nhập số tiền..."
+                                        placeholder={t('purchase.placeholder')}
                                         className={`w-full pl-5 pr-16 py-3.5 bg-white border rounded-xl text-slate-900 font-semibold focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all placeholder:text-slate-400 shadow-sm outline-none ${customAmount && !selectedAmount ? 'border-purple-500 bg-purple-50' : 'border-slate-200'
                                             }`}
                                     />
                                     <span className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 font-bold">
-                                        VNĐ
+                                        {t('purchase.currency')}
                                     </span>
                                 </div>
                             </div>
@@ -187,12 +189,12 @@ export function Purchase() {
                                 {qrLoading ? (
                                     <>
                                         <Loader2 className="w-5 h-5 animate-spin" />
-                                        Đang tạo mã QR...
+                                        {t('purchase.generating')}
                                     </>
                                 ) : (
                                     <>
                                         <QrCode className="w-5 h-5 group-hover:animate-pulse" />
-                                        Tạo mã QR thanh toán
+                                        {t('purchase.generateQR')}
                                     </>
                                 )}
                             </button>
@@ -202,15 +204,15 @@ export function Purchase() {
                         <div className="bg-white rounded-2xl p-8 shadow-lg border border-purple-100/50">
                             <div className="flex items-center gap-2 mb-6 text-purple-800">
                                 <Building2 className="w-5 h-5" />
-                                <h3 className="text-lg font-bold">Thông tin tài khoản nhận</h3>
+                                <h3 className="text-lg font-bold">{t('purchase.bankInfo.title')}</h3>
                             </div>
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between p-4 bg-purple-50/50 rounded-xl border border-purple-100">
-                                    <span className="text-slate-500 font-medium">Ngân hàng</span>
+                                    <span className="text-slate-500 font-medium">{t('purchase.bankInfo.bank')}</span>
                                     <span className="font-bold text-slate-900">MB Bank</span>
                                 </div>
                                 <div className="flex items-center justify-between p-4 bg-purple-50/50 rounded-xl border border-purple-100 group">
-                                    <span className="text-slate-500 font-medium">Số tài khoản</span>
+                                    <span className="text-slate-500 font-medium">{t('purchase.bankInfo.account')}</span>
                                     <div className="flex items-center gap-3">
                                         <span className="font-bold text-slate-900 font-mono text-lg tracking-wide">0123456789</span>
                                         <button
@@ -226,7 +228,7 @@ export function Purchase() {
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-between p-4 bg-purple-50/50 rounded-xl border border-purple-100 group">
-                                    <span className="text-slate-500 font-medium">Chủ tài khoản</span>
+                                    <span className="text-slate-500 font-medium">{t('purchase.bankInfo.owner')}</span>
                                     <div className="flex items-center gap-3">
                                         <span className="font-bold text-slate-900 uppercase">NEXUS AI PLATFORM</span>
                                         <button
@@ -259,8 +261,8 @@ export function Purchase() {
                                                 <Clock className="w-5 h-5 text-yellow-600 animate-pulse" />
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-yellow-700">Đang chờ thanh toán...</p>
-                                                <p className="text-sm text-yellow-600">Vui lòng hoàn tất chuyển khoản</p>
+                                                <p className="font-semibold text-yellow-700">{t('purchase.history.waiting')}</p>
+                                                <p className="text-sm text-yellow-600">{t('purchase.history.prompt')}</p>
                                             </div>
                                         </>
                                     )}
@@ -270,8 +272,8 @@ export function Purchase() {
                                                 <CheckCircle className="w-5 h-5 text-green-600" />
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-green-700">Nạp tiền thành công!</p>
-                                                <p className="text-sm text-green-600">Số dư đã được cập nhật</p>
+                                                <p className="font-semibold text-green-700">{t('purchase.history.successTitle')}</p>
+                                                <p className="text-sm text-green-600">{t('purchase.history.successDesc')}</p>
                                             </div>
                                         </>
                                     )}
@@ -285,7 +287,7 @@ export function Purchase() {
                         {/* QR Code Display */}
                         <div className="bg-white rounded-2xl p-8 shadow-lg border border-purple-100/50 flex flex-col items-center text-center h-fit">
                             <h3 className="text-lg font-bold text-slate-900 mb-8 w-full text-left border-b border-purple-50 pb-4">
-                                Mã QR Thanh Toán
+                                {t('purchase.qrTitle')}
                             </h3>
 
                             {qrInfo ? (
@@ -304,7 +306,7 @@ export function Purchase() {
 
                                     {/* Transfer Content */}
                                     <div className="mb-4">
-                                        <p className="text-sm text-slate-500 mb-2">Nội dung chuyển khoản:</p>
+                                        <p className="text-sm text-slate-500 mb-2">{t('purchase.transferContent')}</p>
                                         <div className="flex items-center justify-center gap-2 bg-slate-100 rounded-lg px-4 py-2">
                                             <code className="font-mono font-bold text-purple-700">{qrInfo.transferContent}</code>
                                             <button
@@ -322,13 +324,13 @@ export function Purchase() {
 
                                     {/* Instructions */}
                                     <div className="text-left bg-slate-50 rounded-lg p-4">
-                                        <p className="text-sm font-semibold mb-2">Hướng dẫn:</p>
+                                        <p className="text-sm font-semibold mb-2">{t('purchase.instructions.title')}</p>
                                         <ol className="text-sm text-slate-500 space-y-1 list-decimal list-inside">
-                                            <li>Mở ứng dụng ngân hàng</li>
-                                            <li>Chọn quét mã QR</li>
-                                            <li>Quét mã QR phía trên</li>
-                                            <li>Kiểm tra thông tin và xác nhận</li>
-                                            <li>Tiền sẽ được cộng trong vòng 5 phút</li>
+                                            <li>{t('purchase.instructions.step1')}</li>
+                                            <li>{t('purchase.instructions.step2')}</li>
+                                            <li>{t('purchase.instructions.step3')}</li>
+                                            <li>{t('purchase.instructions.step4')}</li>
+                                            <li>{t('purchase.instructions.step5')}</li>
                                         </ol>
                                     </div>
                                 </div>
@@ -338,7 +340,7 @@ export function Purchase() {
                                         <QrCode className="w-16 h-16 text-slate-300" />
                                     </div>
                                     <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
-                                        Chọn số tiền và nhấn <span className="font-bold text-purple-700">"Tạo mã QR"</span> để hiển thị mã thanh toán tương ứng.
+                                        {t('purchase.selectAmount')} <span className="font-bold text-purple-700">"{t('purchase.generateQR')}"</span>
                                     </p>
                                 </>
                             )}
@@ -348,7 +350,7 @@ export function Purchase() {
                         <div className="bg-white rounded-2xl p-6 shadow-lg border border-purple-100/50 h-[480px] flex flex-col">
                             <div className="flex items-center gap-2 mb-6 pb-4 border-b border-purple-50">
                                 <History className="w-5 h-5 text-purple-600" />
-                                <h3 className="text-lg font-bold text-slate-900">Lịch sử nạp tiền</h3>
+                                <h3 className="text-lg font-bold text-slate-900">{t('purchase.history.title')}</h3>
                             </div>
 
                             {loading ? (
@@ -357,7 +359,7 @@ export function Purchase() {
                                 </div>
                             ) : history.length === 0 ? (
                                 <div className="flex-1 flex items-center justify-center">
-                                    <p className="text-slate-400 text-center">Chưa có giao dịch nào</p>
+                                    <p className="text-slate-400 text-center">{t('purchase.history.empty')}</p>
                                 </div>
                             ) : (
                                 <div className="flex-1 overflow-y-auto pr-2 space-y-3">
@@ -393,7 +395,7 @@ export function Purchase() {
                                                 {isPending && (
                                                     <div className={`mt-2 pt-2 border-t ${statusConfig.borderColor} flex items-center ${statusConfig.textColor} text-xs font-semibold gap-1`}>
                                                         <ChevronRight className="w-4 h-4" />
-                                                        Nhấn để tiếp tục
+                                                        {t('purchase.history.resume')}
                                                     </div>
                                                 )}
                                             </div>
@@ -407,7 +409,7 @@ export function Purchase() {
 
                 {/* Footer */}
                 <footer className="text-center text-slate-400 py-8 text-sm font-medium">
-                    © 2026 Learning Platform. All rights reserved.
+                    {t('profile.footer')}
                 </footer>
             </div>
         </div>

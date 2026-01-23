@@ -19,7 +19,7 @@ import {
 import { useSubscription } from '../hooks/useSubscription';
 
 export function Plans() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const {
         plans,
@@ -229,14 +229,14 @@ export function Plans() {
 
                                     <div className="mb-8">
                                         {price === 0 ? (
-                                            <span className="text-4xl font-bold text-slate-900 tracking-tight">Miễn phí</span>
+                                            <span className="text-4xl font-bold text-slate-900 tracking-tight">{t('profile.subscription.free')}</span>
                                         ) : (
                                             <>
                                                 <span className="text-4xl font-bold text-slate-900 tracking-tight">
                                                     {formatPrice(price).replace('₫', '')}
                                                 </span>
                                                 <span className="text-sm text-slate-400 font-medium">
-                                                    đ/{billingCycle === 'monthly' ? 'tháng' : 'năm'}
+                                                    {i18n.language === 'en' ? 'VND' : 'đ'}{billingCycle === 'monthly' ? t('profile.subscription.perMonth') : t('profile.subscription.perYear')}
                                                 </span>
                                             </>
                                         )}
@@ -266,16 +266,16 @@ export function Plans() {
                                         {purchasing && confirmPlan === plan.id ? (
                                             <span className="flex items-center justify-center gap-2">
                                                 <Loader2 className="w-4 h-4 animate-spin" />
-                                                Đang xử lý...
+                                                {t('profile.subscription.processing')}
                                             </span>
                                         ) : isCurrentPlan ? (
-                                            'Gói hiện tại'
+                                            t('profile.subscription.current')
                                         ) : plan.id === 'free' ? (
-                                            'Gói mặc định'
+                                            t('profile.subscription.default')
                                         ) : confirmPlan === plan.id ? (
-                                            'Xác nhận mua'
+                                            t('profile.subscription.confirm')
                                         ) : (
-                                            `Chọn ${plan.name}`
+                                            t('profile.subscription.select', { plan: plan.name })
                                         )}
                                     </button>
                                 </div>
@@ -370,7 +370,7 @@ export function Plans() {
                         onClick={() => navigate('/purchase')}
                         className="text-indigo-600 hover:text-indigo-800 font-bold transition-colors"
                     >
-                        Nạp tiền ngay →
+                        {t('profile.balance.deposit')} →
                     </button>
                 </div>
             </main>

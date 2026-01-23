@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Send } from 'lucide-react';
 import { forumGateway } from '../../providers';
 import { ForumCategory } from '../../domain/entities/ForumEntities';
+import { useTranslation } from 'react-i18next';
 
 export function CreatePost() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -34,7 +36,7 @@ export function CreatePost() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!title.trim() || !content.trim() || !categoryId) {
-            setError('Vui lòng điền đầy đủ thông tin');
+            setError(t('forum.create.form.error'));
             return;
         }
 
@@ -59,7 +61,7 @@ export function CreatePost() {
             navigate('/forum');
         } catch (err: any) {
             console.error('Failed to create post:', err);
-            setError(err.message || 'Không thể tạo bài viết. Vui lòng đăng nhập và thử lại.');
+            setError(err.message || t('forum.create.genericError'));
         } finally {
             setSubmitting(false);
         }
@@ -82,15 +84,15 @@ export function CreatePost() {
                         onClick={() => navigate('/forum')}
                         className="hover:text-violet-600 transition-colors"
                     >
-                        Diễn đàn
+                        {t('forum.home')}
                     </button>
                     <ChevronRight className="w-4 h-4" />
-                    <span className="text-foreground font-medium">Tạo bài viết mới</span>
+                    <span className="text-foreground font-medium">{t('forum.create.breadcrumb')}</span>
                 </div>
 
                 {/* Page Title */}
                 <h1 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-teal-500">
-                    Tạo bài viết mới
+                    {t('forum.create.title')}
                 </h1>
 
                 {/* Form */}
@@ -103,7 +105,7 @@ export function CreatePost() {
 
                     {/* Category Select */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">Danh mục</label>
+                        <label className="block text-sm font-medium mb-2">{t('forum.create.form.category')}</label>
                         <select
                             value={categoryId}
                             onChange={(e) => setCategoryId(e.target.value)}
@@ -119,23 +121,23 @@ export function CreatePost() {
 
                     {/* Title */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">Tiêu đề</label>
+                        <label className="block text-sm font-medium mb-2">{t('forum.create.form.title')}</label>
                         <input
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            placeholder="Nhập tiêu đề bài viết..."
+                            placeholder={t('forum.create.form.titlePlaceholder')}
                             className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
                         />
                     </div>
 
                     {/* Content */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">Nội dung</label>
+                        <label className="block text-sm font-medium mb-2">{t('forum.create.form.content')}</label>
                         <textarea
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
-                            placeholder="Viết nội dung bài viết của bạn..."
+                            placeholder={t('forum.create.form.contentPlaceholder')}
                             rows={12}
                             className="w-full p-4 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
                         />
@@ -148,7 +150,7 @@ export function CreatePost() {
                             onClick={() => navigate('/forum')}
                             className="px-6 py-3 text-muted-foreground hover:text-foreground transition-colors"
                         >
-                            Hủy
+                            {t('forum.create.form.cancel')}
                         </button>
                         <button
                             type="submit"
@@ -156,7 +158,7 @@ export function CreatePost() {
                             className="px-8 py-3 bg-gradient-to-r from-violet-600 to-teal-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
                             <Send className="w-5 h-5" />
-                            {submitting ? 'Đang đăng...' : 'Đăng bài viết'}
+                            {submitting ? t('forum.create.form.submitting') : t('forum.create.form.submit')}
                         </button>
                     </div>
                 </form>

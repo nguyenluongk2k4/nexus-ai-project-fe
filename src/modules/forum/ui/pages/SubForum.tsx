@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import logo from '@/assets/logo.svg';
 import {
   ChevronRight,
   MessageSquare,
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react';
 import { getPostsByCategoryUseCase } from '../../providers';
 import { ForumPost, ForumCategory } from '../../domain/entities/ForumEntities';
+import { useTranslation } from 'react-i18next';
 
 const ICON_MAP: Record<string, any> = {
   Bot,
@@ -28,6 +30,7 @@ const ICON_MAP: Record<string, any> = {
 export function SubForum() {
   const { category: categoryId = 'ai' } = useParams<{ category: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [category, setCategory] = useState<ForumCategory | null>(null);
   const [threads, setThreads] = useState<ForumPost[]>([]);
@@ -71,10 +74,10 @@ export function SubForum() {
     const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
     const diff = Date.now() - date.getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
-    if (hours < 1) return 'vừa xong';
-    if (hours < 24) return `${hours} giờ trước`;
+    if (hours < 1) return t('forum.time.justNow');
+    if (hours < 24) return t('forum.time.hoursAgo', { hours });
     const days = Math.floor(hours / 24);
-    return `${days} ngày trước`;
+    return t('forum.time.daysAgo', { days });
   };
 
   if (loading) {
@@ -89,7 +92,7 @@ export function SubForum() {
     return (
       <div className="flex-1 p-6 min-h-screen bg-slate-50">
         <div className="max-w-6xl mx-auto text-center">
-          <p className="text-slate-600">Danh mục không tồn tại</p>
+          <p className="text-slate-600">{t('forum.thread.categoryNotFound')}</p>
         </div>
       </div>
     );
@@ -118,20 +121,18 @@ export function SubForum() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <div>
-              <h1
+              <img 
+                src={logo} 
+                alt={t('forum.title')} 
                 onClick={() => navigate('/forum')}
-                className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-blue-600 tracking-tight cursor-pointer"
-              >
-                Diễn Đàn Công Nghệ
-              </h1>
-            </div>
+                className="h-8 cursor-pointer" 
+              />
             <nav className="hidden md:flex items-center text-sm font-medium text-slate-500">
               <button
                 onClick={() => navigate('/forum')}
                 className="hover:text-violet-600 transition-colors"
               >
-                Trang chủ
+                {t('forum.home')}
               </button>
               <ChevronRight className="w-4 h-4 mx-2" />
               <span className="text-slate-800">{category.name}</span>
@@ -146,7 +147,7 @@ export function SubForum() {
               </span>
               <input
                 className="pl-10 pr-4 py-2.5 rounded-full border border-slate-200/60 bg-white/50 text-sm focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all w-64 backdrop-blur-sm shadow-sm outline-none"
-                placeholder={`Tìm kiếm trong ${category.name}...`}
+                placeholder={t('forum.search.placeholderCategory', { category: category.name })}
                 type="text"
               />
             </div>
@@ -215,7 +216,7 @@ export function SubForum() {
                 }`}
             >
               <Clock className="w-5 h-5" />
-              Mới nhất
+              {t('forum.filter.new')}
             </button>
             <button
               onClick={() => setSortBy('popular')}
@@ -225,7 +226,7 @@ export function SubForum() {
                 }`}
             >
               <TrendingUp className="w-5 h-5" />
-              Phổ biến
+              {t('forum.filter.popular')}
             </button>
             <button
               onClick={() => setSortBy('hot')}
@@ -240,11 +241,11 @@ export function SubForum() {
           </div>
           <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
             <span className="text-sm font-medium text-slate-500">
-              Hiển thị <span className="text-slate-900 font-bold">{threads.length}</span> chủ đề
+              {t('forum.filter.showing', { count: threads.length })}
             </span>
             <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-violet-600 border border-violet-200/50 hover:bg-violet-50 transition-colors font-semibold text-sm">
               <Filter className="w-5 h-5" />
-              Lọc
+              {t('forum.filter.filterBtn')}
             </button>
           </div>
         </div>
@@ -282,13 +283,13 @@ export function SubForum() {
                         {thread.isPinned && (
                           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-600 border border-purple-200 shadow-sm">
                             <Pin className="w-3 h-3 fill-current" />
-                            Ghim
+                            {t('forum.badges.pinned')}
                           </span>
                         )}
                         {thread.isHot && (
                           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-600 border border-orange-200 shadow-sm animate-pulse">
                             <Flame className="w-3 h-3 fill-current" />
-                            Hot
+                            {t('forum.badges.hot')}
                           </span>
                         )}
                       </div>
@@ -310,7 +311,7 @@ export function SubForum() {
                       <MessageSquare className="w-5 h-5" />
                       {thread.stats.comments}
                     </div>
-                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Trả lời</span>
+                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">{t('forum.replies')}</span>
                   </div>
                   <div className="w-px h-8 bg-slate-200"></div>
                   <div className="flex flex-col items-center justify-center min-w-[60px]">
@@ -318,7 +319,7 @@ export function SubForum() {
                       <Eye className="w-5 h-5" />
                       {thread.stats.views}
                     </div>
-                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Lượt xem</span>
+                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">{t('forum.views')}</span>
                   </div>
                 </div>
               </div>
@@ -330,14 +331,14 @@ export function SubForum() {
                     <MessageSquare className="w-5 h-5" />
                     {thread.stats.comments}
                   </div>
-                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Trả lời</span>
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">{t('forum.replies')}</span>
                 </div>
                 <div className="flex flex-col items-center justify-center">
                   <div className="flex items-center gap-1.5 text-green-500 font-bold text-lg">
                     <Eye className="w-5 h-5" />
                     {thread.stats.views}
                   </div>
-                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Lượt xem</span>
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">{t('forum.views')}</span>
                 </div>
               </div>
             </article>
@@ -347,7 +348,7 @@ export function SubForum() {
         {/* Pagination */}
         <div className="flex justify-center items-center mt-12 gap-2">
           <button className="px-4 py-2 rounded-xl bg-white text-slate-600 border border-slate-200 hover:border-violet-500 hover:text-violet-600 font-semibold text-sm transition-all hover:shadow-md backdrop-blur-sm">
-            Trang trước
+            {t('forum.pagination.prev')}
           </button>
           <button className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-blue-600 text-white font-bold shadow-lg shadow-violet-500/30 transform scale-110">
             1
@@ -359,7 +360,7 @@ export function SubForum() {
             3
           </button>
           <button className="px-4 py-2 rounded-xl bg-white text-slate-600 border border-slate-200 hover:border-violet-500 hover:text-violet-600 font-semibold text-sm transition-all hover:shadow-md backdrop-blur-sm">
-            Trang sau
+            {t('forum.pagination.next')}
           </button>
         </div>
       </main>
@@ -372,7 +373,7 @@ export function SubForum() {
             <span className="w-2 h-2 rounded-full bg-violet-600"></span>
             <span className="w-2 h-2 rounded-full bg-slate-300"></span>
           </div>
-          <p className="text-sm font-medium text-slate-500">© 2026 Diễn Đàn Công Nghệ. Crafted with passion.</p>
+          <p className="text-sm font-medium text-slate-500">{t('forum.footer')}</p>
         </div>
       </footer>
 

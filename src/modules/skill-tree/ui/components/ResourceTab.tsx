@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Share2, Zap, Clock, Star, BookOpen, Play, Bell, Calendar, Edit3, Rocket, Check, ChevronDown, Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { SkillNode } from '../hooks/useSkillTree';
 import { getSkillTreeService } from '../../providers';
 import { treeNodeService } from '../../domain/services/treeNodeService';
@@ -12,12 +13,14 @@ interface ResourceTabProps {
 }
 
 export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
+  const { t } = useTranslation();
+
   if (!selectedNode) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-slate-400 p-6">
         <BookOpen className="w-12 h-12 mb-3 opacity-50" />
-        <p className="text-sm font-medium">Chọn một node để xem chi tiết</p>
-        <p className="text-xs mt-1">Click vào skill trên cây</p>
+        <p className="text-sm font-medium">{t('mySkillTree.panel.selectNodePrompt')}</p>
+        <p className="text-xs mt-1">{t('mySkillTree.panel.clickNodeHint')}</p>
       </div>
     );
   }
@@ -88,6 +91,17 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    if (status === 'in-progress') return t('mySkillTree.panel.status.focusing');
+    if (status === 'completed') return t('mySkillTree.panel.status.completed');
+    return t('mySkillTree.panel.status.locked');
+  };
+
+  const formattedDuration = (minutes?: number) => {
+    if (!minutes) return t('mySkillTree.panel.types.selfStudy');
+    return `${Math.round(minutes/60)} ${t('mySkillTree.panel.types.hours')}`;
+  };
+
   return (
     <div className="p-6 h-full overflow-y-auto">
       {/* Header Badge & Share */}
@@ -97,8 +111,7 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
           status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
           'bg-slate-100 text-slate-500'
         }`}>
-          {status === 'in-progress' ? 'Đang tập trung' :
-           status === 'completed' ? 'Hoàn thành' : 'Chưa mở khóa'}
+          {getStatusLabel(status)}
         </span>
         <button className="text-slate-400 hover:text-slate-600">
           <Share2 className="w-4 h-4" />
@@ -111,7 +124,7 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
           {selectedNode.fullName}
         </h2>
         <div className="mt-4">
-          <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Mô tả</h4>
+          <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{t('mySkillTree.panel.description')}</h4>
           <p className="text-sm text-slate-600 leading-relaxed">
             {nodeData?.description || "Nắm vững các khái niệm và ứng dụng thực tế của kỹ năng này để thăng tiến trong sự nghiệp."}
           </p>
@@ -124,10 +137,10 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
         <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex flex-col justify-between h-20">
           <div className="flex items-center gap-1.5">
             <Zap className="w-3.5 h-3.5 text-indigo-500" />
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Độ khó</span>
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{t('mySkillTree.panel.difficulty')}</span>
           </div>
           <span className="text-sm font-bold text-slate-700 capitalize">
-            {nodeData?.difficultyLevel || 'Trung bình'}
+            {nodeData?.difficultyLevel || t('mySkillTree.panel.levels.medium')}
           </span>
         </div>
 
@@ -135,10 +148,10 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
         <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex flex-col justify-between h-20">
           <div className="flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-blue-500" />
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Thời gian ước tính</span>
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{t('mySkillTree.panel.timeEstimate')}</span>
           </div>
           <span className="text-sm font-bold text-slate-700">
-            {nodeData?.estimatedTimeToComplete || '2-4 Tuần'}
+            {nodeData?.estimatedTimeToComplete || `2-4 ${t('mySkillTree.panel.types.weeks')}`}
           </span>
         </div>
 
@@ -146,7 +159,7 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
         <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex flex-col justify-between h-20">
           <div className="flex items-center gap-1.5">
             <Star className="w-3.5 h-3.5 text-amber-500" />
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Độ quan trọng</span>
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{t('mySkillTree.panel.importance')}</span>
           </div>
           <div>
             <div className="flex gap-1 mb-1">
@@ -161,7 +174,7 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
                 />
               ))}
             </div>
-            <span className="text-xs font-bold text-slate-700">Cao</span>
+            <span className="text-xs font-bold text-slate-700">{t('mySkillTree.panel.levels.high')}</span>
           </div>
         </div>
       </div>
@@ -170,16 +183,16 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
       <div className="mb-6 bg-indigo-50/50 border border-indigo-100 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-2">
           <Rocket className="w-4 h-4 text-indigo-600" />
-          <h4 className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Ứng dụng thực tế</h4>
+          <h4 className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">{t('mySkillTree.panel.practicalApp')}</h4>
         </div>
         <div>
           <h5 className="text-sm font-bold text-slate-800 mb-1">
-             {typeof nodeData?.projectIdeas?.[0] === 'object' ? nodeData.projectIdeas[0].title : 'Triển khai dự án mẫu'}
+             {typeof nodeData?.projectIdeas?.[0] === 'object' ? nodeData.projectIdeas[0].title : t('mySkillTree.panel.defaultProjectTitle')}
           </h5>
           <p className="text-xs text-slate-600 leading-relaxed">
             {typeof nodeData?.projectIdeas?.[0] === 'string' 
               ? nodeData.projectIdeas[0] 
-              : nodeData?.projectIdeas?.[0]?.description || (nodeData?.projectIdeas ? "Áp dụng các kiến thức vào kịch bản thực tế." : "Sử dụng kỹ năng này để xây dựng một module chức năng trong dự án hiện tại của bạn.")}
+              : nodeData?.projectIdeas?.[0]?.description || (nodeData?.projectIdeas ? "Áp dụng các kiến thức vào kịch bản thực tế." : t('mySkillTree.panel.defaultProjectDesc'))}
           </p>
         </div>
       </div>
@@ -189,10 +202,10 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-slate-400" />
-            <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tài liệu học tập</h4>
+            <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t('mySkillTree.panel.resources')}</h4>
           </div>
           <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded text-[9px] font-bold">
-            {resources.length > 0 ? `${resources.filter((r: any) => normalizeStatus(r?.status || '') === 'completed').length}/${resources.length} HOÀN THÀNH` : '0/0 HOÀN THÀNH'}
+            {resources.length > 0 ? `${resources.filter((r: any) => normalizeStatus(r?.status || '') === 'completed').length}/${resources.length} ${t('mySkillTree.panel.completedCount')}` : `0/0 ${t('mySkillTree.panel.completedCount')}`}
           </span>
         </div>
 
@@ -200,7 +213,7 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
           {loadingResources ? (
              <div className="text-center py-8">
                 <div className="animate-spin w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full mx-auto mb-2"></div>
-                <p className="text-xs text-slate-500">Đang tải tài liệu...</p>
+                <p className="text-xs text-slate-500">{t('mySkillTree.panel.loadingResources')}</p>
              </div>
           ) : resources.length > 0 ? (
             resources.map((resource: any, idx: number) => {
@@ -227,19 +240,19 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
                       <div className="flex justify-between items-start">
                           <h4 className="text-sm font-bold text-slate-800 mb-0.5 truncate pr-2" title={resourceName}>{resourceName}</h4>
                           
-                          {/* Status Tag */}
+                           {/* Status Tag */}
                            <span className={`flex-shrink-0 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${
                                 status === 'completed' ? 'bg-emerald-100 text-emerald-600' :
                                 status === 'in-progress' ? 'bg-indigo-100 text-indigo-600' :
                                 'bg-slate-100 text-slate-400'
                            }`}>
-                               {status === 'completed' ? 'Hoàn thành' : 
-                                status === 'in-progress' ? 'Đang học' : 'Chưa học'}
+                               {status === 'completed' ? t('mySkillTree.panel.status.completed') : 
+                                status === 'in-progress' ? t('mySkillTree.panel.status.inProgress') : t('mySkillTree.panel.status.notStarted')}
                            </span>
                       </div>
                       
                       <p className="text-xs text-slate-500 flex items-center gap-1.5">
-                        {resource.type || 'Khóa học'} • {resource.duration_minutes ? `${Math.round(resource.duration_minutes/60)} Giờ` : 'Tự học'}
+                        {resource.type || t('mySkillTree.panel.types.course')} • {formattedDuration(resource.duration_minutes)}
                       </p>
                     </div>
                   </div>
@@ -252,7 +265,7 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
                           className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all"
                        >
                           <Play className="w-3 h-3 fill-current" />
-                          Học ngay
+                          {t('mySkillTree.panel.learnNow')}
                        </button>
                     ) : (
                        <button 
@@ -262,7 +275,7 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
                           }`}
                        >
                           {status === 'completed' ? <Check className="w-3 h-3" /> : <BookOpen className="w-3 h-3" />}
-                          {status === 'completed' ? 'Đã xong' : 'Xong?'}
+                          {status === 'completed' ? t('mySkillTree.panel.finished') : t('mySkillTree.panel.markFinished')}
                        </button>
                     )}
                     
@@ -273,12 +286,12 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
-                          title="Mở tài liệu"
+                          title={t('mySkillTree.panel.openResource')}
                         >
                           <Rocket className="w-4 h-4" />
                         </a>
                       )}
-                      <button className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors" title="Thêm vào lịch">
+                      <button className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors" title={t('mySkillTree.panel.addToCalendar')}>
                         <Calendar className="w-4 h-4" />
                       </button>
                     </div>
@@ -289,7 +302,7 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
           ) : (
             <div className="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
               <BookOpen className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-              <p className="text-xs text-slate-500 font-medium">Chưa có tài liệu nào cho kỹ năng này.</p>
+              <p className="text-xs text-slate-500 font-medium">{t('mySkillTree.panel.emptyResources')}</p>
             </div>
           )}
         </div>

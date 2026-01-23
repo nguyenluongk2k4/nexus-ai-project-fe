@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { getForumDashboardUseCase } from '../../providers';
 import { ForumPost, ForumCategory, ForumStats } from '../../domain/entities/ForumEntities';
+import { useTranslation } from 'react-i18next';
 
 const ICON_MAP: Record<string, any> = {
   Bot,
@@ -57,6 +58,7 @@ export function Forum() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const { t } = useTranslation();
 
   useEffect(() => {
     const loadData = async () => {
@@ -87,10 +89,10 @@ export function Forum() {
     const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
     const diff = Date.now() - date.getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
-    if (hours < 1) return 'vừa xong';
-    if (hours < 24) return `${hours} giờ trước`;
+    if (hours < 1) return t('forum.time.justNow');
+    if (hours < 24) return t('forum.time.hoursAgo', { hours });
     const days = Math.floor(hours / 24);
-    return `${days} ngày trước`;
+    return t('forum.time.daysAgo', { days });
   };
 
   const isHot = (post: ForumPost) => Number(post.stats.views) > 500 || Number(post.stats.comments) > 20;
@@ -104,7 +106,7 @@ export function Forum() {
       <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-violet-600 mx-auto mb-4"></div>
-          <p className="text-slate-500 font-medium">Đang tải...</p>
+          <p className="text-slate-500 font-medium">{t('forum.loading')}</p>
         </div>
       </div>
     );
@@ -129,7 +131,7 @@ export function Forum() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-violet-600 transition-colors" />
               <input
                 type="text"
-                placeholder="Tìm kiếm bài viết, thảo luận..."
+                placeholder={t('forum.search.placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="relative w-full pl-12 pr-4 py-3.5 bg-white/60 backdrop-blur-sm border border-slate-200/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-300 focus:bg-white transition-all placeholder:text-slate-400 shadow-sm"
@@ -143,10 +145,10 @@ export function Forum() {
                 onChange={(e) => setSelectedFilter(e.target.value)}
                 className="appearance-none pl-4 pr-10 py-3.5 bg-white/60 backdrop-blur-sm border border-slate-200/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-300 font-medium text-slate-700 cursor-pointer shadow-sm hover:bg-white/80 transition-all"
               >
-                <option value="all">Tất cả</option>
-                <option value="hot">🔥 Hot</option>
-                <option value="new">✨ Mới nhất</option>
-                <option value="unanswered">❓ Chưa trả lời</option>
+                <option value="all">{t('forum.filter.all')}</option>
+                <option value="hot">🔥 {t('forum.filter.hot')}</option>
+                <option value="new">✨ {t('forum.filter.new')}</option>
+                <option value="unanswered">❓ {t('forum.filter.unanswered')}</option>
               </select>
               <Filter className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
             </div>
@@ -158,7 +160,7 @@ export function Forum() {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
               <PenSquare className="w-5 h-5 relative z-10" />
-              <span className="hidden sm:inline relative z-10">Tạo bài viết</span>
+              <span className="hidden sm:inline relative z-10">{t('forum.createPost')}</span>
             </button>
           </div>
         </div>
@@ -171,8 +173,8 @@ export function Forum() {
             {/* Header */}
             <div className="flex items-start justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Thảo luận cộng đồng</h1>
-                <p className="text-slate-600">Khám phá những bài viết chất lượng từ cộng đồng</p>
+                <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">{t('forum.hero.title')}</h1>
+                <p className="text-slate-600">{t('forum.hero.subtitle')}</p>
               </div>
             </div>
 
@@ -226,7 +228,7 @@ export function Forum() {
                           {isNew(post) && (
                             <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200 shadow-sm">
                               <Sparkles className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '3s' }} />
-                              NEW
+                              {t('forum.badges.new')}
                             </span>
                           )}
                           {post.categoryName && (
@@ -268,15 +270,15 @@ export function Forum() {
                         <div className="flex gap-5 text-sm font-medium text-slate-500">
                           <div className="flex items-center gap-2">
                             <MessageSquare className="w-4 h-4" />
-                            <span>{post.stats.comments} câu trả lời</span>
+                            <span>{post.stats.comments} {t('forum.comments')}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Eye className="w-4 h-4" />
-                            <span>{post.stats.views} lượt xem</span>
+                            <span>{post.stats.views} {t('forum.views')}</span>
                           </div>
                         </div>
                         <span className="text-sm font-semibold text-violet-600 group-hover:text-violet-700 flex items-center gap-1">
-                          Đọc chi tiết
+                          {t('forum.readMore')}
                           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </span>
                       </div>
@@ -289,7 +291,7 @@ export function Forum() {
             {/* Load More */}
             <div className="flex justify-center pt-4">
               <button className="px-8 py-3 bg-white border-2 border-slate-200 text-slate-700 hover:border-violet-600 hover:text-violet-600 font-semibold rounded-xl transition-all">
-                Tải thêm bài viết
+                {t('forum.loadMore')}
               </button>
             </div>
           </div>
@@ -300,19 +302,19 @@ export function Forum() {
             <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-300">
               <h3 className="font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                Đang diễn ra
+                {t('forum.sidebar.liveActivity')}
               </h3>
               <div className="space-y-3 text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600">👥 Đang online</span>
+                  <span className="text-slate-600">👥 {t('forum.stats.onlineMembers')}</span>
                   <span className="font-bold text-green-600">{stats?.onlineMembers || 0}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600">💬 Thảo luận active</span>
+                  <span className="text-slate-600">💬 {t('forum.stats.activeDiscussions')}</span>
                   <span className="font-bold text-slate-900">15</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600">✍️ Đang viết bài</span>
+                  <span className="text-slate-600">✍️ {t('forum.stats.writing')}</span>
                   <span className="font-bold text-violet-600">3</span>
                 </div>
               </div>
@@ -320,7 +322,7 @@ export function Forum() {
 
             {/* Categories - Glass */}
             <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl transition-all">
-              <h3 className="font-bold text-lg text-slate-900 mb-4">Danh mục</h3>
+              <h3 className="font-bold text-lg text-slate-900 mb-4">{t('forum.sidebar.categories')}</h3>
               <div className="space-y-2">
                 {categories.map((category) => {
                   const Icon = ICON_MAP[category.iconName] || Bot;
@@ -337,7 +339,7 @@ export function Forum() {
                         <h4 className="font-semibold text-sm text-slate-700 group-hover:text-violet-700 transition-colors">
                           {category.name}
                         </h4>
-                        <span className="text-xs text-slate-500">{category.postCount || 0} bài viết</span>
+                        <span className="text-xs text-slate-500">{category.postCount || 0} {t('forum.stats.totalPosts').toLowerCase()}</span>
                       </div>
                       <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-violet-600 opacity-0 group-hover:opacity-100 transition-all" />
                     </button>
@@ -349,20 +351,20 @@ export function Forum() {
             {/* Stats - Animated */}
             {stats && (
               <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl transition-all">
-                <h3 className="font-bold text-lg text-slate-900 mb-4">Thống kê</h3>
+                <h3 className="font-bold text-lg text-slate-900 mb-4">{t('forum.sidebar.stats')}</h3>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-600">Tổng bài viết</span>
+                    <span className="text-sm text-slate-600">{t('forum.stats.totalPosts')}</span>
                     <span className="text-2xl font-bold text-slate-900">{stats.totalPosts.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-600">Thành viên</span>
+                    <span className="text-sm text-slate-600">{t('forum.stats.members')}</span>
                     <span className="text-2xl font-bold text-slate-900">{stats.totalMembers.toLocaleString()}</span>
                   </div>
 
                   {/* Activity Chart */}
                   <div className="pt-4 mt-4 border-t border-slate-100">
-                    <p className="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-wider">Hoạt động 7 ngày</p>
+                    <p className="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-wider">{t('forum.stats.activity7Days')}</p>
                     <div className="h-20 flex items-end gap-1.5">
                       {[30, 45, 35, 60, 50, 75, 90].map((height, i) => (
                         <div
@@ -380,7 +382,7 @@ export function Forum() {
 
             {/* Top Members - Interactive */}
             <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl transition-all">
-              <h3 className="font-bold text-lg text-slate-900 mb-4">Thành viên nổi bật</h3>
+              <h3 className="font-bold text-lg text-slate-900 mb-4">{t('forum.sidebar.topMembers')}</h3>
               <div className="grid grid-cols-5 gap-3">
                 {MOCK_TOP_MEMBERS.map((member) => (
                   <div key={member.id} className="relative group cursor-pointer">
@@ -408,7 +410,7 @@ export function Forum() {
 
             {/* Hot Tags - Animated */}
             <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl transition-all">
-              <h3 className="font-bold text-lg text-slate-900 mb-4">Chủ đề nổi bật</h3>
+              <h3 className="font-bold text-lg text-slate-900 mb-4">{t('forum.hotTopics')}</h3>
               <div className="flex flex-wrap gap-2">
                 {MOCK_HOT_TAGS.map((tag, idx) => (
                   <button

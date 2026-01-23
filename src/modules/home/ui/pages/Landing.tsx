@@ -1,14 +1,18 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
+import { LanguageSwitcher } from '@/shared/components/LanguageSwitcher';
+import { PublicHeader } from '@/shared/components/PublicHeader';
 import {
   ArrowRight, TreeDeciduous, Brain, Target, Sparkles, ChevronDown,
   Mail, Twitter, Github, Linkedin, Award, Check, Code, Flower2,
   Key, TrendingUp, Quote, Flag
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export function Landing() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
@@ -21,27 +25,10 @@ export function Landing() {
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-50 py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="backdrop-blur-md bg-white/70 rounded-full px-6 py-3 flex justify-between items-center shadow-lg border border-white/60">
-            <div className="flex items-center gap-2">
-              <TreeDeciduous className="w-7 h-7 text-violet-600" />
-              <span className="font-bold text-xl text-slate-900 tracking-tight">NexusAI</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <button onClick={() => navigate('/dashboard')} className="text-sm font-medium hover:text-violet-600 transition-colors">
-                Sign in
-              </button>
-              <Button
-                onClick={() => navigate('/dashboard')}
-                className="px-6 py-2.5 rounded-full bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 transition-all shadow-lg hover:shadow-violet-500/50"
-              >
-                Get Started
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Header */}
+      <PublicHeader />
+
+      {/* Hero Section */}
 
       {/* Hero Section */}
       <section className="relative pt-20 pb-20 lg:pt-32 lg:pb-32 overflow-hidden">
@@ -49,10 +36,10 @@ export function Landing() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="relative z-10 space-y-8">
               <h1 className="font-bold text-6xl md:text-7xl leading-[1.1] text-slate-900">
-                Elevate Your Mind Through <span className="italic bg-gradient-to-r from-violet-600 to-amber-600 bg-clip-text text-transparent">AI-Driven Mastery.</span>
+                {t('landing.hero.title')} <span className="italic bg-gradient-to-r from-violet-600 to-amber-600 bg-clip-text text-transparent">{t('landing.hero.titleHighlight')}</span>
               </h1>
               <p className="text-lg text-slate-600 max-w-lg leading-relaxed font-light">
-                Build personalized learning roadmaps powered by advanced AI. Track your progress, unlock new skills, and discover career opportunities tailored to your unique journey.
+                {t('landing.hero.subtitle')}
               </p>
               <div className="flex flex-wrap gap-4">
                 <button
@@ -60,12 +47,12 @@ export function Landing() {
                   className="relative group overflow-hidden px-8 py-4 rounded-full bg-violet-600 text-white font-medium shadow-xl hover:shadow-violet-500/50 transition-all transform hover:-translate-y-1"
                 >
                   <span className="flex items-center gap-2">
-                    <span>Start Learning Now</span>
+                    <span>{t('landing.hero.startLearning')}</span>
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </span>
                 </button>
                 <button className="px-8 py-4 rounded-full border border-slate-300 font-medium hover:bg-white/50 backdrop-blur-sm transition-all text-slate-900">
-                  Learn More
+                  {t('landing.hero.learnMore')}
                 </button>
               </div>
               <div className="flex items-center gap-4 pt-4 text-sm text-slate-500">
@@ -74,7 +61,7 @@ export function Landing() {
                   <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-teal-500 to-cyan-500"></div>
                   <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-pink-500 to-rose-500"></div>
                 </div>
-                <p className="font-medium">Trusted by 10,000+ Learners</p>
+                <p className="font-medium">{t('landing.hero.trustedBy')}</p>
               </div>
             </div>
 
@@ -147,9 +134,9 @@ export function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { num: '10k+', label: 'Active Learners' },
-              { num: '50k+', label: 'Skills Unlocked' },
-              { num: '95%', label: 'Success Rate' }
+              { num: '10k+', label: t('landing.stats.learners') },
+              { num: '50k+', label: t('landing.stats.skills') },
+              { num: '95%', label: t('landing.stats.success') }
             ].map((stat, i) => (
               <div key={i} className="backdrop-blur-md bg-white/70 p-8 rounded-2xl text-center shadow-xl transform hover:-translate-y-2 transition-all duration-500 border-t border-white/80">
                 <h3 className="font-bold text-5xl text-slate-900 mb-2">{stat.num}</h3>
@@ -164,17 +151,17 @@ export function Landing() {
       <section className="py-24 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-20">
-            <span className="text-violet-600 font-bold tracking-[0.2em] text-xs uppercase mb-4 block">How It Works</span>
-            <h2 className="font-bold text-4xl md:text-5xl text-slate-900 mb-6">Your Personalized Learning Path</h2>
-            <p className="text-slate-600 text-lg font-light">Start your personalized learning journey in just four simple steps.</p>
+            <span className="text-violet-600 font-bold tracking-[0.2em] text-xs uppercase mb-4 block">{t('landing.howItWorks.label')}</span>
+            <h2 className="font-bold text-4xl md:text-5xl text-slate-900 mb-6">{t('landing.howItWorks.title')}</h2>
+            <p className="text-slate-600 text-lg font-light">{t('landing.howItWorks.subtitle')}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             {[
-              { icon: Flag, step: 'STEP 01', title: 'Tell Us Your Goals', desc: 'Share your interests, career aspirations, and current level.' },
-              { icon: Brain, step: 'STEP 02', title: 'AI Creates Path', desc: 'Our AI analyzes and generates a bespoke curriculum for you.' },
-              { icon: Flower2, step: 'STEP 03', title: 'Learn & Grow', desc: 'Follow your path and watch your skill tree bloom.' },
-              { icon: Key, step: 'STEP 04', title: 'Unlock Opportunities', desc: 'Discover jobs matching your new capabilities.' }
+              { icon: Flag, step: 'STEP 01', title: t('landing.howItWorks.step1.title'), desc: t('landing.howItWorks.step1.desc') },
+              { icon: Brain, step: 'STEP 02', title: t('landing.howItWorks.step2.title'), desc: t('landing.howItWorks.step2.desc') },
+              { icon: Flower2, step: 'STEP 03', title: t('landing.howItWorks.step3.title'), desc: t('landing.howItWorks.step3.desc') },
+              { icon: Key, step: 'STEP 04', title: t('landing.howItWorks.step4.title'), desc: t('landing.howItWorks.step4.desc') }
             ].map((item, i) => (
               <div key={i} className="text-center group relative">
                 <div className="w-24 h-24 mx-auto backdrop-blur-md bg-white/70 rounded-full flex items-center justify-center mb-8 shadow-lg group-hover:shadow-violet-500/50 group-hover:scale-110 transition-all duration-500">
@@ -193,16 +180,16 @@ export function Landing() {
       <section className="py-24 bg-white/30 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="font-bold text-4xl md:text-5xl text-slate-900 mb-4">Why Choose NexusAI?</h2>
-            <p className="text-slate-600 font-light text-lg">Everything you need to accelerate your journey.</p>
+            <h2 className="font-bold text-4xl md:text-5xl text-slate-900 mb-4">{t('landing.features.title')}</h2>
+            <p className="text-slate-600 font-light text-lg">{t('landing.features.subtitle')}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
             {/* Large Feature Card - AI Roadmap */}
             <div className="col-span-1 md:col-span-4 md:row-span-2 backdrop-blur-md bg-white/70 rounded-3xl p-10 border border-white/60 hover:shadow-2xl transition-all">
               <Brain className="w-14 h-14 text-violet-600 mb-6" />
-              <h3 className="font-bold text-3xl text-slate-900 mb-4">AI-Powered Roadmaps</h3>
-              <p className="text-slate-600 max-w-md text-lg mb-8">Our AI analyzes millions of job descriptions to build dynamic, adaptive roadmaps that evolve as you do.</p>
+              <h3 className="font-bold text-3xl text-slate-900 mb-4">{t('landing.features.roadmap.title')}</h3>
+              <p className="text-slate-600 max-w-md text-lg mb-8">{t('landing.features.roadmap.desc')}</p>
 
               {/* Enhanced Roadmap Visualization */}
               <div className="relative h-64 w-full bg-white/50 rounded-xl border border-white/50 p-8 overflow-hidden">
@@ -261,8 +248,8 @@ export function Landing() {
             {/* Small Feature Cards */}
             <div className="col-span-1 md:col-span-2 backdrop-blur-md bg-white/70 rounded-3xl p-8 border border-white/60 hover:shadow-2xl transition-all">
               <TrendingUp className="w-12 h-12 text-purple-600 mb-6" />
-              <h3 className="font-bold text-xl text-slate-900 mb-2">Visual Progress</h3>
-              <p className="text-sm text-slate-600 mb-6">Watch your skill tree grow in real-time.</p>
+              <h3 className="font-bold text-xl text-slate-900 mb-2">{t('landing.features.visual.title')}</h3>
+              <p className="text-sm text-slate-600 mb-6">{t('landing.features.visual.desc')}</p>
               <div className="h-24 w-full flex items-end justify-between gap-2">
                 {[30, 50, 40, 70, 60].map((h, i) => (
                   <div key={i} className={`w-full bg-violet-${300 + i * 100} rounded-t-sm transition-all duration-700`} style={{ height: `${h}%` }} />
@@ -272,8 +259,8 @@ export function Landing() {
 
             <div className="col-span-1 md:col-span-2 backdrop-blur-md bg-white/70 rounded-3xl p-8 border border-white/60 hover:shadow-2xl transition-all">
               <Target className="w-12 h-12 text-amber-600 mb-6" />
-              <h3 className="font-bold text-xl text-slate-900 mb-2">Career Alignment</h3>
-              <p className="text-sm text-slate-600 mb-4">Map skills to open roles.</p>
+              <h3 className="font-bold text-xl text-slate-900 mb-2">{t('landing.features.career.title')}</h3>
+              <p className="text-sm text-slate-600 mb-4">{t('landing.features.career.desc')}</p>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-white/50 border border-white/50">
                   <div className="w-6 h-6 rounded-full bg-blue-100 text-xs flex items-center justify-center">G</div>
@@ -295,15 +282,15 @@ export function Landing() {
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="font-bold text-4xl text-slate-900 mb-4">What Our Learners Say</h2>
-            <p className="text-slate-600">Join a community of success stories.</p>
+            <h2 className="font-bold text-4xl text-slate-900 mb-4">{t('landing.testimonials.title')}</h2>
+            <p className="text-slate-600">{t('landing.testimonials.subtitle')}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { name: 'Sarah Chen', role: 'Data Scientist @ TechCorp', quote: 'AI Skill Tree helped me transition to data science in just 3 months. The personalized roadmap was exactly what I needed.' },
-              { name: 'Michael Rodriguez', role: 'Full Stack Engineer', quote: 'The visual progress tracking keeps me motivated. Watching the tree grow is incredibly satisfying and rewarding.' },
-              { name: 'Emily Watson', role: 'Product Designer', quote: 'Finally, a learning platform that understands the flow. No fluff, just direct recommendations that lead to results.' }
+              { name: 'Sarah Chen', role: 'Data Scientist @ TechCorp', quote: t('landing.testimonials.q1') },
+              { name: 'Michael Rodriguez', role: 'Full Stack Engineer', quote: t('landing.testimonials.q2') },
+              { name: 'Emily Watson', role: 'Product Designer', quote: t('landing.testimonials.q3') }
             ].map((testimonial, i) => (
               <div key={i} className="backdrop-blur-md bg-white/70 p-10 rounded-2xl border border-white/60 hover:shadow-2xl transition-all">
                 <Quote className="w-10 h-10 text-violet-600 mb-6" />
@@ -323,15 +310,15 @@ export function Landing() {
 
       {/* FAQ */}
       <section className="py-24 max-w-4xl mx-auto px-4">
-        <h2 className="font-bold text-3xl md:text-4xl text-center text-slate-900 mb-2">Frequently Asked Questions</h2>
-        <p className="text-center text-slate-500 mb-12">Everything you need to know</p>
+        <h2 className="font-bold text-3xl md:text-4xl text-center text-slate-900 mb-2">{t('landing.faq.title')}</h2>
+        <p className="text-center text-slate-500 mb-12">{t('landing.faq.subtitle')}</p>
 
         <div className="space-y-4">
           {[
-            { q: 'What is NexusAI - AI Skill Tree?', a: 'AI Skill Tree is an advanced learning roadmap platform designed to help you master new skills efficiently using AI-powered personalization.' },
-            { q: 'Is it free to use?', a: 'We offer a generous free tier. Our Pro plan unlocks unlimited trees and advanced career analytics.' },
-            { q: 'How does the AI personalization work?', a: 'Our AI analyzes your current knowledge and matches it against millions of data points from successful professionals.' },
-            { q: 'Can I customize my learning path?', a: 'Absolutely. You have full control to add, remove, or reorder modules as you see fit.' }
+            { q: t('landing.faq.q1'), a: t('landing.faq.a1') },
+            { q: t('landing.faq.q2'), a: t('landing.faq.a2') },
+            { q: t('landing.faq.q3'), a: t('landing.faq.a3') },
+            { q: t('landing.faq.q4'), a: t('landing.faq.a4') }
           ].map((faq, i) => (
             <div key={i} className="backdrop-blur-md bg-white/70 rounded-xl px-6 py-4 border border-white/50 hover:bg-white/80 transition-all">
               <button
@@ -353,13 +340,13 @@ export function Landing() {
       <section className="py-24 px-4">
         <div className="max-w-5xl mx-auto relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-r from-violet-950 to-indigo-950">
           <div className="relative z-10 py-16 px-8 md:px-20 text-center">
-            <h2 className="font-bold text-3xl md:text-5xl text-white mb-6">Ready to Start Your Learning Journey?</h2>
-            <p className="text-indigo-100 text-lg mb-10">Join 10,000+ learners growing their skills today.</p>
+            <h2 className="font-bold text-3xl md:text-5xl text-white mb-6">{t('landing.cta.title')}</h2>
+            <p className="text-indigo-100 text-lg mb-10">{t('landing.cta.subtitle')}</p>
             <button
               onClick={() => navigate('/dashboard')}
               className="bg-white text-violet-600 px-10 py-5 rounded-full font-bold shadow-lg hover:bg-gray-50 transition-all transform hover:scale-105 inline-flex items-center gap-2"
             >
-              <span>Get Started Free</span>
+              <span>{t('landing.cta.button')}</span>
               <ArrowRight className="w-5 h-5" />
             </button>
           </div>
@@ -375,11 +362,11 @@ export function Landing() {
                 <TreeDeciduous className="w-6 h-6 text-violet-600" />
                 <span className="font-bold text-xl">NexusAI</span>
               </div>
-              <p className="text-sm text-slate-500 leading-relaxed">Empowering careers through AI-powered personalized roadmaps.</p>
+              <p className="text-sm text-slate-500 leading-relaxed">{t('landing.footer.desc')}</p>
             </div>
 
             <div>
-              <h4 className="font-bold mb-4">Product</h4>
+              <h4 className="font-bold mb-4">{t('landing.footer.product')}</h4>
               <ul className="space-y-3 text-sm text-slate-500">
                 <li><a href="#" className="hover:text-violet-600 transition-colors">Features</a></li>
                 <li><a href="#" className="hover:text-violet-600 transition-colors">Pricing</a></li>
@@ -388,7 +375,7 @@ export function Landing() {
             </div>
 
             <div>
-              <h4 className="font-bold mb-4">Company</h4>
+              <h4 className="font-bold mb-4">{t('landing.footer.company')}</h4>
               <ul className="space-y-3 text-sm text-slate-500">
                 <li><a href="#" className="hover:text-violet-600 transition-colors">About</a></li>
                 <li><a href="#" className="hover:text-violet-600 transition-colors">Blog</a></li>
@@ -397,7 +384,7 @@ export function Landing() {
             </div>
 
             <div>
-              <h4 className="font-bold mb-4">Legal</h4>
+              <h4 className="font-bold mb-4">{t('landing.footer.legal')}</h4>
               <ul className="space-y-3 text-sm text-slate-500">
                 <li><a href="#" className="hover:text-violet-600 transition-colors">Privacy</a></li>
                 <li><a href="#" className="hover:text-violet-600 transition-colors">Terms</a></li>
@@ -407,7 +394,7 @@ export function Landing() {
           </div>
 
           <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-slate-200">
-            <p className="text-xs text-slate-400">© 2026 NexusAI. All rights reserved.</p>
+            <p className="text-xs text-slate-400">{t('landing.footer.rights')}</p>
             <div className="flex gap-6 mt-4 md:mt-0">
               <a href="#" className="text-slate-400 hover:text-violet-600 transition-colors"><Twitter className="w-5 h-5" /></a>
               <a href="#" className="text-slate-400 hover:text-violet-600 transition-colors"><Linkedin className="w-5 h-5" /></a>

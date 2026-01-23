@@ -3,14 +3,16 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { CheckCircle, Wallet, ArrowRight, Home } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function PurchaseSuccess() {
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const { amount, transactionCode } = location.state || {};
 
     const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+        return new Intl.NumberFormat(i18n.language === 'en' ? 'en-US' : 'vi-VN', { style: 'currency', currency: i18n.language === 'en' ? 'USD' : 'VND' }).format(i18n.language === 'en' ? value / 23000 : value);
     };
 
     // Auto redirect to profile after 10 seconds
@@ -39,11 +41,11 @@ export function PurchaseSuccess() {
 
                     {/* Success Message */}
                     <h1 className="text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-teal-500">
-                        Nạp tiền thành công!
+                        {t('purchase.success.title')}
                     </h1>
 
                     <p className="text-muted-foreground mb-8">
-                        Số tiền đã được cộng vào tài khoản của bạn
+                        {t('purchase.success.subtitle')}
                     </p>
 
                     {/* Transaction Details */}
@@ -59,7 +61,7 @@ export function PurchaseSuccess() {
 
                         {transactionCode && (
                             <p className="text-sm text-muted-foreground">
-                                Mã giao dịch: <span className="font-mono font-semibold">{transactionCode}</span>
+                                {t('purchase.success.transactionCode')}: <span className="font-mono font-semibold">{transactionCode}</span>
                             </p>
                         )}
                     </div>
@@ -70,8 +72,9 @@ export function PurchaseSuccess() {
                             onClick={() => navigate('/profile')}
                             className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-teal-500 text-white py-4 px-6 rounded-xl font-semibold hover:shadow-lg transition-all"
                         >
+
                             <Wallet className="w-5 h-5" />
-                            Xem số dư
+                            {t('purchase.success.viewBalance')}
                             <ArrowRight className="w-5 h-5" />
                         </button>
 
@@ -80,13 +83,13 @@ export function PurchaseSuccess() {
                             className="w-full flex items-center justify-center gap-2 bg-white text-foreground py-4 px-6 rounded-xl font-semibold border border-border hover:bg-accent transition-all"
                         >
                             <Home className="w-5 h-5" />
-                            Về trang chủ
+                            {t('purchase.success.home')}
                         </button>
                     </div>
 
                     {/* Auto redirect notice */}
                     <p className="text-xs text-muted-foreground mt-6">
-                        Tự động chuyển về trang hồ sơ sau 10 giây...
+                        {t('purchase.success.redirect', { seconds: 10 })}
                     </p>
                 </div>
             </div>

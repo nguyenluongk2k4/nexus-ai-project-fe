@@ -24,6 +24,7 @@ import {
     Copy,
     ChevronRight,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useProfile } from '../hooks/useProfile';
 import { useAuth } from '@/modules/auth/AuthProvider';
 
@@ -36,6 +37,7 @@ const ACTIVITY_ICONS: Record<string, any> = {
 };
 
 export function Profile() {
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { user } = useAuth();
     const { profile, stats, activities, loading, error, updateProfile } = useProfile();
@@ -55,11 +57,12 @@ export function Profile() {
     }, [profile]);
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('vi-VN').format(amount);
+        return new Intl.NumberFormat(i18n.language === 'en' ? 'en-US' : 'vi-VN', { style: 'currency', currency: i18n.language === 'en' ? 'USD' : 'VND' }).format(i18n.language === 'en' ? amount / 23000 : amount);
+        // Note: Simple conversion for demo, ideally backend provides currency
     };
 
     const formatDate = (dateStr: string) => {
-        return new Date(dateStr).toLocaleDateString('vi-VN', {
+        return new Date(dateStr).toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'vi-VN', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
@@ -67,7 +70,7 @@ export function Profile() {
     };
 
     const formatDateTime = (dateStr: string) => {
-        return new Date(dateStr).toLocaleString('vi-VN', {
+        return new Date(dateStr).toLocaleString(i18n.language === 'en' ? 'en-US' : 'vi-VN', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
@@ -84,10 +87,10 @@ export function Profile() {
                 fullName: fullName || undefined,
                 email: email || undefined,
             });
-            setSaveMessage('Đã lưu thay đổi thành công!');
+            setSaveMessage(t('profile.messages.saveSuccess'));
             setTimeout(() => setSaveMessage(null), 3000);
         } catch (err: any) {
-            setSaveMessage(err.message || 'Không thể lưu thay đổi');
+            setSaveMessage(err.message || t('profile.messages.saveError'));
         } finally {
             setIsSaving(false);
         }
@@ -110,7 +113,7 @@ export function Profile() {
                         onClick={() => window.location.reload()}
                         className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
                     >
-                        Thử lại
+                        {t('profile.buttons.retry')}
                     </button>
                 </div>
             </div>
@@ -146,8 +149,8 @@ export function Profile() {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl md:text-4xl font-extrabold text-purple-950 tracking-tight">Hồ Sơ Cá Nhân</h1>
-                        <p className="text-slate-600 mt-2 text-lg font-medium">Quản lý thông tin cá nhân và theo dõi tiến độ học tập</p>
+                        <h1 className="text-3xl md:text-4xl font-extrabold text-purple-950 tracking-tight">{t('profile.title')}</h1>
+                        <p className="text-slate-600 mt-2 text-lg font-medium">{t('profile.subtitle')}</p>
                     </div>
                 </div>
 
@@ -160,10 +163,12 @@ export function Profile() {
                             {/* Avatar Section */}
                             <div className="flex flex-col md:flex-row items-start md:items-center gap-8 mb-10 pb-8 border-b border-purple-100">
                                 <div className="relative group cursor-pointer">
-                                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-purple-100 p-1 bg-white shadow-sm">
-                                        <div className="w-full h-full rounded-full bg-purple-600 flex items-center justify-center text-4xl font-bold text-white overflow-hidden">
-                                            {displayProfile.fullName?.charAt(0)?.toUpperCase() || displayProfile.username?.charAt(0)?.toUpperCase() || 'U'}
-                                        </div>
+                                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-purple-100 p-1 bg-white shadow-sm overflow-hidden relative">
+                                        <img
+                                            src={displayProfile.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayProfile.fullName || displayProfile.username || 'User')}&background=random`}
+                                            alt={displayProfile.fullName || displayProfile.username}
+                                            className="w-full h-full rounded-full object-cover"
+                                        />
                                     </div>
                                     <button className="absolute bottom-1 right-1 bg-white text-purple-600 p-2.5 rounded-full shadow-md border border-purple-100 hover:bg-purple-50 transition-colors">
                                         <Camera className="w-4 h-4" />
@@ -176,13 +181,13 @@ export function Profile() {
                                         </h2>
                                         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-teal-50 text-teal-700 border border-teal-100 shadow-sm">
                                             <span className="w-2 h-2 rounded-full bg-teal-500 mr-2"></span>
-                                            Đang hoạt động
+                                            {t('profile.activeStatus')}
                                         </span>
                                     </div>
                                     <p className="text-slate-500 text-lg mb-4 font-medium">@{displayProfile.username}</p>
                                     <div className="flex gap-3">
                                         <button className="hidden md:inline-flex items-center text-sm font-bold text-purple-600 hover:text-purple-700 transition-colors bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg">
-                                            <Copy className="w-4 h-4 mr-1.5" /> Copy ID
+                                            <Copy className="w-4 h-4 mr-1.5" /> {t('profile.copyId')}
                                         </button>
                                     </div>
                                 </div>
@@ -194,7 +199,7 @@ export function Profile() {
                                     {/* Full Name */}
                                     <div className="space-y-2">
                                         <label htmlFor="fullname" className="text-sm font-bold text-purple-900 uppercase tracking-wide">
-                                            Tên đầy đủ
+                                            {t('profile.form.fullName')}
                                         </label>
                                         <div className="relative">
                                             <User className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400 w-5 h-5" />
@@ -203,7 +208,7 @@ export function Profile() {
                                                 type="text"
                                                 value={fullName || displayProfile.fullName || ''}
                                                 onChange={(e) => setFullName(e.target.value)}
-                                                placeholder="Nhập tên của bạn"
+                                                placeholder={t('profile.form.fullNamePlaceholder')}
                                                 className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-semibold focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all placeholder:text-slate-400 shadow-sm"
                                             />
                                         </div>
@@ -212,7 +217,7 @@ export function Profile() {
                                     {/* Username */}
                                     <div className="space-y-2">
                                         <label htmlFor="username" className="text-sm font-bold text-purple-900 uppercase tracking-wide">
-                                            Username
+                                            {t('profile.form.username')}
                                         </label>
                                         <div className="relative">
                                             <AtSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -224,13 +229,13 @@ export function Profile() {
                                                 className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 font-medium cursor-not-allowed select-none"
                                             />
                                         </div>
-                                        <p className="text-xs text-slate-400 mt-1 pl-1">Username không thể thay đổi</p>
+                                        <p className="text-xs text-slate-400 mt-1 pl-1">{t('profile.form.usernameHint')}</p>
                                     </div>
 
                                     {/* Email */}
                                     <div className="space-y-2 md:col-span-2">
                                         <label htmlFor="email" className="text-sm font-bold text-purple-900 uppercase tracking-wide">
-                                            Email
+                                            {t('profile.form.email')}
                                         </label>
                                         <div className="relative">
                                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400 w-5 h-5" />
@@ -247,7 +252,7 @@ export function Profile() {
                                     {/* Join Date */}
                                     <div className="space-y-2 md:col-span-2">
                                         <label htmlFor="join_date" className="text-sm font-bold text-purple-900 uppercase tracking-wide">
-                                            Ngày tham gia
+                                            {t('profile.form.joinDate')}
                                         </label>
                                         <div className="relative">
                                             <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -283,14 +288,14 @@ export function Profile() {
                                         ) : (
                                             <Save className="w-5 h-5" />
                                         )}
-                                        Lưu thay đổi
+                                        {t('profile.buttons.save')}
                                     </button>
                                     <button
                                         type="button"
                                         className="w-full sm:w-auto flex-1 bg-white border-2 border-purple-100 text-purple-700 font-bold py-3.5 px-6 rounded-xl hover:bg-purple-50 hover:border-purple-200 transition-all flex items-center justify-center gap-2"
                                     >
                                         <Key className="w-5 h-5" />
-                                        Đổi mật khẩu
+                                        {t('profile.buttons.changePassword')}
                                     </button>
                                 </div>
                             </form>
@@ -299,9 +304,9 @@ export function Profile() {
                         {/* Activity History */}
                         <div className="bg-white rounded-2xl p-8 shadow-lg border border-purple-100/50">
                             <div className="flex items-center justify-between mb-8">
-                                <h3 className="text-xl font-extrabold text-slate-900">Lịch sử hoạt động</h3>
+                                <h3 className="text-xl font-extrabold text-slate-900">{t('profile.history.title')}</h3>
                                 <a className="text-sm font-bold text-purple-600 hover:text-purple-700 transition-colors flex items-center gap-1 group" href="#">
-                                    Xem tất cả <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                    {t('profile.buttons.viewAll')} <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                 </a>
                             </div>
                             <div className="space-y-4">
@@ -331,14 +336,14 @@ export function Profile() {
                     <div className="lg:col-span-4 space-y-8">
                         {/* Stats Card */}
                         <div className="bg-white rounded-2xl p-8 shadow-lg border border-purple-100/50">
-                            <h3 className="text-xl font-extrabold text-slate-900 mb-8">Thống kê của tôi</h3>
+                            <h3 className="text-xl font-extrabold text-slate-900 mb-8">{t('profile.stats.title')}</h3>
                             <div className="space-y-6">
                                 <div className="flex items-center justify-between group py-3 border-b border-dashed border-purple-100 last:border-0">
                                     <div className="flex items-center gap-4">
                                         <div className="p-3 rounded-xl bg-purple-600 text-white shadow-md shadow-purple-200">
                                             <Clock className="w-5 h-5" />
                                         </div>
-                                        <span className="font-bold text-slate-600">Số giờ học</span>
+                                        <span className="font-bold text-slate-600">{t('profile.stats.learningHours')}</span>
                                     </div>
                                     <span className="font-extrabold text-purple-900 text-xl">{stats?.learningHours || 0}h</span>
                                 </div>
@@ -348,7 +353,7 @@ export function Profile() {
                                         <div className="p-3 rounded-xl bg-fuchsia-500 text-white shadow-md shadow-fuchsia-200">
                                             <Award className="w-5 h-5" />
                                         </div>
-                                        <span className="font-bold text-slate-600">Skills hoàn thành</span>
+                                        <span className="font-bold text-slate-600">{t('profile.stats.skillsCompleted')}</span>
                                     </div>
                                     <span className="font-extrabold text-purple-900 text-xl">{stats?.skillsCompleted || 0}</span>
                                 </div>
@@ -358,7 +363,7 @@ export function Profile() {
                                         <div className="p-3 rounded-xl bg-amber-500 text-white shadow-md shadow-amber-200">
                                             <Flame className="w-5 h-5" />
                                         </div>
-                                        <span className="font-bold text-slate-600">Streak days</span>
+                                        <span className="font-bold text-slate-600">{t('profile.stats.streakDays')}</span>
                                     </div>
                                     <span className="font-extrabold text-purple-900 text-xl">{stats?.streakDays || 0}</span>
                                 </div>
@@ -368,7 +373,7 @@ export function Profile() {
                                         <div className="p-3 rounded-xl bg-cyan-500 text-white shadow-md shadow-cyan-200">
                                             <MessageSquare className="w-5 h-5" />
                                         </div>
-                                        <span className="font-bold text-slate-600">Bài viết forum</span>
+                                        <span className="font-bold text-slate-600">{t('profile.stats.forumPosts')}</span>
                                     </div>
                                     <span className="font-extrabold text-purple-900 text-xl">{stats?.forumPosts || 0}</span>
                                 </div>
@@ -382,21 +387,21 @@ export function Profile() {
                                 <div className="flex items-center justify-between mb-8">
                                     <h3 className="text-lg font-bold text-white flex items-center gap-2 opacity-90">
                                         <Wallet className="text-purple-300" />
-                                        Số dư tài khoản
+                                        {t('profile.balance.title')}
                                     </h3>
                                 </div>
                                 <div className="text-center py-8 bg-purple-800/50 rounded-xl border border-purple-700/50 backdrop-blur-sm mb-6">
                                     <div className="text-4xl font-extrabold text-white mb-2 tracking-tight">
-                                        {formatCurrency(displayProfile.balance)} ₫
+                                        {formatCurrency(displayProfile.balance)}
                                     </div>
-                                    <p className="text-sm text-purple-200 font-bold uppercase tracking-wider">Số dư khả dụng</p>
+                                    <p className="text-sm text-purple-200 font-bold uppercase tracking-wider">{t('profile.balance.available')}</p>
                                 </div>
                                 <button
                                     onClick={() => navigate('/purchase')}
                                     className="w-full bg-white text-purple-900 font-bold py-3.5 px-4 rounded-xl shadow-lg hover:bg-purple-50 transition-colors flex items-center justify-center gap-2"
                                 >
                                     <Wallet className="w-5 h-5" />
-                                    Nạp tiền ngay
+                                    {t('profile.balance.deposit')}
                                 </button>
                             </div>
                         </div>
@@ -409,13 +414,13 @@ export function Profile() {
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
                                             <Diamond className="text-purple-600" />
-                                            <h3 className="text-lg font-bold text-slate-900">Gói đăng ký</h3>
+                                            <h3 className="text-lg font-bold text-slate-900">{t('profile.subscription.title')}</h3>
                                         </div>
                                         {displayProfile.subscriptionTier === 'free' ? (
-                                            <p className="text-slate-500 text-sm font-medium">Nâng cấp để trải nghiệm tốt hơn</p>
+                                            <p className="text-slate-500 text-sm font-medium">{t('profile.subscription.upgradeHint')}</p>
                                         ) : displayProfile.subscriptionExpiresAt ? (
                                             <p className="text-slate-500 text-sm font-medium">
-                                                Hết hạn: {formatDate(displayProfile.subscriptionExpiresAt)}
+                                                {t('profile.subscription.expires', { date: formatDate(displayProfile.subscriptionExpiresAt) })}
                                             </p>
                                         ) : null}
                                     </div>
@@ -435,7 +440,7 @@ export function Profile() {
                                     className="w-full bg-white text-purple-700 font-bold py-3 px-4 rounded-xl border-2 border-purple-100 hover:border-purple-600 hover:text-purple-600 transition-all flex items-center justify-center gap-2"
                                 >
                                     <Award className="w-5 h-5" />
-                                    {displayProfile.subscriptionTier === 'free' ? 'Nâng cấp' : 'Quản lý gói'}
+                                    {displayProfile.subscriptionTier === 'free' ? t('profile.subscription.upgrade') : t('profile.subscription.manage')}
                                 </button>
                             </div>
                         </div>
@@ -444,7 +449,7 @@ export function Profile() {
 
                 {/* Footer */}
                 <footer className="text-center text-slate-400 py-8 text-sm font-medium">
-                    © 2026 Learning Platform. All rights reserved.
+                    {t('profile.footer')}
                 </footer>
             </div>
         </div>

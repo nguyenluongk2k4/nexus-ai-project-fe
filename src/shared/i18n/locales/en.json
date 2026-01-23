@@ -6,92 +6,201 @@
     "back": "Back",
     "language": "Language",
     "profile": "Profile",
-    "logout": "Logout"
+    "logout": "Logout",
+    "level": "LVL",
+    "user": "User",
+    "time": {
+      "justNow": "just now",
+      "hoursAgo": "{{hours}} hours ago",
+      "daysAgo": "{{days}} days ago",
+      "yesterday": "Yesterday"
+    }
+  },
+  "landing": {
+    "header": {
+      "signIn": "Sign in",
+      "getStarted": "Get Started"
+    },
+    "hero": {
+      "title": "Elevate Your Mind Through",
+      "titleHighlight": "AI-Driven Mastery.",
+      "subtitle": "Build personalized learning roadmaps powered by advanced AI. Track your progress, unlock new skills, and discover career opportunities tailored to your unique journey.",
+      "startLearning": "Start Learning Now",
+      "learnMore": "Learn More",
+      "trustedBy": "Trusted by 10,000+ Learners"
+    },
+    "stats": {
+      "learners": "Active Learners",
+      "skills": "Skills Unlocked",
+      "success": "Success Rate"
+    },
+    "howItWorks": {
+      "label": "HOW IT WORKS",
+      "title": "Your Personalized Learning Path",
+      "subtitle": "Start your personalized learning journey in just four simple steps.",
+      "step1": { "title": "Tell Us Your Goals", "desc": "Share your interests, career aspirations, and current level." },
+      "step2": { "title": "AI Creates Path", "desc": "Our AI analyzes and generates a bespoke curriculum for you." },
+      "step3": { "title": "Learn & Grow", "desc": "Follow your path and watch your skill tree bloom." },
+      "step4": { "title": "Unlock Opportunities", "desc": "Discover jobs matching your new capabilities." }
+    },
+    "features": {
+      "title": "Why Choose NexusAI?",
+      "subtitle": "Everything you need to accelerate your journey.",
+      "roadmap": { "title": "AI-Powered Roadmaps", "desc": "Our AI analyzes millions of job descriptions to build dynamic, adaptive roadmaps that evolve as you do." },
+      "visual": { "title": "Visual Progress", "desc": "Watch your skill tree grow in real-time." },
+      "career": { "title": "Career Alignment", "desc": "Map skills to open roles." }
+    },
+    "testimonials": {
+      "title": "What Our Learners Say",
+      "subtitle": "Join a community of success stories.",
+      "q1": "AI Skill Tree helped me transition to data science in just 3 months. The personalized roadmap was exactly what I needed.",
+      "q2": "The visual progress tracking keeps me motivated. Watching the tree grow is incredibly satisfying and rewarding.",
+      "q3": "Finally, a learning platform that understands the flow. No fluff, just direct recommendations that lead to results."
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Everything you need to know",
+      "q1": "What is NexusAI - AI Skill Tree?", "a1": "AI Skill Tree is an advanced learning roadmap platform designed to help you master new skills efficiently using AI-powered personalization.",
+      "q2": "Is it free to use?", "a2": "We offer a generous free tier. Our Pro plan unlocks unlimited trees and advanced career analytics.",
+      "q3": "How does the AI personalization work?", "a3": "Our AI analyzes your current knowledge and matches it against millions of data points from successful professionals.",
+      "q4": "Can I customize my learning path?", "a4": "Absolutely. You have full control to add, remove, or reorder modules as you see fit."
+    },
+    "cta": {
+      "title": "Ready to Start Your Learning Journey?",
+      "subtitle": "Join 10,000+ learners growing their skills today.",
+      "button": "Get Started Free"
+    },
+    "footer": {
+      "company": "Company",
+      "product": "Product",
+      "legal": "Legal",
+      "desc": "Empowering careers through AI-powered personalized roadmaps.",
+      "rights": "© 2026 NexusAI. All rights reserved."
+    }
   },
   "nav": {
+    "title": "AI Skill Tree",
+    "subtitle": "Learn & Grow",
     "dashboard": "Dashboard",
+    "dashboardPage": {
+        "welcome": "Welcome back, {{name}}",
+        "subtitle": "Track your learning progress and continue your journey",
+        "weeklyActivity": "Weekly Activity",
+        "weeklyActivitySub": "Hours spent learning",
+        "skillProgress": "Skill Progress",
+        "skillProgressSub": "Current skill levels",
+        "recentActivity": "Recent Activity",
+        "metrics": {
+            "studyTime": "Study Time",
+            "skillsEarned": "Skills Earned",
+            "goalsCompleted": "Goals Completed",
+            "thisWeek": "This week",
+            "totalBadges": "Total badges",
+            "monthlyTarget": "Monthly target"
+        },
+        "activity": {
+            "completedQuiz": "Completed Quiz",
+            "earnedBadge": "Earned Badge",
+            "finishedCourse": "Finished Course"
+        }
+    },
     "skilltree": "Skill Tree",
     "quiz": "Quiz",
     "jobs": "Job Matches",
     "insights": "Insights",
     "timeline": "Timeline",
-    "forum": "Forum"
+    "forum": "Forum",
+    "profile": "Profile",
+    "mySkillTree": "My Skill Tree",
+    "logout": "Logout"
   },
   "profile": {
-    "title": "My Profile",
+    "title": "Personal Profile",
     "subtitle": "Manage your personal information and track your learning progress",
-    "active": "Active",
-    "fullName": {
-      "label": "Full Name",
-      "placeholder": "Enter full name"
+    "activeStatus": "Active",
+    "copyId": "Copy ID",
+    "form": {
+        "fullName": "FULL NAME",
+        "username": "USERNAME",
+        "email": "EMAIL",
+        "joinDate": "JOIN DATE",
+        "fullNamePlaceholder": "Enter your name",
+        "usernameHint": "Username cannot be changed"
     },
-    "username": {
-      "label": "Username",
-      "hint": "Username cannot be changed"
+    "buttons": {
+        "save": "Save Changes",
+        "changePassword": "Change Password",
+        "retry": "Retry",
+        "saving": "Saving...",
+        "viewAll": "View All"
     },
-    "email": {
-      "label": "Email",
-      "placeholder": "Enter email"
+    "messages": {
+        "saveSuccess": "Changes saved successfully!",
+        "saveError": "Could not save changes"
     },
-    "joined": "Joined Date",
-    "save": "Save Changes",
-    "changePassword": "Change Password",
-    "success": "Changes saved successfully!",
-    "error": "Could not save changes",
+    "history": {
+        "title": "Activity History"
+    },
     "stats": {
-      "title": "My Statistics",
-      "learningHours": "Learning Hours",
-      "skillsCompleted": "Skills Completed",
-      "streak": "Streak Days",
-      "forumPosts": "Forum Posts"
+        "title": "My Stats",
+        "learningHours": "Learning Hours",
+        "skillsCompleted": "Skills Completed",
+        "streakDays": "Streak Days",
+        "forumPosts": "Forum Posts"
     },
     "balance": {
-      "title": "Account Balance",
-      "current": "Current Balance",
-      "deposit": "Deposit"
+        "title": "Account Balance",
+        "available": "Available Balance",
+        "current": "Current Balance",
+        "deposit": "Deposit"
     },
     "subscription": {
-      "title": "Subscription Plan",
-      "upgrade": "Upgrade",
-      "manage": "Manage Plan",
-      "expires": "Expires: ",
-      "freeHint": "Upgrade for better experience",
-      "features": "Features",
-      "pricing": "Pricing",
-      "titleNew": "Plans for Modern Teams",
-      "subtitleNew": "Choose the perfect plan for you. Transparent pricing, no hidden fees.",
-      "monthly": "Monthly",
-      "yearly": "Yearly",
-      "savePercent": "Save 17%",
-      "mostPopular": "Most Popular",
-      "currentPlan": "Current Plan",
-      "faq": {
-        "title": "Frequently Asked Questions",
-        "changePlan": {
-          "q": "Can I change my plan later?",
-          "a": "Yes, you can upgrade or downgrade at any time. Changes are prorated."
+        "title": "Subscription Plan",
+        "upgradeHint": "Upgrade for a better experience",
+        "expires": "Expires: {{date}}",
+        "upgrade": "Upgrade",
+        "manage": "Manage Plan",
+        "freeHint": "Upgrade for better experience",
+        "pricing": "Pricing",
+        "titleNew": "Plans for Modern Teams",
+        "subtitleNew": "Choose the perfect plan for you. Transparent pricing, no hidden fees.",
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "savePercent": "Save 17%",
+        "mostPopular": "Most Popular",
+        "currentPlan": "Current Plan",
+        "features": "Features",
+        "faq": {
+            "title": "Frequently Asked Questions",
+            "changePlan": {
+                "q": "Can I change my plan later?",
+                "a": "Yes, you can upgrade or downgrade at any time. Changes are prorated."
+            },
+            "freeTrial": {
+                "q": "Is there a free trial?",
+                "a": "We offer a Free tier to experience basic features. You can upgrade anytime."
+            },
+            "payment": {
+                "q": "What payment methods are accepted?",
+                "a": "Payment is deducted from your account balance. You can deposit via bank transfer or card."
+            },
+            "security": {
+                "q": "Is my data safe?",
+                "a": "Security is our top priority. We use AES-256 encryption."
+            }
         },
-        "freeTrial": {
-          "q": "Is there a free trial?",
-          "a": "We offer a Free tier to experience basic features. You can upgrade anytime."
-        },
-        "payment": {
-          "q": "What payment methods are accepted?",
-          "a": "Payment is deducted from your account balance. You can deposit via bank transfer or card."
-        },
-        "security": {
-          "q": "Is my data safe?",
-          "a": "Security is our top priority. We use AES-256 encryption."
-        }
-      },
-      "trustedBy": "Trusted by industry leaders",
-      "footerNote": "Payment is deducted from account balance."
+        "trustedBy": "Trusted by industry leaders",
+        "footerNote": "Payment is deducted from account balance.",
+        "perMonth": "/month",
+        "perYear": "/year",
+        "free": "Free",
+        "select": "Select {{plan}}",
+        "default": "Default Plan",
+        "confirm": "Confirm Purchase",
+        "current": "Current Plan",
+        "processing": "Processing..."
     },
-    "activity": {
-      "title": "Activity History",
-      "viewAll": "View all"
-    },
-    "activeStatus": "Active"
+    "footer": "© 2026 Learning Platform. All rights reserved."
   },
   "purchase": {
     "title": "Deposit Funds",
@@ -130,29 +239,52 @@
       "successTitle": "Deposit Successful!",
       "successDesc": "Balance updated",
       "resume": "Tap to continue"
+    },
+    "currency": "VND",
+    "success": {
+        "title": "Deposit successful!",
+        "subtitle": "Amount has been added to your account",
+        "viewBalance": "View Balance",
+        "home": "Back to Home",
+        "redirect": "Auto redirecting to profile in 10 seconds...",
+        "transactionCode": "Transaction Code"
     }
   },
   "forum": {
     "title": "Tech Forum",
     "subtitle": "Share knowledge and experience about Information Technology",
+    "hero": {
+      "title": "Community Discussion",
+      "subtitle": "Discover quality articles from the community"
+    },
+    "loading": "Loading...",
+    "footer": "© 2026 Tech Forum. Crafted with passion.",
+    "home": "Home",
     "latestPosts": "Latest Posts",
     "comments": "comments",
     "views": "views",
-    "createPost": "Create New Post",
-    "categories": "Forum Categories",
+    "replies": "replies",
+    "createPost": "Create Post",
+    "categories": "Categories",
     "stats": {
-      "title": "Forum Statistics",
+      "title": "Forum Stats",
       "totalPosts": "Total Posts",
       "members": "Members",
-      "online": "Online"
+      "online": "Online",
+      "onlineMembers": "Online Now",
+      "posts": "posts",
+      "activeDiscussions": "Active Discussions",
+      "writing": "Writing",
+      "activity7Days": "Activity (7 Days)"
     },
     "featured": "Featured Discussions",
-    "featuredSubtitle": "Most popular topics right now",
+    "featuredSubtitle": "Most interesting topics right now",
     "hotTopics": "Hot Topics",
     "topMembers": "Top Members",
-    "readMore": "Read more",
-    "loadMore": "Load older posts",
-    "gotQuestions": "Got a question?",
+    "topContributors": "Top Contributors",
+    "readMore": "Read More",
+    "loadMore": "Load More Posts",
+    "gotQuestions": "Got Questions?",
     "communityConnect": "Connect with thousands of tech experts and get answers instantly.",
     "cta": {
       "ask": "Create New Post",
@@ -161,8 +293,85 @@
     "sidebar": {
       "categories": "Categories",
       "stats": "Statistics",
-      "topMembers": "Top Contributors",
-      "hotTags": "Hot Tags"
+      "topMembers": "Top Members",
+      "hotTags": "Hot Tags",
+      "liveActivity": "Live Activity",
+      "sponsored": {
+         "tag": "Sponsored",
+         "title": "Tech Summit 2026",
+         "desc": "Join now for Early Bird tickets.",
+         "button": "Learn More"
+      },
+      "relatedThreads": "Related Threads"
+    },
+    "search": {
+      "placeholder": "Search posts, discussions...",
+      "placeholderCategory": "Search in {{category}}..."
+    },
+    "filter": {
+      "all": "All",
+      "hot": "Hot",
+      "new": "Newest",
+      "unanswered": "Unanswered",
+      "popular": "Popular",
+      "showing": "Showing {{count}} threads",
+      "filterBtn": "Filter"
+    },
+    "badges": {
+      "hot": "HOT",
+      "new": "NEW",
+      "expert": "Expert",
+      "pinned": "Pinned",
+      "vip": "VIP",
+      "author": "Author",
+      "techLead": "Tech Lead"
+    },
+    "time": {
+      "justNow": "just now",
+      "hoursAgo": "{{hours}} hours ago",
+      "daysAgo": "{{days}} days ago"
+    },
+    "create": {
+      "title": "Create New Post",
+      "breadcrumb": "Create New Post",
+      "form": {
+        "category": "Category",
+        "title": "Title",
+        "titlePlaceholder": "Enter post title...",
+        "content": "Content",
+        "contentPlaceholder": "Write your post content...",
+        "cancel": "Cancel",
+        "submit": "Publish Post",
+        "submitting": "Publishing...",
+        "error": "Please fill in all fields",
+        "genericError": "Cannot create post. Please login and try again."
+      }
+    },
+    "thread": {
+      "notFound": "Thread not found",
+      "categoryNotFound": "Category not found",
+      "like": "Like",
+      "share": "Share",
+      "save": "Save",
+      "reply": "Reply",
+      "writeComment": "Write your comment...",
+      "markdownSupported": "Markdown supported",
+      "submitComment": "Post Comment",
+      "submitting": "Posting...",
+      "cancel": "Cancel",
+      "loginToLike": "You need to login to like",
+      "loginToComment": "You need to login to comment",
+      "sort": {
+        "label": "Sort by:",
+        "newest": "Newest",
+        "mostLiked": "Most Liked",
+      "oldest": "Oldest"
+      }
+
+    },
+    "pagination": {
+        "prev": "Previous",
+        "next": "Next"
     }
   },
   "mySkillTree": {
@@ -201,19 +410,208 @@
       "description": "Description",
       "resources": "Learning Resources",
       "startLearning": "Start Learning",
-      "review": "Review"
+      "learnNow": "Learn Now",
+      "review": "Review",
+      "nodeTypes": {
+        "ability": "Core Ability",
+        "skill": "Skill",
+        "knowledge": "Knowledge",
+        "specialization": "Specialization"
+      },
+      "selectNodePrompt": "Select a node to view details",
+      "clickNodeHint": "Click on a skill in the tree",
+      "difficulty": "Difficulty",
+      "timeEstimate": "Estimated Time",
+      "importance": "Importance",
+      "practicalApp": "Practical Application",
+      "defaultProjectTitle": "Sample Project Implementation",
+      "defaultProjectDesc": "Use this skill to build a functional module in your current project.",
+      "completedCount": "COMPLETED",
+      "loadingResources": "Loading resources...",
+      "emptyResources": "No resources available for this skill.",
+      "openResource": "Open Resource",
+      "addToCalendar": "Add to Calendar",
+      "finished": "Finished",
+      "markFinished": "Done?",
+      "levels": {
+          "medium": "Medium",
+          "high": "High"
+      },
+      "types": {
+          "course": "Course",
+          "selfStudy": "Self Study",
+          "weeks": "Weeks",
+          "hours": "Hours"
+      },
+      "status": {
+          "focusing": "Focusing",
+          "completed": "Completed",
+          "locked": "Locked",
+          "notStarted": "Not Started",
+          "inProgress": "In Progress"
+      }
     },
-
     "toasts": {
         "loadError": "Could not load your skill tree"
+    },
+    "timeline": {
+        "title": "Personal Learning Schedule",
+        "subtitle": "Manage your learning progress",
+        "addTitle": "Add to Timeline",
+        "manual": "Manual",
+        "ai": "AI Auto-schedule",
+        "selectResource": "Select Resource",
+        "selectPlaceholder": "-- Select Resource --",
+        "date": "Date",
+        "time": "Time",
+        "deadline": "Deadline",
+        "priority": "Priority",
+        "status": "Status",
+        "priorities": { "low": "Low", "medium": "Medium", "high": "High" },
+        "statuses": { "not_started": "Not Started", "in_progress": "In Progress", "completed": "Completed" },
+        "aiPromptLabel": "Describe your free time",
+        "aiPromptPlaceholder": "E.g: I'm free at 8pm on Mon, Wed, Fri",
+        "aiHint": "AI will analyze and schedule for you",
+        "generate": "Generate Schedule",
+        "analyzing": "Analyzing...",
+        "aiunderstood": "AI Understood:",
+        "days": "Days",
+        "duration": "Duration",
+        "suggestions": "Suggested Schedule",
+        "confirm": "Confirm Schedule",
+        "cancel": "Cancel",
+        "add": "Add to Calendar",
+        "save": "Save Changes",
+        "close": "Close",
+        "success": "Added to timeline successfully",
+        "errors": { 
+            "fetch": "Error fetching resources", 
+            "add": "Error adding to timeline", 
+            "connection": "Connection error", 
+            "aiParse": "Could not parse request. Please try again.", 
+            "aiConfirm": "Error confirming schedule" 
+        },
+        "periods": {
+            "morning": "Morning",
+            "afternoon": "Afternoon",
+            "evening": "Evening"
+        },
+        "stats": {
+            "total": "Total",
+            "inProgress": "In Progress",
+            "completed": "Completed",
+            "tasks": "Tasks"
+        },
+        "view": {
+            "week": "Week",
+            "month": "Month",
+            "today": "Today",
+            "prevWeek": "Previous Week",
+            "nextWeek": "Next Week",
+            "prevMonth": "Previous Month",
+            "nextMonth": "Next Month"
+        },
+        "empty": {
+            "title": "No activities",
+            "subtitle": "Free time to rest!"
+        },
+        "actions": {
+            "addActivity": "Add Activity",
+            "edit": "Edit Schedule",
+            "deleteConfirm": "Delete \"{{name}}\" from schedule?"
+        },
+        "notifications": {
+            "on": "Enable Reminders",
+            "off": "Disable Reminders"
+        }
     }
   },
   "skillTree": {
       "manageNode": "Manage Node",
+      "page": {
+        "backToSkills": "Back to Skills",
+        "back": "Back",
+        "nodes": "nodes",
+        "loading": "Loading...",
+        "saved": "Saved!",
+        "saving": "Saving...",
+        "saveToMyTree": "Save to My Tree",
+        "creatingTree": "Creating Skill Tree...",
+        "analyzing": "AI is analyzing and selecting suitable path",
+        "title": "Skill Tree",
+        "instruction1": "Use chat panel to ask about learning path.",
+        "instruction2": "AI will automatically create a skill tree for you.",
+        "chatToStart": "Chat to start",
+        "nodeLegend": "Node",
+        "nodesCount": "nodes"
+      },
       "rightPanel": {
         "tabs": {
             "chat": "Chat",
             "resource": "Resources"
+        },
+        "timeline": {
+            "title": "Add to Study Schedule",
+            "manual": "Manual",
+            "ai": "AI Automated",
+            "selectResource": "Select Learning Resource",
+            "selectPlaceholder": "-- Select Resource --",
+            "date": "Study Date",
+            "deadline": "Deadline",
+            "priority": "Priority",
+            "priorities": {
+                "low": "Low",
+                "medium": "Medium",
+                "high": "High"
+            },
+            "aiPromptLabel": "Describe your availability",
+            "aiPromptPlaceholder": "E.g.: I'm free at 8 PM on Mon, Wed, Fri",
+            "aiHint": "AI will analyze and automatically schedule for you",
+            "generate": "Generate Schedule",
+            "analyzing": "Analyzing...",
+            "aiunderstood": "AI Understood:",
+            "days": "Days",
+            "time": "Time",
+            "duration": "Duration",
+            "suggestions": "Suggested Schedule",
+            "confirm": "Confirm Schedule",
+            "cancel": "Cancel",
+            "add": "Add to Calendar",
+            "success": "Successfully added to schedule",
+            "errors": {
+                "fetch": "Error fetching resources",
+                "add": "Error adding to schedule",
+                "connection": "Connection error",
+                "aiParse": "Could not parse request. Please try again.",
+                "aiConfirm": "Error confirming schedule"
+            }
+        },
+        "nodeManagement": {
+            "title": "Node Management",
+            "subtitle": "Swap node with alternatives and preview structure",
+            "currentActive": "Current Active Node",
+            "preview": {
+                "title": "Preview: New Sub-tree",
+                "clear": "Clear Preview",
+                "previewing": "Previewing:",
+                "noSubNodes": "No sub-nodes found"
+            },
+            "alternatives": {
+                "title": "Alternative Nodes",
+                "refresh": "Refresh",
+                "empty": "No alternatives found",
+                "swapTo": "Swap to"
+            },
+            "actions": {
+                "close": "Close",
+                "preview": "Preview",
+                "swap": "Swap"
+            },
+            "errors": {
+                "load": "Failed to load alternatives",
+                "swap": "Failed to swap node",
+                "session": "Session ID is required"
+            }
         }
       }
   },
@@ -256,36 +654,6 @@
     "logout": {
         "success": "Logged out successfully"
     }
-  },
-  "landing": {
-    "nav": {
-      "signIn": "Sign In",
-      "getStarted": "Get Started"
-    },
-    "hero": {
-      "badge": "Learn smarter with AI",
-      "title": {
-        "line1": "Grow your skills,",
-        "line2": "Shape your future"
-      },
-      "description": "Build a personalized learning path driven by AI. Track progress, unlock new capabilities, and discover career opportunities tailored to you.",
-      "startFree": "Start for Free",
-      "learnMore": "Learn more",
-      "trustedBy": "Trusted by 10,000+ learners"
-    },
-    "features": {
-      "personalized": {
-        "title": "Personalized AI Roadmap",
-        "description": "Create a unique learning path based on your interests, goals, and skill history."
-      },
-      "tracking": {
-        "title": "Visual Tracking",
-        "description": "Watch your skill tree grow daily as you unlock new knowledge and capabilities."
-      },
-      "career": {
-        "title": "Career Guidance",
-        "description": "Discover career opportunities that best match your current skill set and potential."
-      }
-    }
   }
+
 }

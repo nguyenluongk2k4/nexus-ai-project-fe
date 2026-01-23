@@ -4,6 +4,7 @@
  */
 
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   DndContext,
   closestCenter,
@@ -47,11 +48,8 @@ import { learningGateway } from '../../providers';
 type TimePeriod = 'morning' | 'afternoon' | 'evening';
 type ViewMode = 'week' | 'month';
 
-const TIME_PERIODS = {
-  morning: { label: 'Buổi sáng', range: '06:00 - 12:00', icon: Sun, hours: [6, 12] },
-  afternoon: { label: 'Buổi chiều', range: '12:00 - 18:00', icon: Sunset, hours: [12, 18] },
-  evening: { label: 'Buổi tối', range: '18:00 - 24:00', icon: Moon, hours: [18, 24] },
-};
+// Removed static TIME_PERIODS definition to move inside component or use translations
+
 
 export function Timeline() {
   const {
@@ -59,6 +57,13 @@ export function Timeline() {
     updateTimelineItem,
     removeFromTimeline,
   } = useLearningProgress();
+  const { t, i18n } = useTranslation();
+
+  const TIME_PERIODS = useMemo(() => ({
+    morning: { label: t('mySkillTree.timeline.periods.morning'), range: '06:00 - 12:00', icon: Sun, hours: [6, 12] },
+    afternoon: { label: t('mySkillTree.timeline.periods.afternoon'), range: '12:00 - 18:00', icon: Sunset, hours: [12, 18] },
+    evening: { label: t('mySkillTree.timeline.periods.evening'), range: '18:00 - 24:00', icon: Moon, hours: [18, 24] },
+  }), [t]);
 
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => {
     const today = new Date();
@@ -134,10 +139,8 @@ export function Timeline() {
 
   // Get month/year for display
   const currentMonthYear = useMemo(() => {
-    const months = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
-      'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
-    return `${months[currentWeekStart.getMonth()]}, ${currentWeekStart.getFullYear()}`;
-  }, [currentWeekStart]);
+    return new Intl.DateTimeFormat(i18n.language === 'en' ? 'en-US' : 'vi-VN', { month: 'long', year: 'numeric' }).format(currentWeekStart);
+  }, [currentWeekStart, i18n.language]);
 
   // Filter items for selected date
   const itemsForSelectedDate = useMemo(() => {
@@ -195,9 +198,8 @@ export function Timeline() {
   }, [timelineItems]);
 
   const formatDate = (date: Date) => {
-    const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
     return {
-      dayName: days[date.getDay()],
+      dayName: new Intl.DateTimeFormat(i18n.language === 'en' ? 'en-US' : 'vi-VN', { weekday: 'short' }).format(date),
       dayNumber: date.getDate(),
     };
   };
@@ -271,25 +273,25 @@ export function Timeline() {
         });
       } else {
         console.error('Failed to update timeline item on backend');
-        alert('Không thể cập nhật lịch học. Vui lòng thử lại.');
+        alert(t('mySkillTree.timeline.errors.add'));
       }
     } catch (error) {
       console.error('Error updating timeline item:', error);
-      alert('Lỗi khi cập nhật lịch học.');
+      alert(t('mySkillTree.timeline.errors.connection'));
     }
   };
 
   const handleDelete = (item: TimelineItem) => {
-    if (window.confirm(`Xác nhận xóa "${item.resourceName}" khỏi lịch học?`)) {
+    if (window.confirm(t('mySkillTree.timeline.actions.deleteConfirm', { name: item.resourceName }))) {
       removeFromTimeline(item.id);
     }
   };
 
   const renderTimelineCard = (item: TimelineItem, barColor: string) => {
     const priorityColors = {
-      high: { bg: 'bg-destructive/10', text: 'text-destructive', label: 'Cao' },
-      medium: { bg: 'bg-amber-500/10', text: 'text-amber-500', label: 'Trung bình' },
-      low: { bg: 'bg-muted', text: 'text-muted-foreground', label: 'Thấp' },
+      high: { bg: 'bg-destructive/10', text: 'text-destructive', label: t('mySkillTree.timeline.priorities.high') },
+      medium: { bg: 'bg-amber-500/10', text: 'text-amber-500', label: t('mySkillTree.timeline.priorities.medium') },
+      low: { bg: 'bg-muted', text: 'text-muted-foreground', label: t('mySkillTree.timeline.priorities.low') },
     };
     const priority = priorityColors[item.priority];
 
@@ -327,7 +329,7 @@ export function Timeline() {
         {/* Header: Priority & Actions */}
         <div className="flex justify-between items-start mb-3 pl-3">
           <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide ${priority.badge || priority.bg + ' ' + priority.text}`}>
-            {item.priority === 'high' ? 'Cao' : item.priority === 'medium' ? 'Trung bình' : 'Thấp'}
+            {t(`mySkillTree.timeline.priorities.${item.priority}`)}
           </span>
 
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -372,7 +374,7 @@ export function Timeline() {
               <Circle className="w-4 h-4" />
             )}
             <span className={`text-xs font-medium ${item.status === 'completed' ? 'text-emerald-500' : ''}`}>
-              {item.status === 'completed' ? 'Hoàn thành' : item.status === 'in_progress' ? 'Đang học' : 'Chưa bắt đầu'}
+              {t(`mySkillTree.timeline.statuses.${item.status}`)}
             </span>
           </button>
         </div>
@@ -416,9 +418,9 @@ export function Timeline() {
                 <div className={`w-16 h-16 ${accent.bg} rounded-2xl flex items-center justify-center mb-4 ${accent.text}`}>
                   <config.icon className="w-8 h-8" />
                 </div>
-                <h3 className="text-sm font-bold text-foreground mb-1">Chưa có hoạt động</h3>
+                <h3 className="text-sm font-bold text-foreground mb-1">{t('mySkillTree.timeline.empty.title')}</h3>
                 <span className="text-xs text-muted-foreground max-w-[200px]">
-                  Khoảng thời gian trống để nghỉ ngơi!
+                  {t('mySkillTree.timeline.empty.subtitle')}
                 </span>
               </div>
             )}
@@ -432,7 +434,7 @@ export function Timeline() {
                       hover:bg-card hover:text-primary hover:border-primary transition-all flex items-center justify-center gap-2 group"
         >
           <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
-          Thêm hoạt động
+          {t('mySkillTree.timeline.actions.addActivity')}
         </button>
       </div>
     );
@@ -460,7 +462,7 @@ export function Timeline() {
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
         <div className="bg-card border border-border rounded-xl w-full max-w-md p-6">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-foreground">Chỉnh sửa lịch học</h3>
+            <h3 className="text-lg font-semibold text-foreground">{t('mySkillTree.timeline.actions.edit')}</h3>
             <button onClick={() => setEditingItem(null)} className="text-muted-foreground hover:text-foreground">
               <X className="w-5 h-5" />
             </button>
@@ -468,12 +470,12 @@ export function Timeline() {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Tài liệu</label>
+              <label className="block text-sm font-medium text-foreground mb-1">{t('mySkillTree.panel.resources')}</label>
               <p className="text-sm text-muted-foreground bg-muted/50 p-2 rounded">{editingItem.resourceName}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Ngày học</label>
+              <label className="block text-sm font-medium text-foreground mb-1">{t('mySkillTree.timeline.date')}</label>
               <input
                 type="date"
                 defaultValue={editingItem.scheduledDate.toISOString().split('T')[0]}
@@ -486,7 +488,7 @@ export function Timeline() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Giờ học</label>
+              <label className="block text-sm font-medium text-foreground mb-1">{t('mySkillTree.timeline.time')}</label>
               <input
                 type="time"
                 defaultValue={editingItem.scheduledTime || '08:00'}
@@ -498,7 +500,7 @@ export function Timeline() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Deadline</label>
+              <label className="block text-sm font-medium text-foreground mb-1">{t('mySkillTree.timeline.deadline')}</label>
               <input
                 type="date"
                 defaultValue={editingItem.deadline?.toISOString().split('T')[0] || ''}
@@ -511,7 +513,7 @@ export function Timeline() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Độ ưu tiên</label>
+              <label className="block text-sm font-medium text-foreground mb-1">{t('mySkillTree.timeline.priority')}</label>
               <select
                 defaultValue={editingItem.priority}
                 onChange={(e) => {
@@ -519,14 +521,14 @@ export function Timeline() {
                 }}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               >
-                <option value="low">Thấp</option>
-                <option value="medium">Trung bình</option>
-                <option value="high">Cao</option>
+                <option value="low">{t('mySkillTree.timeline.priorities.low')}</option>
+                <option value="medium">{t('mySkillTree.timeline.priorities.medium')}</option>
+                <option value="high">{t('mySkillTree.timeline.priorities.high')}</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Trạng thái</label>
+              <label className="block text-sm font-medium text-foreground mb-1">{t('mySkillTree.timeline.status')}</label>
               <select
                 defaultValue={editingItem.status}
                 onChange={(e) => {
@@ -534,9 +536,9 @@ export function Timeline() {
                 }}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               >
-                <option value="not_started">Chưa bắt đầu</option>
-                <option value="in_progress">Đang học</option>
-                <option value="completed">Hoàn thành</option>
+                <option value="not_started">{t('mySkillTree.timeline.statuses.not_started')}</option>
+                <option value="in_progress">{t('mySkillTree.timeline.statuses.in_progress')}</option>
+                <option value="completed">{t('mySkillTree.timeline.statuses.completed')}</option>
               </select>
             </div>
           </div>
@@ -546,7 +548,7 @@ export function Timeline() {
               onClick={() => setEditingItem(null)}
               className="flex-1 py-2 border border-border rounded-lg text-foreground text-sm font-medium hover:bg-muted transition-colors"
             >
-              Đóng
+              {t('mySkillTree.timeline.close')}
             </button>
             <button
               onClick={() => {
@@ -555,7 +557,7 @@ export function Timeline() {
               }}
               className="flex-1 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
             >
-              Lưu thay đổi
+              {t('mySkillTree.timeline.save')}
             </button>
           </div>
         </div>
@@ -571,23 +573,23 @@ export function Timeline() {
           <div className="px-8 py-5 flex justify-between items-center border-b border-border/50">
             {/* Left: Title */}
             <div className="flex flex-col">
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Lịch Học Cá Nhân</h1>
-              <p className="text-sm text-muted-foreground font-medium mt-0.5">Quản lý tiến độ học tập</p>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t('mySkillTree.timeline.title')}</h1>
+              <p className="text-sm text-muted-foreground font-medium mt-0.5">{t('mySkillTree.timeline.subtitle')}</p>
             </div>
 
             {/* Center: Horizontal Stats */}
             <div className="hidden xl:flex items-center divide-x divide-border/60">
               <div className="px-8 text-center">
                 <div className="text-3xl font-bold text-foreground">{stats.total}</div>
-                <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mt-1">Tổng số</div>
+                <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mt-1">{t('mySkillTree.timeline.stats.total')}</div>
               </div>
               <div className="px-8 text-center">
                 <div className="text-3xl font-bold text-primary">{stats.inProgress}</div>
-                <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mt-1">Đang học</div>
+                <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mt-1">{t('mySkillTree.timeline.stats.inProgress')}</div>
               </div>
               <div className="px-8 text-center">
                 <div className="text-3xl font-bold text-emerald-500">{stats.completed}</div>
-                <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mt-1">Hoàn thành</div>
+                <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mt-1">{t('mySkillTree.timeline.stats.completed')}</div>
               </div>
             </div>
 
@@ -602,7 +604,7 @@ export function Timeline() {
                     : 'text-muted-foreground hover:text-foreground'
                     }`}
                 >
-                  Tuần
+                  {t('mySkillTree.timeline.view.week')}
                 </button>
                 <button
                   onClick={() => setViewMode('month')}
@@ -611,7 +613,7 @@ export function Timeline() {
                     : 'text-muted-foreground hover:text-foreground'
                     }`}
                 >
-                  Tháng
+                  {t('mySkillTree.timeline.view.month')}
                 </button>
               </div>
 
@@ -619,7 +621,7 @@ export function Timeline() {
                 onClick={goToToday}
                 className="px-3 py-2 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors"
               >
-                Hôm nay
+                {t('mySkillTree.timeline.view.today')}
               </button>
 
               {/* Date Nav */}
@@ -627,7 +629,7 @@ export function Timeline() {
                 <button
                   onClick={viewMode === 'week' ? goToPreviousWeek : goToPreviousMonth}
                   className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground transition-colors"
-                  title={viewMode === 'week' ? 'Tuần trước' : 'Tháng trước'}
+                  title={viewMode === 'week' ? t('mySkillTree.timeline.view.prevWeek') : t('mySkillTree.timeline.view.prevMonth')}
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
@@ -641,7 +643,7 @@ export function Timeline() {
                 <button
                   onClick={viewMode === 'week' ? goToNextWeek : goToNextMonth}
                   className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground transition-colors"
-                  title={viewMode === 'week' ? 'Tuần sau' : 'Tháng sau'}
+                  title={viewMode === 'week' ? t('mySkillTree.timeline.view.nextWeek') : t('mySkillTree.timeline.view.nextMonth')}
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
@@ -660,7 +662,7 @@ export function Timeline() {
                   ? 'bg-primary/10 text-primary'
                   : 'bg-muted/50 text-muted-foreground hover:text-foreground hover:border-border'
                   }`}
-                title={notificationsEnabled ? 'Tắt nhắc nhở' : 'Bật nhắc nhở'}
+                title={notificationsEnabled ? t('mySkillTree.timeline.notifications.off') : t('mySkillTree.timeline.notifications.on')}
               >
                 {notificationsEnabled && permission === 'granted' ? (
                   <Bell className="w-5 h-5" />
@@ -675,7 +677,7 @@ export function Timeline() {
                 className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all shadow-md hover:shadow-lg font-medium"
               >
                 <Plus className="w-5 h-5" />
-                Thêm lịch
+                {t('mySkillTree.timeline.add')}
               </button>
             </div>
           </div>
@@ -697,13 +699,13 @@ export function Timeline() {
                         <div className="bg-card rounded-xl shadow-lg border-t-4 border-primary px-10 py-4 transform -translate-y-2 min-w-[140px] flex flex-col items-center">
                           {today && (
                             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-card px-3">
-                              <span className="text-[10px] font-bold text-primary uppercase tracking-widest whitespace-nowrap">Hôm nay</span>
+                              <span className="text-[10px] font-bold text-primary uppercase tracking-widest whitespace-nowrap">{t('mySkillTree.timeline.view.today')}</span>
                             </div>
                           )}
                           <div className="text-center mt-4">
                             <span className="block text-4xl font-bold text-foreground">{dayNumber}</span>
                             <span className="inline-block mt-2 bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full">
-                              {taskCount} Tasks
+                              {taskCount} {t('mySkillTree.timeline.stats.tasks')}
                             </span>
                           </div>
                         </div>

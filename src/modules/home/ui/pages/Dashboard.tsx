@@ -4,10 +4,12 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { useDashboard } from '../hooks/useDashboard';
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { PageLoading } from '@/shared/components/PageLoading';
+import { useTranslation } from 'react-i18next';
 
 export function Dashboard() {
   const { data, loading, error } = useDashboard();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   if (loading) return <PageLoading />;
   if (error) return <div className="p-8 text-red-500">{error}</div>;
@@ -16,14 +18,14 @@ export function Dashboard() {
   const { metrics, weeklyActivity, skillProgress, recentActivity } = data;
 
   // Get display name
-  const displayName = user?.fullName || user?.username || 'bạn';
+  const displayName = user?.fullName || user?.username || t('common.user');
 
   return (
     <div className="flex-1 bg-white p-8 overflow-auto">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-foreground mb-2">Chào mừng trở lại, {displayName}</h1>
-          <p className="text-muted-foreground">Track your learning progress and continue your journey</p>
+          <h1 className="text-foreground mb-2">{t('nav.dashboardPage.welcome', { name: displayName })}</h1>
+          <p className="text-muted-foreground">{t('nav.dashboardPage.subtitle')}</p>
         </div>
 
         {/* Metrics Grid */}
@@ -31,10 +33,10 @@ export function Dashboard() {
           {metrics.map((metric: any, idx: number) => (
             <MetricCard
               key={idx}
-              title={metric.title}
+              title={t(metric.title)}
               value={metric.value}
               icon={idx === 0 ? Clock : idx === 1 ? Award : Target}
-              subtitle={metric.subtitle}
+              subtitle={t(metric.subtitle)}
               trend={metric.trend}
             />
           ))}
@@ -46,8 +48,8 @@ export function Dashboard() {
           <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-foreground mb-1">Weekly Activity</h3>
-                <p className="text-muted-foreground">Hours spent learning</p>
+                <h3 className="text-foreground mb-1">{t('nav.dashboardPage.weeklyActivity')}</h3>
+                <p className="text-muted-foreground">{t('nav.dashboardPage.weeklyActivitySub')}</p>
               </div>
               <TrendingUp className="w-5 h-5 text-teal-600" />
             </div>
@@ -84,8 +86,8 @@ export function Dashboard() {
           <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-foreground mb-1">Skill Progress</h3>
-                <p className="text-muted-foreground">Current skill levels</p>
+                <h3 className="text-foreground mb-1">{t('nav.dashboardPage.skillProgress')}</h3>
+                <p className="text-muted-foreground">{t('nav.dashboardPage.skillProgressSub')}</p>
               </div>
               <Award className="w-5 h-5 text-violet-600" />
             </div>
@@ -115,19 +117,23 @@ export function Dashboard() {
 
         {/* Recent Activity */}
         <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
-          <h3 className="text-foreground mb-4">Recent Activity</h3>
+          <h3 className="text-foreground mb-4">{t('nav.dashboardPage.recentActivity')}</h3>
           <div className="space-y-4">
             {recentActivity.map((item: any, idx: number) => (
               <div key={idx} className="flex items-center justify-between py-3 border-b border-border last:border-0">
                 <div>
-                  <p className="text-foreground">{item.action}</p>
+                  <p className="text-foreground">{t(item.action)}</p>
                   <p className="text-muted-foreground">{item.detail}</p>
                 </div>
                 <div className="text-right">
                   {item.score && (
                     <p className="text-teal-600 mb-1">{item.score}</p>
                   )}
-                  <p className="text-muted-foreground">{item.time}</p>
+                  <p className="text-muted-foreground">
+                    {item.time.includes('time') 
+                      ? (item.time === 'common.time.yesterday' ? t(item.time) : t(item.time, { hours: 2 })) 
+                      : item.time}
+                  </p>
                 </div>
               </div>
             ))}

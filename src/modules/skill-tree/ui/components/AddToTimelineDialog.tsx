@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Calendar, Sparkles, Clock, Loader2, Check, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const API_BASE = 'http://localhost:8000/api';
 
@@ -33,6 +34,7 @@ interface AddToTimelineDialogProps {
 }
 
 export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelineDialogProps) {
+    const { t, i18n } = useTranslation();
     const [activeTab, setActiveTab] = useState<'manual' | 'ai'>('manual');
     const [resources, setResources] = useState<Resource[]>([]);
     const [loading, setLoading] = useState(false);
@@ -109,11 +111,11 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                 onClose();
                 resetForm();
             } else {
-                alert('Lỗi khi thêm vào lịch');
+                alert(t('mySkillTree.timeline.errors.add'));
             }
         } catch (error) {
             console.error('Error adding to timeline:', error);
-            alert('Lỗi kết nối');
+            alert(t('mySkillTree.timeline.errors.connection'));
         } finally {
             setLoading(false);
         }
@@ -142,11 +144,11 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                 setAiParsed(data.parsed);
                 setAiSuggestions(data.suggestions);
             } else {
-                setAiError('Không thể phân tích yêu cầu. Vui lòng thử lại.');
+                setAiError(t('mySkillTree.timeline.errors.aiParse'));
             }
         } catch (error) {
             console.error('Error generating AI schedule:', error);
-            setAiError('Lỗi kết nối');
+            setAiError(t('mySkillTree.timeline.errors.connection'));
         } finally {
             setLoading(false);
         }
@@ -166,16 +168,16 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
 
             if (response.ok) {
                 const data = await response.json();
-                alert(data.message);
+                alert(data.message || t('mySkillTree.timeline.success'));
                 onSuccess();
                 onClose();
                 resetForm();
             } else {
-                alert('Lỗi khi xác nhận lịch');
+                alert(t('mySkillTree.timeline.errors.aiConfirm'));
             }
         } catch (error) {
             console.error('Error confirming AI schedule:', error);
-            alert('Lỗi kết nối');
+            alert(t('mySkillTree.timeline.errors.connection'));
         } finally {
             setLoading(false);
         }
@@ -193,7 +195,9 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
     };
 
     const formatDate = (dateStr: string) => {
-        return new Date(dateStr).toLocaleDateString('vi-VN', {
+        // Use current language for date formatting (vi or en)
+        const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN';
+        return new Date(dateStr).toLocaleDateString(locale, {
             weekday: 'short',
             day: 'numeric',
             month: 'short',
@@ -207,7 +211,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
             <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-border">
-                    <h2 className="text-xl font-bold text-foreground">Thêm vào Lịch Học</h2>
+                    <h2 className="text-xl font-bold text-foreground">{t('mySkillTree.timeline.title')}</h2>
                     <button
                         onClick={onClose}
                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -226,7 +230,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                             }`}
                     >
                         <Calendar className="w-4 h-4" />
-                        Thủ công
+                        {t('mySkillTree.timeline.manual')}
                     </button>
                     <button
                         onClick={() => setActiveTab('ai')}
@@ -236,7 +240,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                             }`}
                     >
                         <Sparkles className="w-4 h-4" />
-                        AI Tự động
+                        {t('mySkillTree.timeline.ai')}
                     </button>
                 </div>
 
@@ -247,14 +251,14 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                             {/* Resource Select */}
                             <div>
                                 <label className="block text-sm font-medium text-foreground mb-2">
-                                    Chọn tài liệu học
+                                    {t('mySkillTree.timeline.selectResource')}
                                 </label>
                                 <select
                                     value={selectedResourceId}
                                     onChange={(e) => setSelectedResourceId(e.target.value)}
                                     className="w-full p-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500"
                                 >
-                                    <option value="">-- Chọn tài liệu --</option>
+                                    <option value="">{t('mySkillTree.timeline.selectPlaceholder')}</option>
                                     {resources.map((res) => (
                                         <option key={res.id} value={res.id}>
                                             {res.title} ({res.nodeName})
@@ -267,7 +271,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-foreground mb-2">
-                                        Ngày học
+                                        {t('mySkillTree.timeline.date')}
                                     </label>
                                     <input
                                         type="date"
@@ -278,7 +282,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-foreground mb-2">
-                                        Deadline
+                                        {t('mySkillTree.timeline.deadline')}
                                     </label>
                                     <input
                                         type="date"
@@ -292,7 +296,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                             {/* Priority */}
                             <div>
                                 <label className="block text-sm font-medium text-foreground mb-2">
-                                    Độ ưu tiên
+                                    {t('mySkillTree.timeline.priority')}
                                 </label>
                                 <div className="flex gap-3">
                                     {['low', 'medium', 'high'].map((p) => (
@@ -308,7 +312,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                                                     : 'border-border hover:bg-gray-50'
                                                 }`}
                                         >
-                                            {p === 'high' ? 'Cao' : p === 'medium' ? 'Trung bình' : 'Thấp'}
+                                            {p === 'high' ? t('mySkillTree.timeline.priorities.high') : p === 'medium' ? t('mySkillTree.timeline.priorities.medium') : t('mySkillTree.timeline.priorities.low')}
                                         </button>
                                     ))}
                                 </div>
@@ -319,16 +323,16 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                             {/* AI Prompt Input */}
                             <div>
                                 <label className="block text-sm font-medium text-foreground mb-2">
-                                    Mô tả thời gian rảnh của bạn
+                                    {t('mySkillTree.timeline.aiPromptLabel')}
                                 </label>
                                 <textarea
                                     value={aiPrompt}
                                     onChange={(e) => setAiPrompt(e.target.value)}
-                                    placeholder="Ví dụ: Tôi rảnh 8h tối các ngày thứ 2, 4, 6"
+                                    placeholder={t('mySkillTree.timeline.aiPromptPlaceholder')}
                                     className="w-full p-4 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 min-h-[100px] resize-none"
                                 />
                                 <p className="text-xs text-muted-foreground mt-2">
-                                    AI sẽ phân tích và tự động xếp lịch học cho bạn
+                                    {t('mySkillTree.timeline.aiHint')}
                                 </p>
                             </div>
 
@@ -342,12 +346,12 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                                     {loading ? (
                                         <>
                                             <Loader2 className="w-5 h-5 animate-spin" />
-                                            Đang phân tích...
+                                            {t('mySkillTree.timeline.analyzing')}
                                         </>
                                     ) : (
                                         <>
                                             <Sparkles className="w-5 h-5" />
-                                            Tạo lịch học
+                                            {t('mySkillTree.timeline.generate')}
                                         </>
                                     )}
                                 </button>
@@ -366,14 +370,14 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                                 <div className="p-4 bg-violet-50 rounded-xl">
                                     <h4 className="font-medium text-violet-900 mb-2 flex items-center gap-2">
                                         <Sparkles className="w-4 h-4" />
-                                        AI đã hiểu:
+                                        {t('mySkillTree.timeline.aiunderstood')}
                                     </h4>
                                     <div className="text-sm text-violet-700 space-y-1">
-                                        <p>📅 Các ngày: {aiParsed.days_of_week?.map((d: number) =>
+                                        <p>📅 {t('mySkillTree.timeline.days')}: {aiParsed.days_of_week?.map((d: number) =>
                                             ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'][d]
                                         ).join(', ')}</p>
-                                        <p>🕐 Giờ học: {aiParsed.time_start}</p>
-                                        <p>⏱️ Thời lượng: {aiParsed.duration_minutes} phút</p>
+                                        <p>🕐 {t('mySkillTree.timeline.time')}: {aiParsed.time_start}</p>
+                                        <p>⏱️ {t('mySkillTree.timeline.duration')}: {aiParsed.duration_minutes} phút</p>
                                     </div>
                                 </div>
                             )}
@@ -382,7 +386,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                             {aiSuggestions.length > 0 && (
                                 <div className="space-y-3">
                                     <h4 className="font-medium text-foreground">
-                                        Lịch học đề xuất ({aiSuggestions.length} mục):
+                                        {t('mySkillTree.timeline.suggestions')} ({aiSuggestions.length}):
                                     </h4>
                                     <div className="max-h-[200px] overflow-y-auto space-y-2">
                                         {aiSuggestions.map((item, index) => (
@@ -415,7 +419,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                         onClick={onClose}
                         className="px-6 py-2.5 text-muted-foreground hover:text-foreground transition-colors"
                     >
-                        Hủy
+                        {t('mySkillTree.timeline.cancel')}
                     </button>
 
                     {activeTab === 'manual' ? (
@@ -425,7 +429,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                             className="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-teal-500 text-white rounded-xl font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
                         >
                             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                            Thêm vào lịch
+                            {t('mySkillTree.timeline.add')}
                         </button>
                     ) : aiSuggestions.length > 0 ? (
                         <button
@@ -434,7 +438,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                             className="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-teal-500 text-white rounded-xl font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
                         >
                             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                            Xác nhận lịch học
+                            {t('mySkillTree.timeline.confirm')}
                         </button>
                     ) : null}
                 </div>

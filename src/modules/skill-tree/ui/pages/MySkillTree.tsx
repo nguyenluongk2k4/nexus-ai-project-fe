@@ -392,7 +392,7 @@ export function MySkillTree() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full">
-              LVL {Math.min(Math.floor(totalNodes / 5) + 1, 99)}
+              {t('common.level')} {Math.min(Math.floor(totalNodes / 5) + 1, 99)}
             </span>
             <span className="text-sm text-slate-500">
               {completedNodes}/{totalNodes} {t('mySkillTree.completed')}
@@ -636,16 +636,16 @@ export function MySkillTree() {
             {user?.avatarUrl ? (
               <img 
                 src={user.avatarUrl} 
-                alt={user.fullName || user.username || 'User'} 
+                alt={user.fullName || user.username || t('common.user')} 
                 className="w-10 h-10 rounded-full object-cover"
               />
             ) : (
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center text-white font-bold">
-                {user?.fullName?.charAt(0)?.toUpperCase() || 'U'}
+                {user?.fullName?.charAt(0)?.toUpperCase() || t('common.user').charAt(0)}
               </div>
             )}
             <div>
-              <div className="font-semibold text-slate-800 text-sm">{user?.fullName || 'User'}</div>
+              <div className="font-semibold text-slate-800 text-sm">{user?.fullName || t('common.user')}</div>
               <div className="text-[10px] text-slate-500 uppercase">{t('mySkillTree.user.role')}</div>
             </div>
             <div className="flex items-center gap-3 ml-2 pl-3 border-l border-slate-200">

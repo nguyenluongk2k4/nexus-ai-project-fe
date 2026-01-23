@@ -483,7 +483,7 @@ export function SkillTree() {
                 }}
                 className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-full text-xs font-medium text-slate-600 transition-colors"
               >
-                ← {focusedBranch.skillId ? 'Quay lại Skills' : 'Quay lại'}
+                ← {focusedBranch.skillId ? t('skillTree.page.backToSkills') : t('skillTree.page.back')}
               </button>
             )}
             
@@ -492,14 +492,14 @@ export function SkillTree() {
                 ? 'bg-indigo-100 text-indigo-700' 
                 : 'bg-slate-100 text-slate-500'
             }`}>
-              {filledCount}/{totalCount} nodes
+              {filledCount}/{totalCount} {t('skillTree.page.nodes')}
             </span>
             
             {/* Loading indicator */}
             {treeState.loading && (
               <div className="flex items-center gap-2 px-3 py-1 bg-indigo-50 rounded-full">
                 <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
-                <span className="text-xs text-indigo-600 font-medium">Đang tải...</span>
+                <span className="text-xs text-indigo-600 font-medium">{t('skillTree.page.loading')}</span>
               </div>
             )}
           </div>
@@ -520,17 +520,17 @@ export function SkillTree() {
                 {saveSuccess ? (
                   <>
                     <CheckCircle className="w-4 h-4" />
-                    <span>Đã lưu!</span>
+                    <span>{t('skillTree.page.saved')}</span>
                   </>
                 ) : isSaving ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Đang lưu...</span>
+                    <span>{t('skillTree.page.saving')}</span>
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4" />
-                    <span>Lưu vào My Tree</span>
+                    <span>{t('skillTree.page.saveToMyTree')}</span>
                   </>
                 )}
               </button>
@@ -565,23 +565,23 @@ export function SkillTree() {
                   {treeState.loading ? (
                     <>
                       <Loader2 className="w-16 h-16 mx-auto text-indigo-500 animate-spin mb-6" />
-                      <h2 className="text-xl font-bold text-slate-700 mb-2">Đang tạo Skill Tree...</h2>
-                      <p className="text-slate-500">AI đang phân tích và chọn lộ trình phù hợp</p>
+                      <h2 className="text-xl font-bold text-slate-700 mb-2">{t('skillTree.page.creatingTree')}</h2>
+                      <p className="text-slate-500">{t('skillTree.page.analyzing')}</p>
                     </>
                   ) : (
                     <>
                       <div className="w-20 h-20 mx-auto bg-gradient-to-br from-indigo-100 to-purple-100 rounded-3xl flex items-center justify-center mb-6 shadow-lg">
                         <span className="text-4xl">🌳</span>
                       </div>
-                      <h2 className="text-2xl font-bold text-slate-800 mb-3">Skill Tree</h2>
+                      <h2 className="text-2xl font-bold text-slate-800 mb-3">{t('skillTree.page.title')}</h2>
                       <p className="text-slate-500 mb-6 leading-relaxed">
-                        Sử dụng chat bên phải để hỏi về lộ trình học tập.<br/>
-                        AI sẽ tự động tạo skill tree phù hợp với bạn.
+                        {t('skillTree.page.instruction1')}<br/>
+                        {t('skillTree.page.instruction2')}
                       </p>
                       
                       <div className="flex items-center gap-2 justify-center text-indigo-500">
                         <MessageSquare className="w-5 h-5" />
-                        <span className="text-sm font-medium">Chat để bắt đầu</span>
+                        <span className="text-sm font-medium">{t('skillTree.page.chatToStart')}</span>
                       </div>
                     </>
                   )}
@@ -594,9 +594,9 @@ export function SkillTree() {
                 <div className="absolute top-6 left-8 flex items-center gap-6 bg-white/90 backdrop-blur p-4 rounded-xl border border-slate-200 shadow-sm z-20">
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 rounded-lg bg-indigo-500"></div>
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Node</span>
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{t('skillTree.page.nodeLegend')}</span>
                   </div>
-                  <span className="text-xs text-slate-400">{totalCount} nodes</span>
+                  <span className="text-xs text-slate-400">{totalCount} {t('skillTree.page.nodesCount')}</span>
                 </div>
   
             {/* SVG Tree - Always visible (skeleton or filled) */}

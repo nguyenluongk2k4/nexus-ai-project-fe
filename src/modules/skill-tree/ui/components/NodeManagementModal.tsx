@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, RefreshCw, ChevronRight, ChevronDown, Eye, ArrowRightLeft, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { getSkillTreeService } from '../../providers';
 import { treeNodeService } from '../../domain/services/treeNodeService';
 
@@ -28,11 +29,13 @@ const TreeItem = ({ node, allNodes, depth = 0, isLast = false }: any) => {
   );
   const hasChildren = children.length > 0;
   
+  const { t } = useTranslation();
+  
   const typeConfig: Record<string, { bg: string, colorClass: string, label: string }> = {
-    'ability': { bg: 'bg-fuchsia-500', colorClass: 'text-fuchsia-500', label: 'ABILITY' },
-    'specialization': { bg: 'bg-fuchsia-500', colorClass: 'text-fuchsia-500', label: 'ABILITY' },
-    'skill': { bg: 'bg-pink-500', colorClass: 'text-pink-500', label: 'SKILL' },
-    'knowledge': { bg: 'bg-orange-500', colorClass: 'text-orange-500', label: 'KNOWLEDGE' }
+    'ability': { bg: 'bg-fuchsia-500', colorClass: 'text-fuchsia-500', label: t('mySkillTree.panel.nodeTypes.ability').toUpperCase() },
+    'specialization': { bg: 'bg-fuchsia-500', colorClass: 'text-fuchsia-500', label: t('mySkillTree.panel.nodeTypes.specialization').toUpperCase() },
+    'skill': { bg: 'bg-pink-500', colorClass: 'text-pink-500', label: t('mySkillTree.panel.nodeTypes.skill').toUpperCase() },
+    'knowledge': { bg: 'bg-orange-500', colorClass: 'text-orange-500', label: t('mySkillTree.panel.nodeTypes.knowledge').toUpperCase() }
   };
   
   const config = typeConfig[node.type] || { bg: 'bg-slate-400', colorClass: 'text-slate-500', label: node.type?.toUpperCase() };
@@ -178,6 +181,7 @@ export const NodeManagementModal = ({
   sessionId,
   onNodeUpdated,
 }: NodeManagementModalProps) => {
+  const { t } = useTranslation();
   const [alternatives, setAlternatives] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -203,7 +207,7 @@ export const NodeManagementModal = ({
       setAlternatives(result || []);
     } catch (e) {
       console.error('Failed to load alternatives:', e);
-      setError('Không thể tải các node thay thế');
+      setError(t('mySkillTree.nodeManagement.errors.load'));
     } finally {
       setLoading(false);
     }
@@ -274,7 +278,7 @@ export const NodeManagementModal = ({
 
   const handleSwap = async (alt: any) => {
     if (!sessionId) {
-      setError('Session ID is required');
+      setError(t('mySkillTree.nodeManagement.errors.session'));
       return;
     }
     
@@ -291,7 +295,7 @@ export const NodeManagementModal = ({
       onClose();
     } catch (e) {
       console.error('Swap failed:', e);
-      setError('Không thể swap node');
+      setError(t('mySkillTree.nodeManagement.errors.swap'));
     } finally {
       setSwappingId(null);
     }
@@ -320,8 +324,8 @@ export const NodeManagementModal = ({
               </svg>
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-800">Node Management</h2>
-              <p className="text-sm text-slate-500">Swap node with alternatives and preview structure</p>
+              <h2 className="text-xl font-bold text-slate-800">{t('mySkillTree.nodeManagement.title')}</h2>
+              <p className="text-sm text-slate-500">{t('mySkillTree.nodeManagement.subtitle')}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
@@ -338,7 +342,7 @@ export const NodeManagementModal = ({
             {/* Current Active Node */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Current Active Node</span>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t('mySkillTree.nodeManagement.currentActive')}</span>
                 <span className="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">ID:{node.id.slice(0, 8)}</span>
               </div>
               
@@ -368,11 +372,11 @@ export const NodeManagementModal = ({
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">👁️</span>
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Preview: New Sub-tree</span>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t('mySkillTree.nodeManagement.preview.title')}</span>
                 </div>
                 {selectedAlt && (
                   <button onClick={clearPreview} className="text-xs font-medium text-indigo-500 hover:text-indigo-600">
-                    Clear Preview
+                    {t('mySkillTree.nodeManagement.preview.clear')}
                   </button>
                 )}
               </div>
@@ -384,7 +388,7 @@ export const NodeManagementModal = ({
                       <span className="text-white text-[10px]">i</span>
                     </div>
                     <p className="text-xs text-indigo-700">
-                      Previewing: "<span className="font-semibold">{selectedAlt.name}</span>" and its sub-nodes
+                      {t('mySkillTree.nodeManagement.preview.previewing')} "<span className="font-semibold">{selectedAlt.name}</span>"
                     </p>
                   </div>
                   
@@ -407,13 +411,13 @@ export const NodeManagementModal = ({
                         ))}
                       </div>
                     ) : (
-                      <p className="text-center text-sm text-slate-400 py-4">No sub-nodes found</p>
+                      <p className="text-center text-sm text-slate-400 py-4">{t('mySkillTree.nodeManagement.preview.noSubNodes')}</p>
                     )}
                   </div>
                 </>
               ) : (
                 <div className="bg-slate-50 rounded-xl p-8 border border-dashed border-slate-200 text-center">
-                  <p className="text-sm text-slate-400">Select an alternative node to preview its structure</p>
+                  <p className="text-sm text-slate-400">{t('mySkillTree.nodeManagement.alternatives.empty')}</p>
                 </div>
               )}
             </div>
@@ -422,14 +426,14 @@ export const NodeManagementModal = ({
           {/* Right - Alternatives */}
           <div className="w-[380px] p-6 overflow-y-auto bg-slate-50/50">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Alternative Nodes</span>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t('mySkillTree.nodeManagement.title')}</span>
               <button 
                 onClick={loadAlternatives}
                 disabled={loading}
                 className="flex items-center gap-1.5 text-xs font-semibold text-indigo-500 hover:text-indigo-600"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
+                {t('mySkillTree.nodeManagement.alternatives.refresh')}
               </button>
             </div>
             
@@ -477,7 +481,7 @@ export const NodeManagementModal = ({
             onClick={onClose}
             className="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-800 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
           >
-            Close
+            {t('mySkillTree.nodeManagement.actions.close')}
           </button>
           
           {selectedAlt && (
@@ -491,7 +495,7 @@ export const NodeManagementModal = ({
               ) : (
                 <ArrowRightLeft className="w-4 h-4" />
               )}
-              Swap to "{selectedAlt.name?.length > 20 ? selectedAlt.name.slice(0, 20) + '...' : selectedAlt.name}"
+              {t('mySkillTree.nodeManagement.alternatives.swapTo')} "{selectedAlt.name?.length > 20 ? selectedAlt.name.slice(0, 20) + '...' : selectedAlt.name}"
             </button>
           )}
         </div>

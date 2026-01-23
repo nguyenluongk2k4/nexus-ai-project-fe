@@ -5,8 +5,12 @@ import {
   TreeDeciduous, User, IdCard, Mail, Lock,
   ArrowRight, Github, Chrome, Sparkles, Star
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { PublicHeader } from '@/shared/components/PublicHeader';
+import logo from '@/assets/logo.svg';
 
 export const RegisterPage = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     username: '',
     fullName: '',
@@ -25,7 +29,7 @@ export const RegisterPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
+      alert(t('auth.register.passwordsDoNotMatch'));
       return;
     }
 
@@ -43,7 +47,7 @@ export const RegisterPage = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 via-violet-50 to-pink-50 min-h-screen w-screen overflow-hidden flex items-center justify-center relative p-6">
+    <div className="bg-gradient-to-br from-purple-50 via-violet-50 to-pink-50 h-screen w-full overflow-y-auto no-scrollbar flex items-center justify-center relative p-6">
       {/* Animated Background Blobs */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-200/50 rounded-full mix-blend-multiply filter blur-[100px] opacity-70 animate-blob"></div>
@@ -72,20 +76,20 @@ export const RegisterPage = () => {
         </svg>
       </div>
 
-      <div className="w-full max-w-md relative z-10">
+      <div className="absolute top-0 left-0 w-full z-50">
+        <PublicHeader showAuthButtons={false} />
+      </div>
+
+      <div className="w-full max-w-md relative z-10 mt-16">
         {/* Logo & Title */}
         <div className="flex flex-col items-center justify-center mb-8">
           {/* Glowing Icon */}
-          <div className="relative mb-4 group">
-            <div className="absolute inset-0 bg-gradient-to-br from-violet-600 to-purple-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center shadow-2xl shadow-violet-500/50 transform hover:scale-110 hover:rotate-3 transition-all duration-300">
-              <TreeDeciduous className="w-8 h-8 text-white" />
-              <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-yellow-300 animate-pulse" />
-            </div>
+          <div className="relative mt-80 mb-4 group">
+            <div className="absolute inset-0 "></div>
+            <img src={logo} alt="NexusAI" className=" h-20" />
           </div>
 
-          <h1 className="font-bold text-3xl text-slate-900 tracking-tight mb-1">Create Account</h1>
-          <p className="text-violet-600 text-xs font-bold tracking-[0.2em] uppercase">Join NexusAI Today</p>
+          <p className="text-violet-600 text-xs font-bold tracking-[0.2em] uppercase">{t('auth.register.subtitle')}</p>
         </div>
 
         {/* Glass Signup Card */}
@@ -107,7 +111,7 @@ export const RegisterPage = () => {
             {/* Username */}
             <div className="space-y-2 group">
               <label htmlFor="username" className="text-xs font-bold text-slate-600 uppercase tracking-wider transition-colors group-focus-within:text-violet-600">
-                Username
+                {t('auth.register.usernameLabel')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -129,7 +133,7 @@ export const RegisterPage = () => {
             {/* Full Name */}
             <div className="space-y-2 group">
               <label htmlFor="fullName" className="text-xs font-bold text-slate-600 uppercase tracking-wider transition-colors group-focus-within:text-violet-600">
-                Full Name
+                {t('auth.register.fullNameLabel')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -151,7 +155,7 @@ export const RegisterPage = () => {
             {/* Email */}
             <div className="space-y-2 group">
               <label htmlFor="email" className="text-xs font-bold text-slate-600 uppercase tracking-wider transition-colors group-focus-within:text-violet-600">
-                Email Address
+                {t('auth.register.emailLabel')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -173,7 +177,7 @@ export const RegisterPage = () => {
             {/* Password */}
             <div className="space-y-2 group">
               <label htmlFor="password" className="text-xs font-bold text-slate-600 uppercase tracking-wider transition-colors group-focus-within:text-violet-600">
-                Password
+                {t('auth.register.passwordLabel')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -196,7 +200,7 @@ export const RegisterPage = () => {
             {/* Confirm Password */}
             <div className="space-y-2 group">
               <label htmlFor="confirmPassword" className="text-xs font-bold text-slate-600 uppercase tracking-wider transition-colors group-focus-within:text-violet-600">
-                Confirm Password
+                {t('auth.register.confirmPasswordLabel')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -225,13 +229,13 @@ export const RegisterPage = () => {
                 className="h-4 w-4 text-violet-600 focus:ring-violet-500 border-slate-300 rounded"
               />
               <label htmlFor="terms" className="ml-2 block text-xs text-slate-600">
-                I agree to the{' '}
+                {t('auth.register.termsAgreement')}{' '}
                 <a href="#" className="font-semibold text-violet-600 hover:text-violet-700">
-                  Terms
+                  {t('auth.register.terms')}
                 </a>
-                {' '}and{' '}
+                {' '}{t('auth.register.and')}{' '}
                 <a href="#" className="font-semibold text-violet-600 hover:text-violet-700">
-                  Privacy Policy
+                  {t('auth.register.privacy')}
                 </a>
               </label>
             </div>
@@ -249,11 +253,11 @@ export const RegisterPage = () => {
                 {isLoading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Creating Account...
+                    {t('auth.register.creatingAccount')}
                   </>
                 ) : (
                   <>
-                    Sign Up
+                    {t('auth.register.signUpButton')}
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
@@ -268,7 +272,7 @@ export const RegisterPage = () => {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-4 bg-white/90 backdrop-blur-sm text-slate-500 rounded-full text-xs font-semibold border border-slate-100 shadow-sm">
-                Or continue with
+                {t('auth.register.orContinueWith')}
               </span>
             </div>
           </div>
@@ -295,12 +299,12 @@ export const RegisterPage = () => {
         {/* Sign In Link */}
         <div className="mt-8 text-center">
           <p className="text-slate-600 text-sm">
-            Already have an account?{' '}
+            {t('auth.register.alreadyHaveAccount')}{' '}
             <Link
               to="/login"
               className="font-bold text-violet-600 hover:text-violet-700 transition-colors hover:underline"
             >
-              Sign in here
+              {t('auth.register.signInLink')}
             </Link>
           </p>
         </div>
@@ -352,6 +356,14 @@ export const RegisterPage = () => {
         
         .animate-shake {
           animation: shake 0.5s ease-in-out;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
     </div>

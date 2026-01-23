@@ -2,8 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../AuthProvider';
 import { Mail, Lock, ArrowRight, TreeDeciduous, Github, Chrome, Sparkles, Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { PublicHeader } from '@/shared/components/PublicHeader';
+import logo from '@/assets/logo.svg';
 
 export const LoginPage = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, isLoading, error } = useAuth();
@@ -48,21 +52,20 @@ export const LoginPage = () => {
           <path d="M50,60 C50,40 70,50 90,30" fill="none" stroke="#7C3AED" strokeWidth="0.3" />
         </svg>
       </div>
+      
+      <div className="absolute top-0 left-0 w-full z-50">
+        <PublicHeader showAuthButtons={false} />
+      </div>
 
-      <div className="w-full max-w-md relative z-10">
+      <div className="w-full max-w-md relative z-10 mt-16">
         {/* Logo & Title */}
         <div className="flex flex-col items-center justify-center mb-8">
           {/* Glowing Icon */}
           <div className="relative mb-4 group">
-            <div className="absolute inset-0 bg-gradient-to-br from-violet-600 to-purple-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center shadow-2xl shadow-violet-500/50 transform hover:scale-110 hover:rotate-3 transition-all duration-300">
-              <TreeDeciduous className="w-8 h-8 text-white" />
-              <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-yellow-300 animate-pulse" />
-            </div>
+            <div className="absolute inset-0 "></div>
+              <img src={logo} alt="NexusAI" className=" h-20" />
           </div>
-
-          <h1 className="font-bold text-3xl text-slate-900 tracking-tight mb-1">NexusAI</h1>
-          <p className="text-violet-600 text-xs font-bold tracking-[0.2em] uppercase">Elite Mastery Login</p>
+          <p className="text-violet-600 text-xs font-bold tracking-[0.2em] uppercase">{t('auth.login.subtitle')}</p>
         </div>
 
         {/* Glass Login Card */}
@@ -87,7 +90,7 @@ export const LoginPage = () => {
             {/* Email */}
             <div className="space-y-2 group">
               <label htmlFor="email" className="text-xs font-bold text-slate-600 uppercase tracking-wider transition-colors group-focus-within:text-violet-600">
-                Email Address
+                {t('auth.login.emailLabel')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -109,10 +112,10 @@ export const LoginPage = () => {
             <div className="space-y-2 group">
               <div className="flex items-center justify-between">
                 <label htmlFor="password" className="text-xs font-bold text-slate-600 uppercase tracking-wider transition-colors group-focus-within:text-violet-600">
-                  Password
+                  {t('auth.login.passwordLabel')}
                 </label>
                 <a href="#" className="text-xs font-semibold text-violet-600 hover:text-violet-700 transition-colors">
-                  Forgot password?
+                  {t('auth.login.forgotPassword')}
                 </a>
               </div>
               <div className="relative">
@@ -144,11 +147,11 @@ export const LoginPage = () => {
                 {isLoading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Signing in...
+                    {t('auth.login.signingIn')}
                   </>
                 ) : (
                   <>
-                    Sign In
+                    {t('auth.login.signInButton')}
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
@@ -163,7 +166,7 @@ export const LoginPage = () => {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-4 bg-white/90 backdrop-blur-sm text-slate-500 rounded-full text-xs font-semibold border border-slate-100 shadow-sm">
-                Or continue with
+                {t('auth.login.orContinueWith')}
               </span>
             </div>
           </div>
@@ -190,12 +193,12 @@ export const LoginPage = () => {
         {/* Sign Up Link */}
         <div className="mt-8 text-center">
           <p className="text-slate-600 text-sm">
-            Don't have an account?{' '}
+            {t('auth.login.dontHaveAccount')}{' '}
             <Link
               to="/register"
               className="font-bold text-violet-600 hover:text-violet-700 transition-colors hover:underline"
             >
-              Sign up for free
+              {t('auth.login.signUpLink')}
             </Link>
           </p>
         </div>

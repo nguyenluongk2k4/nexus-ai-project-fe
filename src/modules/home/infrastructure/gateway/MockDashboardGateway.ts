@@ -4,9 +4,9 @@ import { DashboardData } from '../../domain/entities/DashboardData';
 // Mock data moved from useDashboard hook
 const mockDashboardData: DashboardData = {
   metrics: [
-    { title: 'Study Time', value: '24h', subtitle: 'This week', trend: '+12%' },
-    { title: 'Skills Earned', value: '12', subtitle: 'Total badges', trend: '+3' },
-    { title: 'Goals Completed', value: '8/10', subtitle: 'Monthly target', trend: '80%' }
+    { title: 'nav.dashboardPage.metrics.studyTime', value: '24h', subtitle: 'nav.dashboardPage.metrics.thisWeek', trend: '+12%' },
+    { title: 'nav.dashboardPage.metrics.skillsEarned', value: '12', subtitle: 'nav.dashboardPage.metrics.totalBadges', trend: '+3' },
+    { title: 'nav.dashboardPage.metrics.goalsCompleted', value: '8/10', subtitle: 'nav.dashboardPage.metrics.monthlyTarget', trend: '80%' }
   ],
   weeklyActivity: [
     { day: 'Mon', hours: 2 },
@@ -24,9 +24,9 @@ const mockDashboardData: DashboardData = {
     { skill: 'Node.js', progress: 58 }
   ],
   recentActivity: [
-    { action: 'Completed Quiz', detail: 'React Fundamentals', score: '95%', time: '2 hours ago' },
-    { action: 'Earned Badge', detail: 'JavaScript Master', time: '5 hours ago' },
-    { action: 'Finished Course', detail: 'Advanced TypeScript', score: '88%', time: 'Yesterday' }
+    { action: 'nav.dashboardPage.activity.completedQuiz', detail: 'React Fundamentals', score: '95%', time: 'common.time.hoursAgo' },
+    { action: 'nav.dashboardPage.activity.earnedBadge', detail: 'JavaScript Master', time: 'common.time.hoursAgo' },
+    { action: 'nav.dashboardPage.activity.finishedCourse', detail: 'Advanced TypeScript', score: '88%', time: 'common.time.yesterday' }
   ]
 };
 
@@ -37,3 +37,4 @@ export class MockDashboardGateway implements DashboardGateway {
     return mockDashboardData;
   }
 }
+
