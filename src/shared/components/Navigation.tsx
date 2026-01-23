@@ -22,7 +22,10 @@ export function Navigation() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    // Ensure logout state updates before navigating
+    queueMicrotask(() => {
+      navigate('/', { replace: true });
+    });
   };
 
   // Close dropdown when clicking outside

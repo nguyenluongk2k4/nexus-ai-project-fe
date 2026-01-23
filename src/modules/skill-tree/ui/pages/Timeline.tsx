@@ -386,9 +386,9 @@ export function Timeline() {
 
     // Accents matching the Elite design
     const accents = {
-      morning: { dot: 'bg-orange-500', text: 'text-orange-500', bg: 'bg-orange-500/10' },
-      afternoon: { dot: 'bg-blue-500', text: 'text-blue-500', bg: 'bg-blue-500/10' },
-      evening: { dot: 'bg-purple-600', text: 'text-purple-600', bg: 'bg-purple-600/10' },
+      morning: { dot: 'bg-violet-500', text: 'text-violet-500', bg: 'bg-violet-500/10' },
+      afternoon: { dot: 'bg-purple-500', text: 'text-purple-500', bg: 'bg-purple-500/10' },
+      evening: { dot: 'bg-indigo-600', text: 'text-indigo-600', bg: 'bg-indigo-600/10' },
     };
     const accent = accents[period];
 
@@ -565,7 +565,7 @@ export function Timeline() {
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <div className="h-full flex flex-col bg-background overflow-hidden relative">
+      <div className="h-full flex flex-col bg-gradient-to-br from-purple-50 via-violet-50 to-pink-50 overflow-hidden relative">
         {/* Header */}
         <header className="bg-card z-10 shadow-sm border-b border-border">
           <div className="px-8 py-5 flex justify-between items-center border-b border-border/50">
