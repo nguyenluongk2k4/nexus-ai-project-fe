@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { GitBranch, Loader2, TreeDeciduous, Plus, Minus, BookOpen, Brain, Star, Layers } from 'lucide-react';
+import { GitBranch, Loader2, TreeDeciduous, Plus, Minus, BookOpen, Brain, Star, Layers, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { skillTreeGateway } from '../../providers';
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { PageLoading } from '@/shared/components/PageLoading';
-import { ResourcePanel } from '../components/ResourcePanel';
+import { RightPanel } from '../components/RightPanel';
+import { useChat } from '@/modules/chat/ui/hooks/useChat';
 
 // Types for user's skill tree
 interface UserSkillNode {
@@ -19,6 +20,7 @@ interface UserSkillNode {
   parent_id?: string;
   icon?: string;
   color?: string;
+  original_node_id?: string;
 }
 
 interface UserSkillTree {
@@ -65,8 +67,11 @@ export function MySkillTree() {
   const [focusedBranch, setFocusedBranch] = useState<{ abilityId?: string; skillId?: string } | null>(null);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
-  const [showResourcePanel, setShowResourcePanel] = useState(false);
-  const [selectedNodeForResources, setSelectedNodeForResources] = useState<UserSkillNode | null>(null);
+  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
+  const [activeTab, setActiveTab] = useState<'chat' | 'resource'>('resource');
+  
+  // Dummy chat hook for RightPanel compatibility (MyTree doesn't use chat session)
+  const chatProps = useChat({ disableNavigation: true });
 
   // Camera Y position - pans up as user goes deeper into tree (Candy Crush style)
   const cameraY = useMemo(() => {
@@ -141,8 +146,8 @@ export function MySkillTree() {
     setSelectedNodeId(node.id);
     
     // Open resource panel for this node
-    setSelectedNodeForResources(node);
-    setShowResourcePanel(true);
+    setActiveTab('resource'); 
+    setRightPanelCollapsed(false);
     
     if (node.level === 0) {
       // Root node (Backend/Frontend): Toggle focus - hide siblings
@@ -301,7 +306,29 @@ export function MySkillTree() {
     });
     
     return result;
+    return result;
   }, [visibleNodes]);
+
+  // Adapter for RightPanel (UserSkillNode -> SkillNode friendly)
+  const selectedNodeAdapter = useMemo(() => {
+    if (!selectedNodeId || !tree) return null;
+    const node = tree.nodes.find(n => n.id === selectedNodeId);
+    if (!node) return null;
+
+    return {
+      id: node.id,
+      label: node.name,
+      fullName: node.name,
+      type: 'skill', // Default to skill type as UserSkillNode doesn't store type explicitly
+      level: node.level,
+      status: node.status === 'completed' ? 'completed' : node.status === 'in_progress' ? 'in-progress' : 'locked',
+      originalNodeId: node.original_node_id,
+      nodeData: {
+        description: node.description,
+        filled: true,
+      }
+    };
+  }, [selectedNodeId, tree]);
 
   // Stats
   const totalNodes = tree?.nodes?.length || 0;
@@ -575,17 +602,30 @@ export function MySkillTree() {
         </svg>
         </div>
 
-        {/* Resource Panel - inside flex container */}
-        {showResourcePanel && (
-          <div className="w-96 flex-shrink-0 bg-white border-l border-slate-200 overflow-y-auto">
-            <ResourcePanel
-              isOpen={showResourcePanel}
-              node={selectedNodeForResources}
-              onClose={() => setShowResourcePanel(false)}
-              isInline={true}
-            />
-          </div>
-        )}
+        {/* Right Panel with Tabs (Replaces ResourcePanel) */}
+        <RightPanel
+          selectedNode={selectedNodeAdapter as any}
+          getNodeStatus={(node) => node.status as any}
+          // Pass dummy chat props to satisfy interface but they won't be used actively
+          messages={[]} 
+          status="idle"
+          error={null}
+          onClearError={() => {}}
+          onSend={() => {}}
+          sessions={[]}
+          sessionsLoading={false}
+          hasMore={false}
+          onLoadMore={async () => {}}
+          loadingMore={false}
+          currentSessionId={null}
+          onSelectSession={() => {}}
+          onNewChat={() => {}}
+          isCollapsed={rightPanelCollapsed}
+          onToggleCollapse={() => setRightPanelCollapsed(!rightPanelCollapsed)}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          hideChat={true}
+        />
       </div>
 
       {/* Bottom Bar */}

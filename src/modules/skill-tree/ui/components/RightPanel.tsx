@@ -36,6 +36,9 @@ interface RightPanelProps {
   // Tab state (Controlled)
   activeTab?: 'chat' | 'resource';
   onTabChange?: (tab: 'chat' | 'resource') => void;
+  
+  // Customization
+  hideChat?: boolean;
 }
 
 export function RightPanel({
@@ -57,7 +60,8 @@ export function RightPanel({
   isCollapsed = false,
   onToggleCollapse,
   activeTab: controlledTab,
-  onTabChange
+  onTabChange,
+  hideChat = false
 }: RightPanelProps) {
   const { t } = useTranslation();
   const [internalTab, setInternalTab] = useState<TabType>('chat');
@@ -83,12 +87,14 @@ export function RightPanel({
           <ChevronLeft className="w-4 h-4" />
         </button>
         <div className="w-px h-4 bg-slate-200" />
-        <button
-          onClick={() => { handleTabChange('chat'); onToggleCollapse?.(); }}
-          className={`p-2 rounded-lg ${activeTab === 'chat' ? 'bg-indigo-100 text-indigo-600' : 'text-slate-400 hover:bg-slate-100'}`}
-        >
-          <MessageSquare className="w-4 h-4" />
-        </button>
+        {!hideChat && (
+          <button
+            onClick={() => { handleTabChange('chat'); onToggleCollapse?.(); }}
+            className={`p-2 rounded-lg ${activeTab === 'chat' ? 'bg-indigo-100 text-indigo-600' : 'text-slate-400 hover:bg-slate-100'}`}
+          >
+            <MessageSquare className="w-4 h-4" />
+          </button>
+        )}
         <button
           onClick={() => { handleTabChange('resource'); onToggleCollapse?.(); }}
           className={`p-2 rounded-lg ${activeTab === 'resource' ? 'bg-indigo-100 text-indigo-600' : 'text-slate-400 hover:bg-slate-100'}`}
@@ -103,17 +109,19 @@ export function RightPanel({
     <div className="w-[480px] bg-white border-l border-slate-200 flex flex-col shadow-lg flex-shrink-0">
       {/* Tab Bar */}
       <div className="flex items-center border-b border-slate-200">
-        <button
-          onClick={() => handleTabChange('chat')}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
-            activeTab === 'chat'
-              ? 'border-indigo-500 text-indigo-600 bg-indigo-50/50'
-              : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-          }`}
-        >
-          <MessageSquare className="w-4 h-4" />
-          {t('skillTree.rightPanel.tabs.chat')}
-        </button>
+        {!hideChat && (
+          <button
+            onClick={() => handleTabChange('chat')}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
+              activeTab === 'chat'
+                ? 'border-indigo-500 text-indigo-600 bg-indigo-50/50'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            <MessageSquare className="w-4 h-4" />
+            {t('skillTree.rightPanel.tabs.chat')}
+          </button>
+        )}
         <button
           onClick={() => handleTabChange('resource')}
           className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${

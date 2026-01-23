@@ -25,26 +25,38 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
   const status = getNodeStatus(selectedNode);
   const { nodeData } = selectedNode;
   
-  // Lazy load resources
+  // Local state for resources (since MySkillTree doesn't update from treeNodeService)
+  const [resources, setResources] = useState<any[]>([]);
   const [loadingResources, setLoadingResources] = useState(false);
   
+  // Sync resources from props or fetch
   useEffect(() => {
     if (!selectedNode?.id) return;
     
-    const shouldFetch = !nodeData?.learningResources || nodeData.learningResources.length === 0;
-    
-    if (shouldFetch) {
-       setLoadingResources(true);
-       getSkillTreeService().getNodeResources(selectedNode.id)
-         .then(resources => {
-            if (resources && resources.length > 0) {
-               // Update the tree node data directly via service to trigger reactivity
-               treeNodeService.setResources({ [selectedNode.id]: resources });
-            }
-         })
-         .finally(() => setLoadingResources(false));
+    // If props have resources, use them (priority source of truth)
+    if (nodeData?.learningResources && nodeData.learningResources.length > 0) {
+      setResources(nodeData.learningResources);
+      return;
     }
-  }, [selectedNode?.id]);
+    
+    // Otherwise fetch
+    setLoadingResources(true);
+    getSkillTreeService().getNodeResources(selectedNode.id)
+      .then(res => {
+         if (res) {
+            setResources(res);
+            // Still update service for other consumers if needed
+            if (res.length > 0) {
+               treeNodeService.setResources({ [selectedNode.id]: res });
+            }
+         }
+      })
+      .catch(err => {
+        console.error("Failed to load resources:", err);
+        setResources([]); 
+      })
+      .finally(() => setLoadingResources(false));
+  }, [selectedNode?.id, nodeData?.learningResources]);
 
   // Helper helper to normalize status
   const normalizeStatus = (status: string) => status.replace('_', '-');
@@ -56,71 +68,25 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
        const apiStatus = denormalizeStatus(newStatus);
        await getSkillTreeService().updateResourceStatus(resourceId, apiStatus as any);
        
-       // Update local state (keep underscores in data if that's what comes from API, 
-       // but we might want to standardize. Let's assume data is underscores.)
-       const updatedResources = nodeData.learningResources.map((r: any) => 
+       // Update local state
+       setResources(prev => prev.map((r: any) => 
           (r.id === resourceId) ? { ...r, status: apiStatus } : r
-       );
+       ));
        
-       treeNodeService.setResources({
-         [selectedNode.id]: updatedResources
-       });
+       // Update global service (best effort)
+       if (nodeData?.learningResources) {
+         const updatedResources = nodeData.learningResources.map((r: any) => 
+            (r.id === resourceId) ? { ...r, status: apiStatus } : r
+         );
+         treeNodeService.setResources({
+           [selectedNode.id]: updatedResources
+         });
+       }
        
     } catch (e) {
        console.error("Failed to update status", e);
     }
   };
-
-  // // Helper for rendering status dropdown
-  // const renderStatusDropdown = (resourceId: string, currentStatus: string) => {
-  //   // Normalize for UI (dashes)
-  //   const uiStatus = normalizeStatus(currentStatus);
-    
-  //   // If not started, show "Start Learning" primary button
-  //   if (uiStatus === 'not-started') {
-  //       return (
-  //           <button 
-  //               onClick={() => handleStatusUpdate(resourceId, 'in-progress')}
-  //               className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm hover:shadow-md active:scale-95"
-  //           >
-  //               <Play className="w-3.5 h-3.5 fill-current" />
-  //               Bắt đầu học
-  //           </button>
-  //       );
-  //   }
-
-  //   // Otherwise show status badge/dropdown
-  //   return (
-  //   <div className="flex items-center gap-2">
-  //     <div className="relative group">
-  //       <button className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 border border-slate-200 rounded text-[10px] font-medium text-slate-700 hover:bg-slate-100 transition-colors">
-  //         {uiStatus === 'completed' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
-  //         {uiStatus === 'in-progress' && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />}
-          
-  //         {uiStatus === 'completed' ? 'Đã hoàn thành' : 
-  //          uiStatus === 'in-progress' ? 'Đang học' : 'Chưa bắt đầu'}
-  //         <ChevronDown className="w-3 h-3 text-slate-400 ml-1" />
-  //       </button>
-        
-  //       {/* Dropdown Menu */}
-  //       <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-lg shadow-lg border border-slate-100 py-1 hidden group-hover:block z-10">
-  //         {(['not-started', 'in-progress', 'completed'] as const).map((s) => (
-  //            <button 
-  //              key={s}
-  //              onClick={() => handleStatusUpdate(resourceId, s === 'not-started' ? 'not_started' : s)}
-  //              className="w-full text-left px-3 py-1.5 text-[10px] hover:bg-slate-50 flex items-center gap-2"
-  //            >
-  //               <span className={`w-1.5 h-1.5 rounded-full ${
-  //                 s === 'completed' ? 'bg-emerald-500' :
-  //                 s === 'in-progress' ? 'bg-indigo-500' : 'bg-slate-400'
-  //               }`} />
-  //               {s === 'completed' ? 'Đã hoàn thành' : s === 'in-progress' ? 'Đang học' : 'Chưa bắt đầu'}
-  //            </button>
-  //         ))}
-  //       </div>
-  //     </div>
-  //   </div>
-  // )};
 
   return (
     <div className="p-6 h-full overflow-y-auto">
@@ -226,7 +192,7 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
             <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tài liệu học tập</h4>
           </div>
           <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded text-[9px] font-bold">
-            {nodeData?.learningResources ? `${nodeData.learningResources.filter((r: any) => normalizeStatus(r?.status || '') === 'completed').length}/${nodeData.learningResources.length} HOÀN THÀNH` : '0/0 HOÀN THÀNH'}
+            {resources.length > 0 ? `${resources.filter((r: any) => normalizeStatus(r?.status || '') === 'completed').length}/${resources.length} HOÀN THÀNH` : '0/0 HOÀN THÀNH'}
           </span>
         </div>
 
@@ -236,8 +202,8 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
                 <div className="animate-spin w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full mx-auto mb-2"></div>
                 <p className="text-xs text-slate-500">Đang tải tài liệu...</p>
              </div>
-          ) : nodeData?.learningResources?.length > 0 ? (
-            nodeData.learningResources.map((resource: any, idx: number) => {
+          ) : resources.length > 0 ? (
+            resources.map((resource: any, idx: number) => {
               const resourceName = typeof resource === 'string' ? resource : (resource.name || resource.title || 'Learning Resource');
               const rawStatus = resource.status || 'not_started';
               const status = normalizeStatus(rawStatus);
