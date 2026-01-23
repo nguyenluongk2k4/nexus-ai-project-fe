@@ -6,10 +6,12 @@ import { SyncLearningDataUseCase } from './usecases/SyncLearningDataUseCase';
 import { CalculateStatsUseCase } from './usecases/CalculateStatsUseCase';
 
 import { SkillTreeHttpGateway } from './infrastructure/gateway/SkillTreeHttpGateway';
+import { LocalStorageLearningGateway } from './infrastructure/gateway/LocalStorageLearningGateway';
 
 // Gateways (Infrastructure)
 const learningGateway = new HttpLearningGateway();
 export const skillTreeGateway = new SkillTreeHttpGateway();
+export const httpLearningGateway = new HttpLearningGateway();
 
 // Services (Domain)
 const learningService = new LearningService(learningGateway);

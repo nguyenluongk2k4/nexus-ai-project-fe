@@ -27,6 +27,7 @@ export class ChatWsGateway implements ChatGateway {
         const data = JSON.parse(event.data);
         switch (data.type) {
           case 'session_started':
+            treeNodeService.setLoading(true); // Start loading when session starts processing
             onMessage({
               id: crypto.randomUUID(),
               role: 'system',
@@ -36,6 +37,17 @@ export class ChatWsGateway implements ChatGateway {
             break;
           case 'status':
             onStatusChange(data.status as ConnectionStatus);
+            
+            // Handle loading state based on status
+            if (data.status === 'thinking') {
+                treeNodeService.setLoading(true);
+            } else if (data.status === 'idle') {
+               // Only turn off if not waiting for Tree Stream (HTTP)
+               const isTreeStreaming = (window as any).__treeStreamingActive;
+               if (!isTreeStreaming) {
+                 treeNodeService.setLoading(false);
+               }
+            }
             break;
           case 'bot_message':
             // Check if bot message contains tree data
@@ -60,11 +72,9 @@ export class ChatWsGateway implements ChatGateway {
                 // Error response, reset loading
                 treeNodeService.setLoading(false);
               }
-              // Note: Don't reset loading for other JSON responses - might be intermediate
             } catch (e) {
               // Not JSON - this is a normal text chat message
-              // Reset loading since this is just text chat, not tree generation
-              treeNodeService.setLoading(false);
+              // Do nothing with tree loading - waiting for explicit tree events
             }
             
             // Only add normal text messages to chat (skip tree JSON)
@@ -151,8 +161,6 @@ export class ChatWsGateway implements ChatGateway {
 
   sendMessage(text: string, sessionId: string | null): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      // Set tree loading IMMEDIATELY when user sends message
-      treeNodeService.setLoading(true);
       
       const token = localStorage.getItem('token');
       this.ws.send(JSON.stringify({

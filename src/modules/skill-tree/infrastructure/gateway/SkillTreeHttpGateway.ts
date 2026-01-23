@@ -6,7 +6,8 @@ import { apiConfig } from '@/shared/config/api.config';
 export class SkillTreeHttpGateway implements SkillTreeGateway {
   async getNodeResources(nodeId: string): Promise<any[]> {
     try {
-      return await httpClient.get<any[]>(apiConfig.endpoints.skillTree.nodeResources(nodeId));
+      const url = apiConfig.endpoints.skillTree.nodeResources(nodeId);
+      return await httpClient.get<any[]>(url);
     } catch (e) {
       console.error("Failed to fetch resources", e);
       return [];

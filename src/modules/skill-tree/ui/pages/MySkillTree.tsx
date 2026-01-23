@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { GitBranch, Loader2, TreeDeciduous, Plus, Minus, BookOpen, Brain, Star, Layers, ZoomIn } from 'lucide-react';
+import { GitBranch, Loader2, TreeDeciduous, Plus, Minus, BookOpen, Brain, Star, Layers } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { skillTreeGateway } from '../../providers';
 import { useAuth } from '@/modules/auth/AuthProvider';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { PageLoading } from '@/shared/components/PageLoading';
+import { ResourcePanel } from '../components/ResourcePanel';
 
 // Types for user's skill tree
 interface UserSkillNode {
@@ -50,6 +54,7 @@ const animationStyles = `
 `;
 
 export function MySkillTree() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [tree, setTree] = useState<UserSkillTree | null>(null);
@@ -60,6 +65,8 @@ export function MySkillTree() {
   const [focusedBranch, setFocusedBranch] = useState<{ abilityId?: string; skillId?: string } | null>(null);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
+  const [showResourcePanel, setShowResourcePanel] = useState(false);
+  const [selectedNodeForResources, setSelectedNodeForResources] = useState<UserSkillNode | null>(null);
 
   // Camera Y position - pans up as user goes deeper into tree (Candy Crush style)
   const cameraY = useMemo(() => {
@@ -89,7 +96,9 @@ export function MySkillTree() {
       const data = await skillTreeGateway.getMyTree();
       setTree(data);
     } catch (e) {
-      setError('Không thể tải skill tree của bạn');
+      const errMsg = t('mySkillTree.toasts.loadError');
+      setError(errMsg);
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }
@@ -131,6 +140,10 @@ export function MySkillTree() {
   const handleNodeClick = (node: UserSkillNode & { x: number; y: number }) => {
     setSelectedNodeId(node.id);
     
+    // Open resource panel for this node
+    setSelectedNodeForResources(node);
+    setShowResourcePanel(true);
+    
     if (node.level === 0) {
       // Root node (Backend/Frontend): Toggle focus - hide siblings
       if (focusedRootId === node.id) {
@@ -144,22 +157,41 @@ export function MySkillTree() {
       }
     } else if (node.level === 1) {
       // Ability: Toggle expand to show/hide skills
+      // Fix: Also focus parent Root if not already focused
+      const parentRoot = tree?.nodes.find(n => 
+        n.level === 0 && tree.edges.some(e => e.source === n.id && e.target === node.id)
+      );
+
       if (focusedBranch?.abilityId === node.id && focusedBranch?.skillId) {
         setFocusedBranch({ abilityId: node.id }); // Collapse skills
       } else if (focusedBranch?.abilityId === node.id) {
         setFocusedBranch(null); // Collapse ability
       } else {
         setFocusedBranch({ abilityId: node.id });
+        // Auto-focus parent root to hide other roots
+        if (parentRoot) {
+          setFocusedRootId(parentRoot.id);
+        }
       }
     } else if (node.level === 2) {
       // Skill: Toggle expand to show/hide knowledge
       const parentAbility = tree?.nodes.find(n => 
         n.level === 1 && tree.edges.some(e => e.source === n.id && e.target === node.id)
       );
+      
+      // Fix: Also focus grandparent Root
+      const parentRoot = parentAbility ? tree?.nodes.find(n => 
+        n.level === 0 && tree.edges.some(e => e.source === n.id && e.target === parentAbility.id)
+      ) : null;
+
       if (focusedBranch?.skillId === node.id) {
         setFocusedBranch({ abilityId: parentAbility?.id }); // Collapse knowledge
       } else {
         setFocusedBranch({ abilityId: parentAbility?.id, skillId: node.id });
+        // Auto-focus parent root
+        if (parentRoot) {
+          setFocusedRootId(parentRoot.id);
+        }
       }
     }
   };
@@ -277,11 +309,7 @@ export function MySkillTree() {
 
   // Loading state
   if (loading) {
-    return (
-      <div className="flex h-full items-center justify-center bg-slate-50">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-      </div>
-    );
+    return <PageLoading />;
   }
 
   // Error state
@@ -294,7 +322,7 @@ export function MySkillTree() {
             onClick={loadMyTree}
             className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
           >
-            Thử lại
+            {t('common.retry')}
           </button>
         </div>
       </div>
@@ -310,17 +338,18 @@ export function MySkillTree() {
             <TreeDeciduous className="w-12 h-12 text-indigo-500" />
           </div>
           <h2 className="text-2xl font-bold text-gray-800 mb-3">
-            Chưa có skill nào
+            {t('mySkillTree.emptyState.title')}
           </h2>
           <p className="text-gray-500 mb-6">
-            Hãy chat với AI để tạo skill tree và lưu vào đây nhé!
+            {t('mySkillTree.emptyState.subtitle')}
           </p>
           <button
             onClick={() => navigate('/skilltree')}
             className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-medium hover:opacity-90 transition-opacity flex items-center gap-2 mx-auto"
+            key="empty-state-button"
           >
             <GitBranch className="w-5 h-5" />
-            Tạo Skill Tree
+            {t('mySkillTree.emptyState.button')}
           </button>
         </div>
       </div>
@@ -339,7 +368,7 @@ export function MySkillTree() {
               LVL {Math.min(Math.floor(totalNodes / 5) + 1, 99)}
             </span>
             <span className="text-sm text-slate-500">
-              {completedNodes}/{totalNodes} hoàn thành
+              {completedNodes}/{totalNodes} {t('mySkillTree.completed')}
             </span>
             
             {/* Back button when focused */}
@@ -356,25 +385,24 @@ export function MySkillTree() {
                 }}
                 className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-full text-xs font-medium text-slate-600 transition-colors"
               >
-                ← Quay lại
+                ← {t('common.back')}
               </button>
             )}
-          </div>
-          <h1 className="text-2xl font-bold text-slate-800">
-            {tree.name || 'My Learning Path'}
-          </h1>
+          </div>       
           <button
             onClick={() => navigate('/skilltree')}
             className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
-            Thêm Skills
+            {t('mySkillTree.addSkills')}
           </button>
         </div>
       </header>
 
-      {/* Main Tree Area */}
-      <div className="flex-1 relative overflow-hidden">
+      {/* Main Content Area - Tree + Resource Panel */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Tree Area */}
+        <div className="flex-1 relative overflow-hidden">
         {/* Zoom Controls */}
         <div className="absolute bottom-4 left-4 bg-white rounded-xl shadow-lg border border-slate-200 z-20">
           <button 
@@ -526,7 +554,7 @@ export function MySkillTree() {
                     fontSize="0.9"
                     fontWeight="bold"
                   >
-                    + Click để mở
+                    + {t('mySkillTree.node.clickToExpand')}
                   </text>
                 )}
 
@@ -545,28 +573,49 @@ export function MySkillTree() {
             );
           })}
         </svg>
+        </div>
+
+        {/* Resource Panel - inside flex container */}
+        {showResourcePanel && (
+          <div className="w-96 flex-shrink-0 bg-white border-l border-slate-200 overflow-y-auto">
+            <ResourcePanel
+              isOpen={showResourcePanel}
+              node={selectedNodeForResources}
+              onClose={() => setShowResourcePanel(false)}
+              isInline={true}
+            />
+          </div>
+        )}
       </div>
 
       {/* Bottom Bar */}
-      <div className="flex-shrink-0 bg-white border-t border-slate-200 px-6 py-3">
+      <div className="flex-shrink-0 bg-white border-t border-slate-200 px-6 py-3 z-40 relative">
         <div className="flex items-center justify-between">
           {/* User Info */}
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center text-white font-bold">
-              {user?.fullName?.charAt(0)?.toUpperCase() || 'U'}
-            </div>
+            {user?.avatarUrl ? (
+              <img 
+                src={user.avatarUrl} 
+                alt={user.fullName || user.username || 'User'} 
+                className="w-10 h-10 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center text-white font-bold">
+                {user?.fullName?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+            )}
             <div>
               <div className="font-semibold text-slate-800 text-sm">{user?.fullName || 'User'}</div>
-              <div className="text-[10px] text-slate-500 uppercase">Foundational Root</div>
+              <div className="text-[10px] text-slate-500 uppercase">{t('mySkillTree.user.role')}</div>
             </div>
             <div className="flex items-center gap-3 ml-2 pl-3 border-l border-slate-200">
               <div className="text-center">
                 <div className="text-sm font-bold text-indigo-600">{completedNodes * 100}</div>
-                <div className="text-[9px] text-slate-400 uppercase">XP</div>
+                <div className="text-[9px] text-slate-400 uppercase">{t('mySkillTree.stats.xp')}</div>
               </div>
               <div className="text-center">
                 <div className="text-sm font-bold text-indigo-600">{totalNodes}</div>
-                <div className="text-[9px] text-slate-400 uppercase">Nodes</div>
+                <div className="text-[9px] text-slate-400 uppercase">{t('mySkillTree.stats.nodes')}</div>
               </div>
             </div>
           </div>
@@ -588,13 +637,14 @@ export function MySkillTree() {
                 {tab === 'abilities' && <Star className="w-4 h-4" />}
                 {tab === 'all' && <Layers className="w-4 h-4" />}
                 <span className="uppercase tracking-wider text-xs">
-                  {tab === 'all' ? 'Full Tree' : tab}
+                  {t(`mySkillTree.tabs.${tab}`)}
                 </span>
               </button>
             ))}
           </div>
         </div>
       </div>
+
     </div>
   );
 }

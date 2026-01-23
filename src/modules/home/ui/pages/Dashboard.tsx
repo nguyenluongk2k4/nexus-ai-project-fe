@@ -3,12 +3,13 @@ import { Clock, Award, Target, TrendingUp } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useDashboard } from '../hooks/useDashboard';
 import { useAuth } from '@/modules/auth/AuthProvider';
+import { PageLoading } from '@/shared/components/PageLoading';
 
 export function Dashboard() {
   const { data, loading, error } = useDashboard();
   const { user } = useAuth();
 
-  if (loading) return <div className="p-8">Đang tải dashboard...</div>;
+  if (loading) return <PageLoading />;
   if (error) return <div className="p-8 text-red-500">{error}</div>;
   if (!data) return null;
 

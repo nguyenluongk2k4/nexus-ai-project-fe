@@ -1,0 +1,291 @@
+{
+  "common": {
+    "loading": "Đang tải...",
+    "error": "Đã có lỗi xảy ra",
+    "retry": "Thử lại",
+    "back": "Quay lại",
+    "language": "Ngôn ngữ",
+    "profile": "Hồ sơ",
+    "logout": "Đăng xuất"
+  },
+  "nav": {
+    "dashboard": "Bảng điều khiển",
+    "skilltree": "Cây kỹ năng",
+    "quiz": "Trắc nghiệm",
+    "jobs": "Việc làm",
+    "insights": "Thống kê",
+    "timeline": "Lịch học",
+    "forum": "Diễn đàn"
+  },
+  "profile": {
+    "title": "Hồ Sơ Cá Nhân",
+    "subtitle": "Quản lý thông tin cá nhân và theo dõi tiến độ học tập của bạn",
+    "active": "Đang hoạt động",
+    "fullName": {
+      "label": "Tên đầy đủ",
+      "placeholder": "Nhập tên đầy đủ"
+    },
+    "username": {
+      "label": "Username",
+      "hint": "Username không thể thay đổi"
+    },
+    "email": {
+      "label": "Email",
+      "placeholder": "Nhập email"
+    },
+    "joined": "Ngày tham gia",
+    "save": "Lưu thay đổi",
+    "changePassword": "Đổi mật khẩu",
+    "success": "Đã lưu thay đổi thành công!",
+    "error": "Không thể lưu thay đổi",
+    "stats": {
+      "title": "Thống kê của tôi",
+      "learningHours": "Số giờ học",
+      "skillsCompleted": "Skills hoàn thành",
+      "streak": "Streak days",
+      "forumPosts": "Bài viết forum"
+    },
+    "balance": {
+      "title": "Số dư tài khoản",
+      "current": "Số dư hiện tại",
+      "deposit": "Nạp tiền"
+    },
+    "subscription": {
+      "title": "Gói đăng ký",
+      "upgrade": "Nâng cấp",
+      "manage": "Quản lý gói",
+      "expires": "Hết hạn: ",
+      "freeHint": "Nâng cấp để trải nghiệm tốt hơn",
+      "features": "Tính năng",
+      "pricing": "Bảng giá",
+      "titleNew": "Gói dịch vụ dành cho đội ngũ hiện đại",
+      "subtitleNew": "Chọn gói phù hợp với quy mô của bạn. Giá cả minh bạch, không phí ẩn.",
+      "monthly": "Theo tháng",
+      "yearly": "Theo năm",
+      "savePercent": "Giảm 17%",
+      "mostPopular": "Phổ biến nhất",
+      "currentPlan": "Gói hiện tại",
+      "faq": {
+        "title": "Câu hỏi thường gặp",
+        "changePlan": {
+          "q": "Tôi có thể đổi gói sau không?",
+          "a": "Có, bạn có thể nâng cấp hoặc hạ cấp gói bất cứ lúc nào. Thay đổi sẽ được tính theo tỷ lệ."
+        },
+        "freeTrial": {
+          "q": "Có dùng thử miễn phí không?",
+          "a": "Chúng tôi cung cấp gói Free để trải nghiệm. Bạn có thể nâng cấp bất cứ lúc nào."
+        },
+        "payment": {
+          "q": "Chấp nhận phương thức thanh toán nào?",
+          "a": "Thanh toán được trừ từ số dư tài khoản. Bạn có thể nạp tiền qua ngân hàng hoặc ví điện tử."
+        },
+        "security": {
+          "q": "Dữ liệu của tôi có an toàn không?",
+          "a": "Bảo mật là ưu tiên hàng đầu. Chúng tôi sử dụng mã hóa AES-256."
+        }
+      },
+      "trustedBy": "Được tin dùng bởi các tổ chức hàng đầu",
+      "footerNote": "Thanh toán được trừ từ số dư tài khoản."
+    },
+    "activity": {
+      "title": "Lịch sử hoạt động",
+      "viewAll": "Xem tất cả"
+    },
+    "activeStatus": "Đang hoạt động"
+  },
+  "purchase": {
+    "title": "Nạp Tiền Vào Tài Khoản",
+    "subtitle": "Quét mã QR để nạp tiền nhanh chóng và an toàn",
+    "back": "Quay lại hồ sơ",
+    "selectAmount": "Chọn số tiền nạp",
+    "orCustom": "Hoặc nhập số tiền khác",
+    "placeholder": "Nhập số tiền...",
+    "youWillDeposit": "Bạn sẽ nạp:",
+    "generateQR": "Tạo mã QR thanh toán",
+    "generating": "Đang tạo mã QR...",
+    "bankInfo": {
+      "title": "Thông tin tài khoản nhận",
+      "bank": "Ngân hàng",
+      "account": "Số tài khoản",
+      "owner": "Chủ tài khoản"
+    },
+    "qrTitle": "Mã QR Thanh Toán",
+    "transferContent": "Nội dung chuyển khoản:",
+    "instructions": {
+      "title": "Hướng dẫn:",
+      "step1": "Mở ứng dụng ngân hàng",
+      "step2": "Chọn quét mã QR",
+      "step3": "Quét mã QR phía trên",
+      "step4": "Kiểm tra thông tin và xác nhận",
+      "step5": "Tiền sẽ được cộng trong vòng 5 phút"
+    },
+    "history": {
+      "title": "Lịch sử nạp tiền",
+      "empty": "Chưa có giao dịch nào",
+      "pending": "Đang chờ",
+      "completed": "Thành công",
+      "failed": "Thất bại",
+      "waiting": "Đang chờ thanh toán...",
+      "prompt": "Vui lòng hoàn tất chuyển khoản",
+      "successTitle": "Nạp tiền thành công!",
+      "successDesc": "Số dư đã được cập nhật",
+      "resume": "Nhấn để tiếp tục"
+    }
+  },
+  "forum": {
+    "title": "Diễn Đàn Công Nghệ",
+    "subtitle": "Nơi chia sẻ kiến thức và kinh nghiệm về Công nghệ thông tin",
+    "latestPosts": "Bài viết mới nhất",
+    "comments": "bình luận",
+    "views": "lượt xem",
+    "createPost": "Tạo bài viết mới",
+    "categories": "Danh mục Diễn đàn",
+    "stats": {
+      "title": "Thống kê diễn đàn",
+      "totalPosts": "Tổng bài viết",
+      "members": "Thành viên",
+      "online": "Trực tuyến"
+    },
+    "featured": "Thảo luận nổi bật",
+    "featuredSubtitle": "Những bài viết đang được quan tâm nhất",
+    "hotTopics": "Chủ đề nóng",
+    "topMembers": "Thành viên ưu tú",
+    "readMore": "Đọc chi tiết",
+    "loadMore": "Xem thêm bài viết cũ hơn",
+    "gotQuestions": "Bạn có câu hỏi?",
+    "communityConnect": "Kết nối cùng hàng ngàn chuyên gia công nghệ và nhận giải đáp ngay lập tức.",
+    "cta": {
+      "ask": "Tạo bài viết mới",
+      "join": "Tham gia thảo luận"
+    },
+    "sidebar": {
+      "categories": "Danh mục",
+      "stats": "Thống kê",
+      "topMembers": "Thành viên ưu tú",
+      "hotTags": "Chủ đề nóng"
+    }
+  },
+  "mySkillTree": {
+    "title": "Lộ trình học tập của tôi",
+    "completed": "hoàn thành",
+    "addSkills": "Thêm Skills",
+    "emptyState": {
+      "title": "Chưa có skill nào",
+      "subtitle": "Hãy chat với AI để tạo skill tree và lưu vào đây nhé!",
+      "button": "Tạo Skill Tree"
+    },
+    "node": {
+      "clickToExpand": "Click để mở"
+    },
+    "tabs": {
+      "all": "Toàn bộ",
+      "knowledge": "Kiến thức",
+      "skills": "Kỹ năng",
+      "abilities": "Khả năng"
+    },
+    "user": {
+      "role": "Thành viên cốt lõi"
+    },
+    "stats": {
+        "xp": "XP",
+        "nodes": "Kỹ năng"
+    },
+
+    "status": {
+      "notStarted": "Chưa bắt đầu",
+      "inProgress": "Đang học",
+      "completed": "Hoàn thành"
+    },
+
+    "panel": {
+      "description": "Mô tả",
+      "resources": "Tài liệu học tập",
+      "startLearning": "Bắt đầu học",
+      "review": "Ôn tập"
+    },
+
+    "toasts": {
+        "loadError": "Không thể tải skill tree của bạn"
+    }
+  },
+  "skillTree": {
+      "manageNode": "Quản lý Node",
+      "rightPanel": {
+        "tabs": {
+            "chat": "Trò chuyện",
+            "resource": "Tài liệu"
+        }
+      }
+  },
+  "auth": {
+    "login": {
+        "title": "Chào mừng trở lại",
+        "subtitle": "Đăng nhập để tiếp tục phát triển bản thân.",
+        "emailLabel": "Địa chỉ Email",
+        "passwordLabel": "Mật khẩu",
+        "forgotPassword": "Quên mật khẩu?",
+        "rememberMe": "Ghi nhớ đăng nhập",
+        "signInButton": "Đăng nhập",
+        "signingIn": "Đang đăng nhập...",
+        "orContinueWith": "Hoặc tiếp tục với",
+        "dontHaveAccount": "Chưa có tài khoản?",
+        "signUpLink": "Đăng ký miễn phí",
+        "backToLanding": "Về trang chủ",
+        "success": "Đăng nhập thành công"
+    },
+    "register": {
+        "title": "Tạo tài khoản mới",
+        "subtitle": "Tham gia AI Skill Tree để bắt đầu hành trình của bạn.",
+        "usernameLabel": "Tên đăng nhập",
+        "fullNameLabel": "Họ và tên",
+        "emailLabel": "Địa chỉ Email",
+        "passwordLabel": "Mật khẩu",
+        "confirmPasswordLabel": "Xác nhận mật khẩu",
+        "termsAgreement": "Tôi đồng ý với",
+        "terms": "Điều khoản",
+        "and": "và",
+        "privacy": "Chính sách quyền riêng tư",
+        "signUpButton": "Đăng ký",
+        "creatingAccount": "Đang tạo tài khoản...",
+        "orContinueWith": "Hoặc tiếp tục với",
+        "alreadyHaveAccount": "Đã có tài khoản?",
+        "signInLink": "Đăng nhập tại đây",
+        "backToLanding": "Về trang chủ",
+        "passwordsDoNotMatch": "Mật khẩu không khớp!"
+    },
+    "logout": {
+        "success": "Đăng xuất thành công"
+    }
+  },
+  "landing": {
+    "nav": {
+      "signIn": "Đăng nhập",
+      "getStarted": "Bắt đầu miễn phí"
+    },
+    "hero": {
+      "badge": "Học tập thông minh hơn với AI",
+      "title": {
+        "line1": "Phát triển kỹ năng,",
+        "line2": "Mở rộng tương lai"
+      },
+      "description": "Xây dựng lộ trình học tập được cá nhân hóa bởi AI. Theo dõi tiến độ, mở khóa kỹ năng mới và khám phá cơ hội nghề nghiệp phù hợp với bạn.",
+      "startFree": "Tạo lộ trình ngay",
+      "learnMore": "Tìm hiểu thêm",
+      "trustedBy": "Hơn 10,000+ người học tin dùng"
+    },
+    "features": {
+      "personalized": {
+        "title": "Lộ trình AI Cá nhân hóa",
+        "description": "Tạo lộ trình học tập riêng biệt dựa trên sở thích, mục tiêu và lịch sử kỹ năng của bạn."
+      },
+      "tracking": {
+        "title": "Theo dõi trực quan",
+        "description": "Nhìn thấy cây kỹ năng của bạn lớn lên mỗi ngày khi bạn mở khóa kiến thức và năng lực mới."
+      },
+      "career": {
+        "title": "Định hướng nghề nghiệp",
+        "description": "Khám phá các cơ hội nghề nghiệp phù hợp nhất với bộ kỹ năng hiện tại và tiềm năng của bạn."
+      }
+    }
+  }
+}

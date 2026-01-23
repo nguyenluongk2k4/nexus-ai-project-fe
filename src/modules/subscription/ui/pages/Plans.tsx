@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft,
     Check,
@@ -18,6 +19,7 @@ import {
 import { useSubscription } from '../hooks/useSubscription';
 
 export function Plans() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const {
         plans,
@@ -84,7 +86,7 @@ export function Plans() {
                     className="inline-flex items-center text-slate-500 hover:text-indigo-900 transition-colors text-sm font-medium gap-2 group"
                 >
                     <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                    Quay lại hồ sơ
+                    {t('common.back')}
                 </button>
             </div>
 
@@ -92,13 +94,13 @@ export function Plans() {
                 {/* Header */}
                 <div className="text-center max-w-3xl mx-auto mb-16 px-4">
                     <h2 className="text-indigo-600 font-bold tracking-wide uppercase text-xs mb-3 bg-indigo-50 inline-block px-3 py-1 rounded-full border border-indigo-100">
-                        Bảng giá
+                        {t('profile.subscription.pricing')}
                     </h2>
                     <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-800">
-                        Gói dịch vụ dành cho đội ngũ hiện đại
+                        {t('profile.subscription.titleNew')}
                     </h1>
                     <p className="text-slate-600 text-lg md:text-xl font-medium mb-10 max-w-2xl mx-auto">
-                        Chọn gói phù hợp với quy mô của bạn. Giá cả minh bạch, không phí ẩn.
+                        {t('profile.subscription.subtitleNew')}
                     </p>
 
                     {/* Billing Cycle Toggle */}
@@ -110,7 +112,7 @@ export function Plans() {
                                 : 'text-slate-500 hover:text-slate-900'
                                 }`}
                         >
-                            Theo tháng
+                            {t('profile.subscription.monthly')}
                         </button>
                         <button
                             onClick={() => setBillingCycle('yearly')}
@@ -119,9 +121,9 @@ export function Plans() {
                                 : 'text-slate-500 hover:text-slate-900'
                                 }`}
                         >
-                            Theo năm
+                            {t('profile.subscription.yearly')}
                             <span className="text-[10px] font-bold bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700 px-2 py-0.5 rounded-full uppercase tracking-wide border border-emerald-200/50">
-                                Giảm 17%
+                                {t('profile.subscription.savePercent')}
                             </span>
                         </button>
                     </div>
@@ -146,7 +148,7 @@ export function Plans() {
                                         onClick={() => navigate('/purchase')}
                                         className="text-sm text-red-600 underline hover:text-red-700 mt-1"
                                     >
-                                        Nạp tiền ngay →
+                                        {t('profile.balance.deposit')} →
                                     </button>
                                 )}
                             </div>
@@ -203,7 +205,7 @@ export function Plans() {
                                             <div className="bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 border border-yellow-300 px-4 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg shadow-amber-300/30">
                                                 <Sparkles className="w-4 h-4 text-amber-800" />
                                                 <span className="text-xs font-bold text-amber-900 uppercase tracking-wide">
-                                                    Phổ biến nhất
+                                                    {t('profile.subscription.mostPopular')}
                                                 </span>
                                             </div>
                                         </div>
@@ -212,7 +214,7 @@ export function Plans() {
                                     {isCurrentPlan && (
                                         <div className="absolute -top-5 left-0 right-0 flex justify-center">
                                             <span className="bg-violet-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg">
-                                                Gói hiện tại
+                                                {t('profile.subscription.currentPlan')}
                                             </span>
                                         </div>
                                     )}
@@ -286,7 +288,7 @@ export function Plans() {
                 <div className="mt-24 border-y border-white/50 bg-white/40 backdrop-blur-md">
                     <div className="max-w-7xl mx-auto px-6 py-12">
                         <p className="text-center text-sm font-bold text-indigo-900/40 uppercase tracking-widest mb-8">
-                            Được tin dùng bởi các tổ chức hàng đầu
+                            {t('profile.subscription.trustedBy')}
                         </p>
                         <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
                             <div className="flex items-center gap-2 group cursor-default">
@@ -317,45 +319,45 @@ export function Plans() {
 
                 {/* FAQ Section */}
                 <div className="max-w-3xl mx-auto px-6 mt-24">
-                    <h2 className="text-3xl font-bold text-slate-900 text-center mb-12">Câu hỏi thường gặp</h2>
+                    <h2 className="text-3xl font-bold text-slate-900 text-center mb-12">{t('profile.subscription.faq.title')}</h2>
                     <div className="space-y-3">
                         <details className="group bg-white/70 backdrop-blur-sm rounded-lg border border-white shadow-sm overflow-hidden transition-all duration-300">
                             <summary className="flex justify-between items-center cursor-pointer p-6 hover:bg-white transition-colors">
-                                <span className="text-lg font-semibold text-slate-800">Tôi có thể đổi gói sau không?</span>
+                                <span className="text-lg font-semibold text-slate-800">{t('profile.subscription.faq.changePlan.q')}</span>
                                 <span className="text-slate-400 transition-transform duration-300 group-open:rotate-180">▼</span>
                             </summary>
                             <div className="px-6 pb-6 pt-0 text-slate-600 leading-relaxed">
-                                Có, bạn có thể nâng cấp hoặc hạ cấp gói bất cứ lúc nào. Thay đổi sẽ được tính theo tỷ lệ cho thời gian còn lại trong chu kỳ thanh toán của bạn.
+                                {t('profile.subscription.faq.changePlan.a')}
                             </div>
                         </details>
 
                         <details className="group bg-white/70 backdrop-blur-sm rounded-lg border border-white shadow-sm overflow-hidden transition-all duration-300">
                             <summary className="flex justify-between items-center cursor-pointer p-6 hover:bg-white transition-colors">
-                                <span className="text-lg font-semibold text-slate-800">Có dùng thử miễn phí không?</span>
+                                <span className="text-lg font-semibold text-slate-800">{t('profile.subscription.faq.freeTrial.q')}</span>
                                 <span className="text-slate-400 transition-transform duration-300 group-open:rotate-180">▼</span>
                             </summary>
                             <div className="px-6 pb-6 pt-0 text-slate-600 leading-relaxed">
-                                Chúng tôi cung cấp gói Free để bạn trải nghiệm các tính năng cơ bản. Bạn có thể nâng cấp lên gói Pro hoặc Premium bất cứ lúc nào khi cần thêm tính năng.
+                                {t('profile.subscription.faq.freeTrial.a')}
                             </div>
                         </details>
 
                         <details className="group bg-white/70 backdrop-blur-sm rounded-lg border border-white shadow-sm overflow-hidden transition-all duration-300">
                             <summary className="flex justify-between items-center cursor-pointer p-6 hover:bg-white transition-colors">
-                                <span className="text-lg font-semibold text-slate-800">Chấp nhận phương thức thanh toán nào?</span>
+                                <span className="text-lg font-semibold text-slate-800">{t('profile.subscription.faq.payment.q')}</span>
                                 <span className="text-slate-400 transition-transform duration-300 group-open:rotate-180">▼</span>
                             </summary>
                             <div className="px-6 pb-6 pt-0 text-slate-600 leading-relaxed">
-                                Thanh toán được trừ trực tiếp từ số dư tài khoản của bạn. Bạn có thể nạp tiền vào tài khoản thông qua các phương thức như chuyển khoản ngân hàng, ví điện tử, hoặc thẻ tín dụng.
+                                {t('profile.subscription.faq.payment.a')}
                             </div>
                         </details>
 
                         <details className="group bg-white/70 backdrop-blur-sm rounded-lg border border-white shadow-sm overflow-hidden transition-all duration-300">
                             <summary className="flex justify-between items-center cursor-pointer p-6 hover:bg-white transition-colors">
-                                <span className="text-lg font-semibold text-slate-800">Dữ liệu của tôi có an toàn không?</span>
+                                <span className="text-lg font-semibold text-slate-800">{t('profile.subscription.faq.security.q')}</span>
                                 <span className="text-slate-400 transition-transform duration-300 group-open:rotate-180">▼</span>
                             </summary>
                             <div className="px-6 pb-6 pt-0 text-slate-600 leading-relaxed">
-                                Bảo mật là ưu tiên hàng đầu của chúng tôi. Chúng tôi sử dụng mã hóa AES-256 cho tất cả dữ liệu và tuân thủ các tiêu chuẩn bảo mật quốc tế.
+                                {t('profile.subscription.faq.security.a')}
                             </div>
                         </details>
                     </div>
@@ -363,7 +365,7 @@ export function Plans() {
 
                 {/* Footer */}
                 <div className="mt-16 text-center text-sm text-slate-500 font-medium px-4">
-                    Thanh toán được trừ từ số dư tài khoản.{' '}
+                    {t('profile.subscription.footerNote')}{' '}
                     <button
                         onClick={() => navigate('/purchase')}
                         className="text-indigo-600 hover:text-indigo-800 font-bold transition-colors"

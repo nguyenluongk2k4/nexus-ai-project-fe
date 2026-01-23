@@ -33,9 +33,14 @@ const ProtectedRoute = () => {
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
+import { Toaster } from 'sonner';
+
+// ... existing code ...
+
 export default function App() {
   return (
     <LearningProgressProvider>
+      <Toaster position="top-right" richColors />
       <AuthProvider>
         <BrowserRouter>
           <Routes>

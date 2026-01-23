@@ -60,7 +60,6 @@ export interface TimelineItem {
   priority: 'low' | 'medium' | 'high';
   estimatedTime?: string;
 }
-
 export interface LearningStats {
   totalResources: number;
   notStarted: number;
