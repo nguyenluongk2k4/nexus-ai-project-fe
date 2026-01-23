@@ -11,6 +11,7 @@ import { LocalStorageLearningGateway } from './infrastructure/gateway/LocalStora
 // Gateways (Infrastructure)
 const learningGateway = new LocalStorageLearningGateway();
 export const skillTreeGateway = new SkillTreeHttpGateway();
+export const httpLearningGateway = new HttpLearningGateway();
 
 // Services (Domain)
 const learningService = new LearningService(learningGateway);

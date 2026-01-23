@@ -191,6 +191,19 @@
         "nodes": "Kỹ năng"
     },
 
+    "status": {
+      "notStarted": "Chưa bắt đầu",
+      "inProgress": "Đang học",
+      "completed": "Hoàn thành"
+    },
+
+    "panel": {
+      "description": "Mô tả",
+      "resources": "Tài liệu học tập",
+      "startLearning": "Bắt đầu học",
+      "review": "Ôn tập"
+    },
+
     "toasts": {
         "loadError": "Không thể tải skill tree của bạn"
     }

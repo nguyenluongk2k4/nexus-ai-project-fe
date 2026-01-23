@@ -6,6 +6,7 @@ import { useAuth } from '@/modules/auth/AuthProvider';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { PageLoading } from '@/shared/components/PageLoading';
+import { ResourcePanel } from '../components/ResourcePanel';
 
 // Types for user's skill tree
 interface UserSkillNode {
@@ -64,6 +65,8 @@ export function MySkillTree() {
   const [focusedBranch, setFocusedBranch] = useState<{ abilityId?: string; skillId?: string } | null>(null);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
+  const [showResourcePanel, setShowResourcePanel] = useState(false);
+  const [selectedNodeForResources, setSelectedNodeForResources] = useState<UserSkillNode | null>(null);
 
   // Camera Y position - pans up as user goes deeper into tree (Candy Crush style)
   const cameraY = useMemo(() => {
@@ -136,6 +139,10 @@ export function MySkillTree() {
   // Handle node click with focus/expand effect
   const handleNodeClick = (node: UserSkillNode & { x: number; y: number }) => {
     setSelectedNodeId(node.id);
+    
+    // Open resource panel for this node
+    setSelectedNodeForResources(node);
+    setShowResourcePanel(true);
     
     if (node.level === 0) {
       // Root node (Backend/Frontend): Toggle focus - hide siblings
@@ -381,10 +388,7 @@ export function MySkillTree() {
                 ← {t('common.back')}
               </button>
             )}
-          </div>
-          <h1 className="text-2xl font-bold text-slate-800">
-            {tree.name || t('mySkillTree.title')}
-          </h1>
+          </div>       
           <button
             onClick={() => navigate('/skilltree')}
             className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors flex items-center gap-2"
@@ -395,8 +399,10 @@ export function MySkillTree() {
         </div>
       </header>
 
-      {/* Main Tree Area */}
-      <div className="flex-1 relative overflow-hidden">
+      {/* Main Content Area - Tree + Resource Panel */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Tree Area */}
+        <div className="flex-1 relative overflow-hidden">
         {/* Zoom Controls */}
         <div className="absolute bottom-4 left-4 bg-white rounded-xl shadow-lg border border-slate-200 z-20">
           <button 
@@ -567,16 +573,37 @@ export function MySkillTree() {
             );
           })}
         </svg>
+        </div>
+
+        {/* Resource Panel - inside flex container */}
+        {showResourcePanel && (
+          <div className="w-96 flex-shrink-0 bg-white border-l border-slate-200 overflow-y-auto">
+            <ResourcePanel
+              isOpen={showResourcePanel}
+              node={selectedNodeForResources}
+              onClose={() => setShowResourcePanel(false)}
+              isInline={true}
+            />
+          </div>
+        )}
       </div>
 
       {/* Bottom Bar */}
-      <div className="flex-shrink-0 bg-white border-t border-slate-200 px-6 py-3">
+      <div className="flex-shrink-0 bg-white border-t border-slate-200 px-6 py-3 z-40 relative">
         <div className="flex items-center justify-between">
           {/* User Info */}
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center text-white font-bold">
-              {user?.fullName?.charAt(0)?.toUpperCase() || 'U'}
-            </div>
+            {user?.avatarUrl ? (
+              <img 
+                src={user.avatarUrl} 
+                alt={user.fullName || user.username || 'User'} 
+                className="w-10 h-10 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center text-white font-bold">
+                {user?.fullName?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+            )}
             <div>
               <div className="font-semibold text-slate-800 text-sm">{user?.fullName || 'User'}</div>
               <div className="text-[10px] text-slate-500 uppercase">{t('mySkillTree.user.role')}</div>
@@ -617,6 +644,7 @@ export function MySkillTree() {
           </div>
         </div>
       </div>
+
     </div>
   );
 }

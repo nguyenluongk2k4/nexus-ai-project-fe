@@ -189,6 +189,7 @@ export function SkillTree() {
           fullName: node.name,
           type: node.type,
           level: node.level,
+          originalNodeId: node.originalNodeId, // NEW: Preserve original mapping
           x: 50, // Default for session nodes (repositioned later)
           y: 10 + (node.level * 20),
           status: ((node.metadata as any)?.status === 'completed' || (node.metadata as any)?.status === 'unlocked') 

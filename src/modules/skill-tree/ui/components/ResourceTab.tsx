@@ -279,21 +279,44 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
                   </div>
 
                   {/* Actions Row */}
-                  {/* <div className="flex items-center justify-between pt-3 border-t border-slate-50">
-                    {renderStatusDropdown(resource.id, rawStatus)}
+                  <div className="flex items-center justify-between pt-3 border-t border-slate-50 mt-auto">
+                    {status === 'not-started' ? (
+                       <button 
+                          onClick={() => handleStatusUpdate(resource.id, 'in-progress')}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all"
+                       >
+                          <Play className="w-3 h-3 fill-current" />
+                          Học ngay
+                       </button>
+                    ) : (
+                       <button 
+                          onClick={() => handleStatusUpdate(resource.id, status === 'completed' ? 'not_started' : 'completed')}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                             status === 'completed' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          }`}
+                       >
+                          {status === 'completed' ? <Check className="w-3 h-3" /> : <BookOpen className="w-3 h-3" />}
+                          {status === 'completed' ? 'Đã xong' : 'Xong?'}
+                       </button>
+                    )}
                     
                     <div className="flex items-center gap-1">
-                      <button className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors" title="Nhắc nhở">
-                        <Bell className="w-4 h-4" />
-                      </button>
-                      <button className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors" title="Lên lịch">
+                      {resource.url && (
+                        <a 
+                          href={resource.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
+                          title="Mở tài liệu"
+                        >
+                          <Rocket className="w-4 h-4" />
+                        </a>
+                      )}
+                      <button className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors" title="Thêm vào lịch">
                         <Calendar className="w-4 h-4" />
                       </button>
-                      <button className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors" title="Ghi chú">
-                        <Edit3 className="w-4 h-4" />
-                      </button>
                     </div>
-                  </div> */}
+                  </div>
                 </div>
               );
             })

@@ -191,6 +191,19 @@
         "nodes": "Nodes"
     },
 
+    "status": {
+      "notStarted": "Not Started",
+      "inProgress": "In Progress",
+      "completed": "Completed"
+    },
+
+    "panel": {
+      "description": "Description",
+      "resources": "Learning Resources",
+      "startLearning": "Start Learning",
+      "review": "Review"
+    },
+
     "toasts": {
         "loadError": "Could not load your skill tree"
     }

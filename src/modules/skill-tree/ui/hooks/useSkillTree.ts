@@ -13,6 +13,7 @@ export interface SkillNode {
   type?: string;
   status: 'unlocked' | 'available' | 'locked';
   level: number;
+  originalNodeId?: string; // NEW
   x: number;
   y: number;
   connections: string[];
@@ -156,6 +157,7 @@ export function useSkillTree() {
               x: apiNode.position?.x || 50,
               y: apiNode.position?.y || 50,
               connections: [],
+              originalNodeId: apiNode.original_node_id, // NEW: Capture original mapping
               nodeData: {
                   ...apiNode.data,
                   filled: true, // Mark as filled since data comes from API
@@ -183,6 +185,7 @@ export function useSkillTree() {
         name: n.fullName,
         type: 'skill',
         level: n.level,
+        originalNodeId: n.originalNodeId, // NEW
         filled: n.status !== 'locked',
         parentId: null,
         connections: n.connections, // CRITICAL: Include connections for edge drawing
@@ -222,6 +225,7 @@ export function useSkillTree() {
                 description: n.description, // Include description
                 type: n.type || 'skill',
                 level: n.level,
+                originalNodeId: n.original_node_id, // NEW
                 filled: true,
                 parentId: n.parentId, // Critical for building connections
                 connections: [], // Will be built from parentId in SkillTree.tsx

@@ -26,6 +26,7 @@ export interface TreeNodeData {
   type: 'root' | 'specialization' | 'ability' | 'skill' | 'knowledge';
   parentId?: string | null;
   level: number;
+  originalNodeId?: string; // NEW: Track mapping to template node
   filled: boolean; // false = placeholder, true = has real data
   metadata?: {
     difficultyLevel?: string;
