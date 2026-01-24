@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, Lock, Minus, Plus, MessageSquare, Loader2, Save, CheckCircle } from 'lucide-react';
+import { Check, Lock, Minus, Plus, MessageSquare, Loader2, Save, CheckCircle, BookOpen } from 'lucide-react';
 import { useSkillTree, SkillNode } from '@/modules/skill-tree/ui/hooks/useSkillTree';
 import { useChat } from '@/modules/chat/ui/hooks/useChat';
 import { RightPanel } from '../components/RightPanel';
@@ -398,6 +398,7 @@ export function SkillTree() {
     const handleNodeClick = async (node: SkillNode) => {
       setSelectedNodeId(node.id);
       setActiveTab('resource'); // Auto-switch to resource tab
+      setRightPanelCollapsed(false); // Ensure Right Panel is open (especially on mobile)
   
       if (node.level === 1) {
         // Level 1 (Ability): Toggle expand to show/hide level 2 children (skills)
@@ -465,9 +466,9 @@ export function SkillTree() {
     return (
       <div className="flex-1 flex flex-col min-w-0 h-full bg-slate-50">
         {/* Header */}
-        <header className="h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md px-6 flex items-center justify-between z-10 flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <h2 className="text-lg font-bold text-slate-800">{t('nav.skilltree')}</h2>
+        <header className="min-h-[3.5rem] border-b border-slate-200 bg-white/80 backdrop-blur-md px-4 md:px-6 flex items-center justify-between z-10 flex-shrink-0 flex-wrap gap-2 py-2 md:py-0">
+          <div className="flex items-center gap-2 md:gap-3">
+            <h2 className="text-base md:text-lg font-bold text-slate-800 shrink-0">{t('nav.skilltree')}</h2>
             
             {/* Back button when focused - smart navigation */}
             {focusedBranch?.abilityId && (
@@ -481,35 +482,46 @@ export function SkillTree() {
                     setFocusedBranch(null);
                   }
                 }}
-                className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-full text-xs font-medium text-slate-600 transition-colors"
+                className="flex items-center gap-1 px-2 py-1 md:px-3 md:py-1.5 bg-slate-100 hover:bg-slate-200 rounded-full text-[10px] md:text-xs font-medium text-slate-600 transition-colors shrink-0"
               >
-                ← {focusedBranch.skillId ? t('skillTree.page.backToSkills') : t('skillTree.page.back')}
+                ← <span className="hidden sm:inline">{focusedBranch.skillId ? t('skillTree.page.backToSkills') : t('skillTree.page.back')}</span>
+                <span className="sm:hidden">{t('skillTree.page.back')}</span>
               </button>
             )}
             
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+            <span className={`text-[10px] md:text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${
               filledCount > 0 
                 ? 'bg-indigo-100 text-indigo-700' 
                 : 'bg-slate-100 text-slate-500'
             }`}>
-              {filledCount}/{totalCount} {t('skillTree.page.nodes')}
+              {filledCount}/{totalCount} <span className="hidden sm:inline">{t('skillTree.page.nodes')}</span>
             </span>
             
             {/* Loading indicator */}
             {treeState.loading && (
               <div className="flex items-center gap-2 px-3 py-1 bg-indigo-50 rounded-full">
-                <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
-                <span className="text-xs text-indigo-600 font-medium">{t('skillTree.page.loading')}</span>
+                <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin text-indigo-500" />
+                <span className="text-[10px] md:text-xs text-indigo-600 font-medium hidden sm:inline">{t('skillTree.page.loading')}</span>
               </div>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
+             {/* Mobile Chat Toggle */}
+             <button
+               onClick={() => setRightPanelCollapsed(!rightPanelCollapsed)}
+               className={`md:hidden p-2 rounded-full transition-colors ${
+                 !rightPanelCollapsed ? 'bg-indigo-100 text-indigo-600' : 'text-slate-600 hover:bg-slate-100'
+               }`}
+             >
+               {activeTab === 'resource' ? <BookOpen className="w-5 h-5" /> : <MessageSquare className="w-5 h-5" />}
+             </button>
+
             {/* Save to My Tree button - only show when tree has nodes */}
             {treeState.nodes.length > 0 && currentSessionId && (
               <button
                 onClick={handleSaveToMyTree}
                 disabled={isSaving || saveSuccess}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-medium transition-all text-xs md:text-sm ${
                   saveSuccess 
                     ? 'bg-green-100 text-green-700 cursor-default'
                     : isSaving 
@@ -519,69 +531,70 @@ export function SkillTree() {
               >
                 {saveSuccess ? (
                   <>
-                    <CheckCircle className="w-4 h-4" />
-                    <span>{t('skillTree.page.saved')}</span>
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4" />
+                    <span className="hidden sm:inline">{t('skillTree.page.saved')}</span>
                   </>
                 ) : isSaving ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>{t('skillTree.page.saving')}</span>
+                    <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
+                    <span className="hidden sm:inline">{t('skillTree.page.saving')}</span>
                   </>
                 ) : (
                   <>
-                    <Save className="w-4 h-4" />
-                    <span>{t('skillTree.page.saveToMyTree')}</span>
+                    <Save className="w-3 h-3 md:w-4 md:h-4" />
+                    <span className="hidden sm:inline">{t('skillTree.page.saveToMyTree')}</span>
+                    <span className="sm:hidden">{t('skillTree.button.save')}</span>
                   </>
                 )}
               </button>
             )}
             
-            <div className="flex items-center bg-slate-100 rounded-full px-3 py-1 gap-2">
-              <span className="text-[11px] font-bold text-slate-500">ZOOM</span>
+            <div className="flex items-center bg-slate-100 rounded-full px-2 md:px-3 py-1 gap-1 md:gap-2">
+              <span className="text-[10px] md:text-[11px] font-bold text-slate-500 hidden sm:inline">ZOOM</span>
               <button 
                 onClick={() => setZoomLevel(Math.max(50, zoomLevel - 10))}
                 className="p-1 hover:text-indigo-600 transition-colors"
               >
-                <Minus className="w-4 h-4" />
+                <Minus className="w-3 h-3 md:w-4 md:h-4" />
               </button>
-              <span className="text-xs font-mono w-10 text-center font-bold">{zoomLevel}%</span>
+              <span className="text-[10px] md:text-xs font-mono w-8 md:w-10 text-center font-bold">{zoomLevel}%</span>
               <button 
                 onClick={() => setZoomLevel(Math.min(150, zoomLevel + 10))}
                 className="p-1 hover:text-indigo-600 transition-colors"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-3 h-3 md:w-4 md:h-4" />
               </button>
             </div>
           </div>
         </header>
   
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden relative md:static">
           {/* Tree Canvas - shows empty state or tree */}
-          <div className="flex-1 relative overflow-hidden">
+          <div className="flex-1 relative overflow-hidden flex flex-col">
             {totalCount === 0 ? (
               /* Empty State - shown before first data */
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center max-w-lg px-6">
+              <div className="absolute inset-0 flex items-center justify-center p-4">
+                <div className="text-center max-w-lg w-full">
                   {treeState.loading ? (
                     <>
-                      <Loader2 className="w-16 h-16 mx-auto text-indigo-500 animate-spin mb-6" />
-                      <h2 className="text-xl font-bold text-slate-700 mb-2">{t('skillTree.page.creatingTree')}</h2>
-                      <p className="text-slate-500">{t('skillTree.page.analyzing')}</p>
+                      <Loader2 className="w-12 h-12 md:w-16 md:h-16 mx-auto text-indigo-500 animate-spin mb-4 md:mb-6" />
+                      <h2 className="text-lg md:text-xl font-bold text-slate-700 mb-2">{t('skillTree.page.creatingTree')}</h2>
+                      <p className="text-sm md:text-base text-slate-500">{t('skillTree.page.analyzing')}</p>
                     </>
                   ) : (
                     <>
-                      <div className="w-20 h-20 mx-auto bg-gradient-to-br from-indigo-100 to-purple-100 rounded-3xl flex items-center justify-center mb-6 shadow-lg">
-                        <span className="text-4xl">🌳</span>
+                      <div className="w-16 h-16 md:w-20 md:h-20 mx-auto bg-gradient-to-br from-indigo-100 to-purple-100 rounded-3xl flex items-center justify-center mb-4 md:mb-6 shadow-lg">
+                        <span className="text-3xl md:text-4xl">🌳</span>
                       </div>
-                      <h2 className="text-2xl font-bold text-slate-800 mb-3">{t('skillTree.page.title')}</h2>
-                      <p className="text-slate-500 mb-6 leading-relaxed">
-                        {t('skillTree.page.instruction1')}<br/>
+                      <h2 className="text-xl md:text-2xl font-bold text-slate-800 mb-2 md:mb-3">{t('skillTree.page.title')}</h2>
+                      <p className="text-sm md:text-base text-slate-500 mb-4 md:mb-6 leading-relaxed">
+                        {t('skillTree.page.instruction1')}<br className="hidden md:block"/>
                         {t('skillTree.page.instruction2')}
                       </p>
                       
                       <div className="flex items-center gap-2 justify-center text-indigo-500">
-                        <MessageSquare className="w-5 h-5" />
-                        <span className="text-sm font-medium">{t('skillTree.page.chatToStart')}</span>
+                        <MessageSquare className="w-4 h-4 md:w-5 md:h-5" />
+                        <span className="text-xs md:text-sm font-medium">{t('skillTree.page.chatToStart')}</span>
                       </div>
                     </>
                   )}
@@ -590,13 +603,13 @@ export function SkillTree() {
             ) : (
               /* Tree Visualization - shown after first data */
               <>
-                {/* Legend */}
-                <div className="absolute top-6 left-8 flex items-center gap-6 bg-white/90 backdrop-blur p-4 rounded-xl border border-slate-200 shadow-sm z-20">
+                {/* Legend - Hide on small mobile */}
+                <div className="absolute top-2 left-2 md:top-6 md:left-8 flex items-center gap-2 md:gap-6 bg-white/90 backdrop-blur p-2 md:p-4 rounded-xl border border-slate-200 shadow-sm z-20 hidden sm:flex">
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-indigo-500"></div>
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{t('skillTree.page.nodeLegend')}</span>
+                    <div className="w-3 h-3 md:w-4 md:h-4 rounded-lg bg-indigo-500"></div>
+                    <span className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-tight">{t('skillTree.page.nodeLegend')}</span>
                   </div>
-                  <span className="text-xs text-slate-400">{totalCount} {t('skillTree.page.nodesCount')}</span>
+                  <span className="text-[10px] md:text-xs text-slate-400">{totalCount} {t('skillTree.page.nodesCount')}</span>
                 </div>
   
             {/* SVG Tree - Always visible (skeleton or filled) */}

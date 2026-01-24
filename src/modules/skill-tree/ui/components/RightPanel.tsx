@@ -79,7 +79,7 @@ export function RightPanel({
 
   if (isCollapsed) {
     return (
-      <div className="w-12 bg-white border-l border-slate-200 flex flex-col items-center py-4 gap-2">
+      <div className="hidden md:flex w-12 bg-white border-l border-slate-200 flex-col items-center py-4 gap-2">
         <button
           onClick={onToggleCollapse}
           className="p-2 hover:bg-slate-100 rounded-lg text-slate-500"
@@ -106,7 +106,7 @@ export function RightPanel({
   }
 
   return (
-    <div className="w-[480px] bg-white border-l border-slate-200 flex flex-col shadow-lg flex-shrink-0">
+    <div className="absolute inset-0 z-40 md:static md:inset-auto w-full md:w-[480px] bg-white border-l border-slate-200 flex flex-col shadow-lg flex-shrink-0 h-full">
       {/* Tab Bar */}
       <div className="flex items-center border-b border-slate-200">
         {!hideChat && (
