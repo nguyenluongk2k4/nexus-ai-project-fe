@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Home, GitBranch, FileQuestion, Briefcase, TrendingUp, LogOut, MessageSquare, Users, Calendar, User, ChevronDown, TreeDeciduous, Globe } from 'lucide-react';
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { useTranslation } from 'react-i18next';
+import logo from '@/assets/logo.svg';
 
 export function Navigation() {
   const navigate = useNavigate();
@@ -58,10 +59,7 @@ export function Navigation() {
       <div className={`mb-8 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
         {!isCollapsed && (
           <div>
-            <h1 className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-teal-500 font-bold text-xl truncate">
-              {t('nav.title')}
-            </h1>
-            <p className="text-muted-foreground mt-1 text-sm truncate">{t('nav.subtitle')}</p>
+            <img src={logo} alt="Nexus AI" className="h-16 mb-1" />
           </div>
         )}
         <button 

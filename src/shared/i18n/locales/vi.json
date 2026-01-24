@@ -526,6 +526,9 @@
     }
   },
   "skillTree": {
+      "button": {
+        "save": "Lưu"
+      },
       "manageNode": "Quản lý Node",
       "page": {
         "backToSkills": "Quay lại Skills",

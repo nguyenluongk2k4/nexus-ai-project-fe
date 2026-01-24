@@ -9,6 +9,7 @@ import { NodeTooltip } from '../components/NodeTooltip';
 import { treeState$, TreeNodeData, TreeState, treeNodeService } from '../../domain/services/treeNodeService';
 import { skillTreeGateway } from '../../providers';
 import { Settings } from 'lucide-react';
+import logo from '@/assets/logo.svg';
 
 // Node types for different states
 type NodeStatus = 'completed' | 'in-progress' | 'locked';
@@ -583,10 +584,9 @@ export function SkillTree() {
                     </>
                   ) : (
                     <>
-                      <div className="w-16 h-16 md:w-20 md:h-20 mx-auto bg-gradient-to-br from-indigo-100 to-purple-100 rounded-3xl flex items-center justify-center mb-4 md:mb-6 shadow-lg">
-                        <span className="text-3xl md:text-4xl">🌳</span>
+                      <div className="h-20 md:h-20 mx-auto flex items-center justify-center mb-4 md:mb-6">
+                        <img src={logo} alt="Nexus AI" className="h-10 md:h-16" />
                       </div>
-                      <h2 className="text-xl md:text-2xl font-bold text-slate-800 mb-2 md:mb-3">{t('skillTree.page.title')}</h2>
                       <p className="text-sm md:text-base text-slate-500 mb-4 md:mb-6 leading-relaxed">
                         {t('skillTree.page.instruction1')}<br className="hidden md:block"/>
                         {t('skillTree.page.instruction2')}
