@@ -15,23 +15,13 @@ interface ResourceTabProps {
 export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
   const { t } = useTranslation();
 
-  if (!selectedNode) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full text-slate-400 p-6">
-        <BookOpen className="w-12 h-12 mb-3 opacity-50" />
-        <p className="text-sm font-medium">{t('mySkillTree.panel.selectNodePrompt')}</p>
-        <p className="text-xs mt-1">{t('mySkillTree.panel.clickNodeHint')}</p>
-      </div>
-    );
-  }
-
-  const status = getNodeStatus(selectedNode);
-  const { nodeData } = selectedNode;
-  
-  // Local state for resources (since MySkillTree doesn't update from treeNodeService)
+  // Local state for resources (moved up to avoid conditional hook error)
   const [resources, setResources] = useState<any[]>([]);
   const [loadingResources, setLoadingResources] = useState(false);
   
+  const status = selectedNode ? getNodeStatus(selectedNode) : 'locked';
+  const nodeData = selectedNode?.nodeData;
+
   // Sync resources from props or fetch
   useEffect(() => {
     if (!selectedNode?.id) return;
@@ -60,6 +50,16 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
       })
       .finally(() => setLoadingResources(false));
   }, [selectedNode?.id, nodeData?.learningResources]);
+
+  if (!selectedNode) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-slate-400 p-6">
+        <BookOpen className="w-12 h-12 mb-3 opacity-50" />
+        <p className="text-sm font-medium">{t('mySkillTree.panel.selectNodePrompt')}</p>
+        <p className="text-xs mt-1">{t('mySkillTree.panel.clickNodeHint')}</p>
+      </div>
+    );
+  }
 
   // Helper helper to normalize status
   const normalizeStatus = (status: string) => status.replace('_', '-');
