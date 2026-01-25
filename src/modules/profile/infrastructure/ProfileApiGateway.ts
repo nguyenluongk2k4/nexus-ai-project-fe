@@ -4,7 +4,9 @@
 import { ProfileGateway } from '../domain/ports/ProfileGateway';
 import { UserProfile, ProfileStats, ActivityItem, UpdateProfileRequest } from '../domain/entities/ProfileEntities';
 
-const API_BASE = 'http://localhost:8000';
+import { API_BASE_URL } from "@/config/api";
+
+const API_BASE = API_BASE_URL;
 
 export class ProfileApiGateway implements ProfileGateway {
     private getToken(): string | null {

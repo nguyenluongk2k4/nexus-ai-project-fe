@@ -1,7 +1,9 @@
 import { ForumGateway } from '../../domain/ports/ForumGateway';
 import { ForumPost, ForumCategory, ForumComment, ForumStats } from '../../domain/entities/ForumEntities';
 
-const API_BASE = 'http://localhost:8000/api/forum';
+import { API_BASE_URL } from "@/config/api";
+
+const API_BASE = `${API_BASE_URL}/api/forum`;
 
 // Response type interfaces matching backend
 interface UserResponse {

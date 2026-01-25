@@ -3,11 +3,12 @@
  * Two modes: Manual selection and AI Auto-scheduling
  */
 
+import { format } from "date-fns";
+import { API_BASE_URL } from "../../../../config/api";
 import { useState, useEffect } from 'react';
 import { X, Calendar, Sparkles, Clock, Loader2, Check, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-const API_BASE = 'http://localhost:8000/api';
 
 interface Resource {
     id: string;
@@ -77,7 +78,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
 
     const fetchResources = async () => {
         try {
-            const response = await fetch(`${API_BASE}/timeline/resources`, {
+            const response = await fetch(`${API_BASE_URL}/api/timeline/resources`, {
                 headers: getHeaders(),
             });
             if (response.ok) {
@@ -93,15 +94,6 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
     const handleManualSubmit = async () => {
         if (!selectedResourceId || !scheduledDate) return;
 
-        setLoading(true);
-        try {
-            const response = await fetch(`${API_BASE}/timeline`, {
-                method: 'POST',
-                headers: getHeaders(),
-                body: JSON.stringify({
-                    resourceId: selectedResourceId,
-                    scheduledDate,
-                    deadline: deadline || null,
                     priority,
                 }),
             });

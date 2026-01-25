@@ -1,13 +1,14 @@
 import { UploadResponse } from '../domain/entities/UploadResponse';
+import { API_BASE_URL } from "../../../config/api";
+
+const API_URL = `${API_BASE_URL}/api/upload`;
 
 export class UploadHttpGateway {
-  private readonly baseUrl = 'http://localhost:8000/api/upload';
-
   async upload(file: File): Promise<UploadResponse> {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(this.baseUrl, {
+    const response = await fetch(API_URL, {
       method: 'POST',
       body: formData,
     });
