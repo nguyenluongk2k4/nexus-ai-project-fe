@@ -4,7 +4,7 @@
  */
 
 import { format } from "date-fns";
-import { API_BASE_URL } from "../../../../config/api";
+import { API_BASE_URL } from "@/config/api";
 import { useState, useEffect } from 'react';
 import { X, Calendar, Sparkles, Clock, Loader2, Check, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -94,6 +94,15 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
     const handleManualSubmit = async () => {
         if (!selectedResourceId || !scheduledDate) return;
 
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/timeline`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({
+                    resourceId: selectedResourceId,
+                    scheduledDate,
+                    deadline: deadline || undefined,
                     priority,
                 }),
             });
@@ -122,7 +131,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
         setAiSuggestions([]);
 
         try {
-            const response = await fetch(`${API_BASE}/timeline/ai-schedule`, {
+            const response = await fetch(`${API_BASE_URL}/api/timeline/ai-schedule`, {
                 method: 'POST',
                 headers: getHeaders(),
                 body: JSON.stringify({
@@ -152,7 +161,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
 
         setLoading(true);
         try {
-            const response = await fetch(`${API_BASE}/timeline/ai-schedule/confirm`, {
+            const response = await fetch(`${API_BASE_URL}/api/timeline/ai-schedule/confirm`, {
                 method: 'POST',
                 headers: getHeaders(),
                 body: JSON.stringify(aiSuggestions),

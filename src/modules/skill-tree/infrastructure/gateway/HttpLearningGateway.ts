@@ -11,9 +11,9 @@ import {
     DailyGoal,
 } from '../../domain/entities/LearningEntities';
 
-import { API_BASE_URL } from "../../../config/api";
+import { API_BASE_URL } from "@/config/api";
 
-const API_URL = `${API_BASE_URL}/api`;
+const API_BASE = `${API_BASE_URL}/api`;
 
 export class HttpLearningGateway implements LearningGateway {
     private getToken(): string | null {

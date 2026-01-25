@@ -4,9 +4,9 @@
 import { PurchaseGateway } from '../domain/ports/PurchaseGateway';
 import { PurchaseHistory, QRPaymentInfo } from '../domain/entities/PurchaseEntities';
 
-import { API_BASE_URL } from "../../../config/api";
+import { API_BASE_URL } from "@/config/api";
 
-const API_ROOT = `${API_BASE_URL}/api/purchase`;
+const API_BASE = API_BASE_URL;
 
 export class PurchaseApiGateway implements PurchaseGateway {
     private getToken(): string | null {

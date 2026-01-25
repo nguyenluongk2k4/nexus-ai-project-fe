@@ -3,9 +3,9 @@
 import { SubscriptionGateway } from '../domain/ports/SubscriptionGateway';
 import { SubscriptionPlan, UserSubscription, PurchasePlanResult, BillingCycle } from '../domain/entities/SubscriptionEntities';
 
-import { API_BASE_URL } from "../../../config/api";
+import { API_BASE_URL } from "@/config/api";
 
-const API_ROOT = `${API_BASE_URL}/api/subscription`;
+const API_BASE = API_BASE_URL;
 
 export class SubscriptionApiGateway implements SubscriptionGateway {
     private getToken(): string | null {
