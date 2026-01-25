@@ -159,7 +159,7 @@ export class ChatWsGateway implements ChatGateway {
     };
   }
 
-  sendMessage(text: string, sessionId: string | null): void {
+  sendMessage(text: string, sessionId: string | null, attachments: any[] = []): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       
       const token = localStorage.getItem('token');
@@ -167,7 +167,8 @@ export class ChatWsGateway implements ChatGateway {
         type: 'user_message',
         text,
         session_id: sessionId,
-        token: token
+        token: token,
+        attachments: attachments
       }));
     }
   }

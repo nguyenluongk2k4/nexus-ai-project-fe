@@ -53,7 +53,11 @@ export function SkillTree() {
       loadingMore,
       currentSessionId,
       startNewChat,
-      selectSession
+      selectSession,
+      uploadFile,
+      attachments,
+      isUploading,
+      removeAttachment
     } = useChat({ disableNavigation: true });
   
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -763,6 +767,10 @@ export function SkillTree() {
             onToggleCollapse={() => setRightPanelCollapsed(!rightPanelCollapsed)}
             activeTab={activeTab}
             onTabChange={setActiveTab}
+            uploadFile={uploadFile}
+            attachments={attachments}
+            isUploading={isUploading}
+            removeAttachment={removeAttachment}
           />
         </div>
 

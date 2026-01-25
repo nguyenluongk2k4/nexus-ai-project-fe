@@ -141,80 +141,87 @@ export function MySkillTree() {
               ${toX} ${toY}`;
   };
 
-  // Handle node click with focus/expand effect
-  const handleNodeClick = (node: UserSkillNode & { x: number; y: number }) => {
-    setSelectedNodeId(node.id);
+  // Build maps for efficient graph traversal
+  const { childrenByParent, parentByChild } = useMemo(() => {
+    if (!tree || !Array.isArray(tree.edges)) return { childrenByParent: {}, parentByChild: {} };
     
-    // Open resource panel for this node
+    const children: Record<string, string[]> = {};
+    const parents: Record<string, string> = {};
+    
+    tree.edges.forEach(edge => {
+      if (!edge.source || !edge.target) return;
+      // Children map
+      if (!children[edge.source]) children[edge.source] = [];
+      children[edge.source].push(edge.target);
+      
+      // Parent map (assuming tree structure with single parent)
+      parents[edge.target] = edge.source;
+    });
+    
+    return { childrenByParent: children, parentByChild: parents };
+  }, [tree]);
+
+  // Handle node click with robust focus/expand logic
+  const handleNodeClick = (node: UserSkillNode & { x: number; y: number }, e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log('🖱️ NODE CLICK:', node.name, node.level, node.id);
+    console.log('   Current Focus:', { focusedRootId, focusedBranch });
+    
+    // 1. Basic selection for Right Panel
+    setSelectedNodeId(node.id);
     setActiveTab('resource'); 
     setRightPanelCollapsed(false);
     
+    // 2. Focus Logic
     if (node.level === 0) {
-      // Root node (Backend/Frontend): Toggle focus - hide siblings
+      // --- ROOT CLICK ---
       if (focusedRootId === node.id) {
-        // Already focused, unfocus
+        console.log('   Action: Unfocus Root');
         setFocusedRootId(null);
         setFocusedBranch(null);
       } else {
-        // Focus on this root, hide other roots
+        console.log('   Action: Focus Root');
         setFocusedRootId(node.id);
         setFocusedBranch(null);
       }
     } else if (node.level === 1) {
-      // Ability: Toggle expand to show/hide skills
-      // Fix: Also focus parent Root if not already focused
-      const parentRoot = tree?.nodes.find(n => 
-        n.level === 0 && tree.edges.some(e => e.source === n.id && e.target === node.id)
-      );
-
-      if (focusedBranch?.abilityId === node.id && focusedBranch?.skillId) {
-        setFocusedBranch({ abilityId: node.id }); // Collapse skills
-      } else if (focusedBranch?.abilityId === node.id) {
-        setFocusedBranch(null); // Collapse ability
+      // --- ABILITY CLICK ---
+      const parentId = parentByChild[node.id];
+      console.log('   Parent Root ID:', parentId);
+      
+      if (focusedBranch?.abilityId === node.id) {
+         if (focusedBranch.skillId) {
+           console.log('   Action: Collapse Skills (Keep Ability)');
+           setFocusedBranch({ abilityId: node.id });
+         } else {
+           console.log('   Action: Collapse Ability');
+           setFocusedBranch(null);
+         }
       } else {
-        setFocusedBranch({ abilityId: node.id });
-        // Auto-focus parent root to hide other roots
-        if (parentRoot) {
-          setFocusedRootId(parentRoot.id);
-        }
+         console.log('   Action: Expand Ability');
+         setFocusedBranch({ abilityId: node.id });
+         if (parentId) setFocusedRootId(parentId);
       }
     } else if (node.level === 2) {
-      // Skill: Toggle expand to show/hide knowledge
-      const parentAbility = tree?.nodes.find(n => 
-        n.level === 1 && tree.edges.some(e => e.source === n.id && e.target === node.id)
-      );
-      
-      // Fix: Also focus grandparent Root
-      const parentRoot = parentAbility ? tree?.nodes.find(n => 
-        n.level === 0 && tree.edges.some(e => e.source === n.id && e.target === parentAbility.id)
-      ) : null;
+      // --- SKILL CLICK ---
+      const parentAbilityId = parentByChild[node.id];
+      const rootId = parentAbilityId ? parentByChild[parentAbilityId] : null;
+      console.log('   Parent Ability:', parentAbilityId, 'Grandparent Root:', rootId);
 
       if (focusedBranch?.skillId === node.id) {
-        setFocusedBranch({ abilityId: parentAbility?.id }); // Collapse knowledge
+        console.log('   Action: Collapse Knowledge');
+        setFocusedBranch({ abilityId: parentAbilityId });
       } else {
-        setFocusedBranch({ abilityId: parentAbility?.id, skillId: node.id });
-        // Auto-focus parent root
-        if (parentRoot) {
-          setFocusedRootId(parentRoot.id);
-        }
+        console.log('   Action: Expand Skill');
+        setFocusedBranch({ abilityId: parentAbilityId, skillId: node.id });
+        if (rootId) setFocusedRootId(rootId);
       }
     }
   };
 
-  // Build parent-child map
-  const childrenByParent = useMemo(() => {
-    if (!tree) return {};
-    const map: Record<string, string[]> = {};
-    tree.edges.forEach(edge => {
-      if (!map[edge.source]) map[edge.source] = [];
-      map[edge.source].push(edge.target);
-    });
-    return map;
-  }, [tree]);
-
   // Get visible nodes based on focus state (progressive reveal)
   const visibleNodes = useMemo(() => {
-    if (!tree?.nodes) return [];
+    if (!tree || !Array.isArray(tree.nodes)) return [];
     
     // Get root nodes - filter by focusedRootId if set
     let rootNodes = tree.nodes.filter(n => n.level === 0);
@@ -269,8 +276,9 @@ export function MySkillTree() {
     
     const byLevel: Record<number, (UserSkillNode & { x?: number; y?: number })[]> = {};
     visibleNodes.forEach(n => {
-      if (!byLevel[n.level]) byLevel[n.level] = [];
-      byLevel[n.level].push({ ...n });
+      const level = typeof n.level === 'number' ? n.level : 3; // Default to lowest if missing
+      if (!byLevel[level]) byLevel[level] = [];
+      byLevel[level].push({ ...n });
     });
     
     // Y positions (root at bottom, knowledge at top)
@@ -311,7 +319,7 @@ export function MySkillTree() {
 
   // Adapter for RightPanel (UserSkillNode -> SkillNode friendly)
   const selectedNodeAdapter = useMemo(() => {
-    if (!selectedNodeId || !tree) return null;
+    if (!selectedNodeId || !tree || !Array.isArray(tree.nodes)) return null;
     const node = tree.nodes.find(n => n.id === selectedNodeId);
     if (!node) return null;
 
@@ -525,7 +533,7 @@ export function MySkillTree() {
               <g
                 key={node.id}
                 transform={`translate(${node.x}, ${node.y})`}
-                onClick={() => handleNodeClick(node)}
+                onClick={(e) => handleNodeClick(node, e)}
                 className="cursor-pointer"
               >
                 {/* Glow effect for selected/expanded */}

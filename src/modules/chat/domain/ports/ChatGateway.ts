@@ -2,7 +2,7 @@ import { Message, ConnectionStatus } from '../entities/Message';
 
 export interface ChatGateway {
   connect(onMessage: (message: Message) => void, onStatusChange: (status: ConnectionStatus) => void, onError: (error: string) => void): void;
-  sendMessage(text: string, sessionId: string | null): void;
+  sendMessage(text: string, sessionId: string | null, attachments?: any[]): void;
   startNewSession(): void;
   disconnect(): void;
 }

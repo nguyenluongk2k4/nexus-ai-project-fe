@@ -16,8 +16,8 @@ export class ChatService {
     return text.trim().length > 0;
   }
 
-  send(text: string, sessionId: string | null) {
-    this.gateway.sendMessage(text, sessionId);
+  send(text: string, sessionId: string | null, attachments: any[] = []) {
+    this.gateway.sendMessage(text, sessionId, attachments);
   }
 
   disconnect() {

@@ -167,22 +167,95 @@ export function useChat(options: UseChatOptions = {}) {
     }
   }, [currentSessionId, sessions]);
 
+  // File Upload State
+  const [attachments, setAttachments] = useState<import('../../domain/entities/UploadResponse').UploadResponse[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const uploadFile = useCallback(async (file: File) => {
+    const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+    if (file.size > MAX_SIZE) {
+      const msg = 'File quá lớn (Max 5MB)';
+      setError(msg);
+      throw new Error(msg); 
+    }
+
+    setIsUploading(true);
+    try {
+      const { uploadGateway } = await import('../../infrastructure/UploadHttpGateway');
+      const response = await uploadGateway.upload(file);
+      setAttachments(prev => [...prev, response]);
+      return response;
+    } catch (err: any) {
+      console.error('Upload failed:', err);
+      setError('Upload failed: ' + err.message);
+      throw err;
+    } finally {
+      setIsUploading(false);
+    }
+  }, []);
+
+  const removeAttachment = useCallback((index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
   const send = useCallback(async (text: string) => {
     try {
+      let finalText = text;
+      let finalAttachments = [...attachments];
+
+      // Auto-convert long text to file
+      const CHAR_LIMIT = 800;
+      if (text.length > CHAR_LIMIT) {
+          try {
+             // Create file from text
+             const blob = new Blob([text], { type: 'text/plain' });
+             const file = new File([blob], "long-message.txt", { type: "text/plain" });
+             
+             // Upload
+             // Note: uploadFile triggers state update, but we need the response now
+             // We reuse the logic but avoiding double state update issues isn't critical here
+             // since we clear attachments right after.
+             const autoFile = await uploadFile(file);
+             
+             finalAttachments.push(autoFile);
+             finalText = `(Nội dung quá dài (${text.length} ký tự), hệ thống đã tự động chuyển thành file đính kèm)`;
+          } catch (uploadErr) {
+             console.error("Auto-upload failed", uploadErr);
+             // Fallback: send as text if upload fails, or throw error?
+             // Throwing might be safer to avoid clogging socket
+             setError('Gửi thất bại: Nội dung quá dài và không thể tự động tạo file.');
+             return;
+          }
+      }
+
+      // Validation
+      if (!finalText.trim() && finalAttachments.length === 0) {
+          return;
+      }
+      if (finalAttachments.length > 0 && !finalText.trim()) {
+          setError('Vui lòng thêm mô tả cho file đính kèm');
+          return;
+      }
+      
       // Optimistic update
       const userMsg: Message = {
         id: crypto.randomUUID(),
         role: 'user',
-        text,
+        text: finalText, 
+        attachments: finalAttachments, // Include attachments in UI
         timestamp: new Date().toISOString()
       };
+      
       setMessages((prev) => [...prev, userMsg]);
       
-      await sendMessageUseCase.execute(text, currentSessionId);
+      // Clear attachments after sending
+      setAttachments([]);
+      
+      await sendMessageUseCase.execute(finalText, currentSessionId, finalAttachments);
     } catch (err: any) {
       setError(err.message);
     }
-  }, [currentSessionId]);
+  }, [currentSessionId, attachments, uploadFile]);
 
   const clearError = () => setError(null);
 
@@ -200,6 +273,11 @@ export function useChat(options: UseChatOptions = {}) {
     loadingMore,
     currentSessionId,
     startNewChat,
-    selectSession: loadSessionMessages
+    selectSession: loadSessionMessages,
+    // Upload
+    uploadFile,
+    attachments,
+    isUploading,
+    removeAttachment
   };
 }

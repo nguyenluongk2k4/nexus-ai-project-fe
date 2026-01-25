@@ -7,6 +7,8 @@ import { SkillNode } from '../hooks/useSkillTree';
 import { Message, ConnectionStatus } from '@/modules/chat/domain/entities/Message';
 import { ChatSession } from '@/modules/chat/ui/components/ChatSessionList';
 
+import { UploadResponse } from '@/modules/chat/domain/entities/UploadResponse';
+
 type TabType = 'chat' | 'resource';
 
 interface RightPanelProps {
@@ -39,6 +41,12 @@ interface RightPanelProps {
   
   // Customization
   hideChat?: boolean;
+  
+  // Upload Props passed from useChat
+  uploadFile?: (file: File) => Promise<UploadResponse>;
+  attachments?: UploadResponse[];
+  isUploading?: boolean;
+  removeAttachment?: (index: number) => void;
 }
 
 export function RightPanel({
@@ -61,7 +69,11 @@ export function RightPanel({
   onToggleCollapse,
   activeTab: controlledTab,
   onTabChange,
-  hideChat = false
+  hideChat = false,
+  uploadFile,
+  attachments,
+  isUploading,
+  removeAttachment
 }: RightPanelProps) {
   const { t } = useTranslation();
   const [internalTab, setInternalTab] = useState<TabType>('chat');
@@ -163,6 +175,10 @@ export function RightPanel({
             currentSessionId={currentSessionId}
             onSelectSession={onSelectSession}
             onNewChat={onNewChat}
+            uploadFile={uploadFile}
+            attachments={attachments}
+            isUploading={isUploading}
+            removeAttachment={removeAttachment}
           />
         ) : (
           <ResourceTab
