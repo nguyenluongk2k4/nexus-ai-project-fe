@@ -9,6 +9,12 @@ const envWsUrl = import.meta.env.VITE_WS_URL;
 
 // Helper to determine Base URL
 const getBaseUrl = () => {
+  // CRITICAL FIX: If running on production domain (not localhost), ALWAYS use relative path
+  // This prevents 'localhost:8000' from leaking into production builds via env vars
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      return '/api';
+  }
+
   if (envApiUrl) {
     // Ensure it ends with /api if provided
     return envApiUrl.endsWith('/api') ? envApiUrl : `${envApiUrl}/api`;
