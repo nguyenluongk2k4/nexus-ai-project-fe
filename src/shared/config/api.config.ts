@@ -3,13 +3,33 @@
  * Centralized config for all API endpoints
  */
 
-const host = window.location.hostname || 'localhost';
-const port = 8000;
+// Environment configuration
+const envApiUrl = import.meta.env.VITE_API_URL;
+const envWsUrl = import.meta.env.VITE_WS_URL;
+
+// Helper to determine Base URL
+const getBaseUrl = () => {
+  if (envApiUrl) {
+    // Ensure it ends with /api if provided
+    return envApiUrl.endsWith('/api') ? envApiUrl : `${envApiUrl}/api`;
+  }
+  // Default to relative path for Nginx proxy
+  return '/api';
+};
+
+// Helper to determine WS URL
+const getWsBaseUrl = () => {
+  if (envWsUrl) return envWsUrl;
+  
+  // Default to current host with upgrading protocol
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${protocol}//${window.location.host}/api`;
+};
 
 export const apiConfig = {
   // Base URLs
-  baseUrl: `http://${host}:${port}/api`,
-  wsUrl: `ws://${host}:${port}/api`,
+  baseUrl: getBaseUrl(),
+  wsUrl: getWsBaseUrl(),
   
   // All API Endpoints
   endpoints: {
@@ -98,6 +118,10 @@ export const apiConfig = {
   
   // Helper methods
   getWsUrl(path: string): string {
+    // Prevent double path if env var already includes it (common config error)
+    if (this.wsUrl.endsWith(path)) {
+      return this.wsUrl;
+    }
     return `${this.wsUrl}${path}`;
   },
   
