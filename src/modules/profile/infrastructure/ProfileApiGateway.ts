@@ -4,9 +4,9 @@
 import { ProfileGateway } from '../domain/ports/ProfileGateway';
 import { UserProfile, ProfileStats, ActivityItem, UpdateProfileRequest } from '../domain/entities/ProfileEntities';
 
-import { API_BASE_URL } from "@/config/api";
+import { apiConfig } from "@/shared/config/api.config";
 
-const API_BASE = API_BASE_URL;
+const API_PROFILE_URL = apiConfig.getHttpUrl('/profile');
 
 export class ProfileApiGateway implements ProfileGateway {
     private getToken(): string | null {
@@ -30,7 +30,7 @@ export class ProfileApiGateway implements ProfileGateway {
             throw new Error('Chưa đăng nhập');
         }
 
-        const response = await fetch(`${API_BASE}/api/profile/me`, {
+        const response = await fetch(`${API_PROFILE_URL}/me`, {
             method: 'GET',
             headers: this.getHeaders(),
         });
@@ -60,7 +60,7 @@ export class ProfileApiGateway implements ProfileGateway {
     }
 
     async updateProfile(data: UpdateProfileRequest): Promise<UserProfile> {
-        const response = await fetch(`${API_BASE}/api/profile/me`, {
+        const response = await fetch(`${API_PROFILE_URL}/me`, {
             method: 'PUT',
             headers: this.getHeaders(),
             body: JSON.stringify({
@@ -83,7 +83,7 @@ export class ProfileApiGateway implements ProfileGateway {
             throw new Error('Chưa đăng nhập');
         }
 
-        const response = await fetch(`${API_BASE}/api/profile/stats`, {
+        const response = await fetch(`${API_PROFILE_URL}/stats`, {
             method: 'GET',
             headers: this.getHeaders(),
         });
@@ -109,7 +109,7 @@ export class ProfileApiGateway implements ProfileGateway {
             throw new Error('Chưa đăng nhập');
         }
 
-        const response = await fetch(`${API_BASE}/api/profile/activities`, {
+        const response = await fetch(`${API_PROFILE_URL}/activities`, {
             method: 'GET',
             headers: this.getHeaders(),
         });

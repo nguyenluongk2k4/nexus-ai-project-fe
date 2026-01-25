@@ -1,9 +1,9 @@
 import { ForumGateway } from '../../domain/ports/ForumGateway';
 import { ForumPost, ForumCategory, ForumComment, ForumStats } from '../../domain/entities/ForumEntities';
 
-import { API_BASE_URL } from "@/config/api";
+import { apiConfig } from "@/shared/config/api.config";
 
-const API_BASE = `${API_BASE_URL}/api/forum`;
+const API_FORUM_URL = apiConfig.getHttpUrl('/forum');
 
 // Response type interfaces matching backend
 interface UserResponse {
@@ -135,7 +135,7 @@ export class HttpForumGateway implements ForumGateway {
     private postIdToUuid: Map<number, string> = new Map();
 
     async getStats(): Promise<ForumStats> {
-        const response = await fetch(`${API_BASE}/stats`);
+        const response = await fetch(`${API_FORUM_URL}/stats`);
         if (!response.ok) {
             throw new Error('Failed to fetch forum stats');
         }
@@ -148,7 +148,7 @@ export class HttpForumGateway implements ForumGateway {
     }
 
     async getCategories(): Promise<ForumCategory[]> {
-        const response = await fetch(`${API_BASE}/categories`);
+        const response = await fetch(`${API_FORUM_URL}/categories`);
         if (!response.ok) {
             throw new Error('Failed to fetch categories');
         }
@@ -158,7 +158,7 @@ export class HttpForumGateway implements ForumGateway {
 
     async getCategoryById(id: string): Promise<ForumCategory | null> {
         try {
-            const response = await fetch(`${API_BASE}/categories/${id}/posts`);
+            const response = await fetch(`${API_FORUM_URL}/categories/${id}/posts`);
             if (!response.ok) {
                 return null;
             }
@@ -170,7 +170,7 @@ export class HttpForumGateway implements ForumGateway {
     }
 
     async getLatestPosts(): Promise<ForumPost[]> {
-        const response = await fetch(`${API_BASE}/posts?limit=10`);
+        const response = await fetch(`${API_FORUM_URL}/posts?limit=10`);
         if (!response.ok) {
             throw new Error('Failed to fetch latest posts');
         }
@@ -186,7 +186,7 @@ export class HttpForumGateway implements ForumGateway {
     }
 
     async getPostsByCategory(categoryId: string): Promise<ForumPost[]> {
-        const response = await fetch(`${API_BASE}/categories/${categoryId}/posts`);
+        const response = await fetch(`${API_FORUM_URL}/categories/${categoryId}/posts`);
         if (!response.ok) {
             throw new Error('Failed to fetch posts by category');
         }
@@ -224,7 +224,7 @@ export class HttpForumGateway implements ForumGateway {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            const response = await fetch(`${API_BASE}/posts/${actualUuid}`, { headers });
+            const response = await fetch(`${API_FORUM_URL}/posts/${actualUuid}`, { headers });
             if (!response.ok) {
                 return null;
             }
@@ -249,7 +249,7 @@ export class HttpForumGateway implements ForumGateway {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            const response = await fetch(`${API_BASE}/posts/${actualUuid}`, { headers });
+            const response = await fetch(`${API_FORUM_URL}/posts/${actualUuid}`, { headers });
             if (!response.ok) {
                 return [];
             }
@@ -266,7 +266,7 @@ export class HttpForumGateway implements ForumGateway {
             throw new Error('Authentication required');
         }
 
-        const response = await fetch(`${API_BASE}/posts`, {
+        const response = await fetch(`${API_FORUM_URL}/posts`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -304,7 +304,7 @@ export class HttpForumGateway implements ForumGateway {
             throw new Error('Post not found');
         }
 
-        const response = await fetch(`${API_BASE}/posts/${actualUuid}/comments`, {
+        const response = await fetch(`${API_FORUM_URL}/posts/${actualUuid}/comments`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -336,7 +336,7 @@ export class HttpForumGateway implements ForumGateway {
             throw new Error('Post not found');
         }
 
-        const response = await fetch(`${API_BASE}/posts/${actualUuid}/like`, {
+        const response = await fetch(`${API_FORUM_URL}/posts/${actualUuid}/like`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

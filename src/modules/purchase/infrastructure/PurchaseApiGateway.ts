@@ -4,9 +4,9 @@
 import { PurchaseGateway } from '../domain/ports/PurchaseGateway';
 import { PurchaseHistory, QRPaymentInfo } from '../domain/entities/PurchaseEntities';
 
-import { API_BASE_URL } from "@/config/api";
+import { apiConfig } from "@/shared/config/api.config";
 
-const API_BASE = API_BASE_URL;
+const API_PURCHASE_URL = apiConfig.getHttpUrl('/purchase');
 
 export class PurchaseApiGateway implements PurchaseGateway {
     private getToken(): string | null {
@@ -30,7 +30,7 @@ export class PurchaseApiGateway implements PurchaseGateway {
             throw new Error('Chưa đăng nhập');
         }
 
-        const response = await fetch(`${API_BASE}/api/purchase/create`, {
+        const response = await fetch(`${API_PURCHASE_URL}/create`, {
             method: 'POST',
             headers: this.getHeaders(),
             body: JSON.stringify({ amount }),
@@ -60,7 +60,7 @@ export class PurchaseApiGateway implements PurchaseGateway {
             throw new Error('Chưa đăng nhập');
         }
 
-        const response = await fetch(`${API_BASE}/api/purchase/history`, {
+        const response = await fetch(`${API_PURCHASE_URL}/history`, {
             method: 'GET',
             headers: this.getHeaders(),
         });
@@ -87,7 +87,7 @@ export class PurchaseApiGateway implements PurchaseGateway {
             throw new Error('Chưa đăng nhập');
         }
 
-        const response = await fetch(`${API_BASE}/api/purchase/status/${transactionCode}`, {
+        const response = await fetch(`${API_PURCHASE_URL}/status/${transactionCode}`, {
             method: 'GET',
             headers: this.getHeaders(),
         });
@@ -106,7 +106,7 @@ export class PurchaseApiGateway implements PurchaseGateway {
             throw new Error('Chưa đăng nhập');
         }
 
-        const response = await fetch(`${API_BASE}/api/purchase/balance`, {
+        const response = await fetch(`${API_PURCHASE_URL}/balance`, {
             method: 'GET',
             headers: this.getHeaders(),
         });
@@ -125,7 +125,7 @@ export class PurchaseApiGateway implements PurchaseGateway {
             throw new Error('Chưa đăng nhập');
         }
 
-        const response = await fetch(`${API_BASE}/api/purchase/resume/${transactionCode}`, {
+        const response = await fetch(`${API_PURCHASE_URL}/resume/${transactionCode}`, {
             method: 'GET',
             headers: this.getHeaders(),
         });

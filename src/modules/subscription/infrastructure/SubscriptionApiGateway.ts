@@ -3,9 +3,9 @@
 import { SubscriptionGateway } from '../domain/ports/SubscriptionGateway';
 import { SubscriptionPlan, UserSubscription, PurchasePlanResult, BillingCycle } from '../domain/entities/SubscriptionEntities';
 
-import { API_BASE_URL } from "@/config/api";
+import { apiConfig } from "@/shared/config/api.config";
 
-const API_BASE = API_BASE_URL;
+const API_SUBSCRIPTION_URL = apiConfig.getHttpUrl('/subscription');
 
 export class SubscriptionApiGateway implements SubscriptionGateway {
     private getToken(): string | null {
@@ -24,7 +24,7 @@ export class SubscriptionApiGateway implements SubscriptionGateway {
     }
 
     async getPlans(): Promise<SubscriptionPlan[]> {
-        const response = await fetch(`${API_BASE}/api/subscription/plans`, {
+        const response = await fetch(`${API_SUBSCRIPTION_URL}/plans`, {
             method: 'GET',
             headers: this.getHeaders(),
         });
@@ -58,7 +58,7 @@ export class SubscriptionApiGateway implements SubscriptionGateway {
             };
         }
 
-        const response = await fetch(`${API_BASE}/api/subscription/current`, {
+        const response = await fetch(`${API_SUBSCRIPTION_URL}/current`, {
             method: 'GET',
             headers: this.getHeaders(),
         });
@@ -83,7 +83,7 @@ export class SubscriptionApiGateway implements SubscriptionGateway {
             throw new Error('Chưa đăng nhập');
         }
 
-        const response = await fetch(`${API_BASE}/api/subscription/purchase`, {
+        const response = await fetch(`${API_SUBSCRIPTION_URL}/purchase`, {
             method: 'POST',
             headers: this.getHeaders(),
             body: JSON.stringify({

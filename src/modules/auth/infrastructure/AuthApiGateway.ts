@@ -2,9 +2,9 @@
 
 import { AuthGateway, AuthResponse, LoginRequest, RegisterRequest, User } from "../domain/types";
 
-import { API_BASE_URL } from "@/config/api";
+import { apiConfig } from "@/shared/config/api.config";
 
-const API_URL = `${API_BASE_URL}/api/auth`;
+const API_URL = apiConfig.getHttpUrl('/auth');
 
 export class AuthApiGateway implements AuthGateway {
   

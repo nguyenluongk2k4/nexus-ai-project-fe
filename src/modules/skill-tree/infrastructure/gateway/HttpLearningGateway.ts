@@ -11,9 +11,9 @@ import {
     DailyGoal,
 } from '../../domain/entities/LearningEntities';
 
-import { API_BASE_URL } from "@/config/api";
+import { apiConfig } from "@/shared/config/api.config";
 
-const API_BASE = `${API_BASE_URL}/api`;
+const API_TIMELINE_URL = apiConfig.getHttpUrl('/timeline');
 
 export class HttpLearningGateway implements LearningGateway {
     private getToken(): string | null {
@@ -34,7 +34,7 @@ export class HttpLearningGateway implements LearningGateway {
     // Timeline - loaded from API
     async loadTimeline(): Promise<TimelineItem[]> {
         try {
-            const response = await fetch(`${API_BASE}/timeline`, {
+            const response = await fetch(`${API_TIMELINE_URL}`, {
                 headers: this.getHeaders(),
             });
 
@@ -158,7 +158,7 @@ export class HttpLearningGateway implements LearningGateway {
         priority: string;
     }): Promise<TimelineItem | null> {
         try {
-            const response = await fetch(`${API_BASE}/timeline`, {
+            const response = await fetch(`${API_TIMELINE_URL}`, {
                 method: 'POST',
                 headers: this.getHeaders(),
                 body: JSON.stringify(item),
@@ -192,7 +192,7 @@ export class HttpLearningGateway implements LearningGateway {
         updates: { scheduledDate?: string; deadline?: string; priority?: string; status?: string }
     ): Promise<boolean> {
         try {
-            const response = await fetch(`${API_BASE}/timeline/${itemId}`, {
+            const response = await fetch(`${API_TIMELINE_URL}/${itemId}`, {
                 method: 'PUT',
                 headers: this.getHeaders(),
                 body: JSON.stringify(updates),
@@ -207,7 +207,7 @@ export class HttpLearningGateway implements LearningGateway {
 
     async deleteTimelineItem(itemId: string): Promise<boolean> {
         try {
-            const response = await fetch(`${API_BASE}/timeline/${itemId}`, {
+            const response = await fetch(`${API_TIMELINE_URL}/${itemId}`, {
                 method: 'DELETE',
                 headers: this.getHeaders(),
             });
@@ -221,7 +221,7 @@ export class HttpLearningGateway implements LearningGateway {
 
     async getAvailableResources(): Promise<any[]> {
         try {
-            const response = await fetch(`${API_BASE}/timeline/resources`, {
+            const response = await fetch(`${API_TIMELINE_URL}/resources`, {
                 headers: this.getHeaders(),
             });
 

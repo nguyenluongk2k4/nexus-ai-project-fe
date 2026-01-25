@@ -4,8 +4,10 @@
  */
 
 import { format } from "date-fns";
-import { API_BASE_URL } from "@/config/api";
+import { apiConfig } from "@/shared/config/api.config";
 import { useState, useEffect } from 'react';
+
+const API_TIMELINE_URL = apiConfig.getHttpUrl('/timeline');
 import { X, Calendar, Sparkles, Clock, Loader2, Check, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -78,7 +80,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
 
     const fetchResources = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/timeline/resources`, {
+            const response = await fetch(`${API_TIMELINE_URL}/resources`, {
                 headers: getHeaders(),
             });
             if (response.ok) {
@@ -96,7 +98,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
 
         setLoading(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/timeline`, {
+            const response = await fetch(`${API_TIMELINE_URL}`, {
                 method: 'POST',
                 headers: getHeaders(),
                 body: JSON.stringify({
@@ -131,7 +133,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
         setAiSuggestions([]);
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/timeline/ai-schedule`, {
+            const response = await fetch(`${API_TIMELINE_URL}/ai-schedule`, {
                 method: 'POST',
                 headers: getHeaders(),
                 body: JSON.stringify({
@@ -161,7 +163,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
 
         setLoading(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/timeline/ai-schedule/confirm`, {
+            const response = await fetch(`${API_TIMELINE_URL}/ai-schedule/confirm`, {
                 method: 'POST',
                 headers: getHeaders(),
                 body: JSON.stringify(aiSuggestions),
