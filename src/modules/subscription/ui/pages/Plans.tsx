@@ -17,6 +17,7 @@ import {
     Factory,
 } from 'lucide-react';
 import { useSubscription } from '../hooks/useSubscription';
+import { DotLottiePlayer } from '@dotlottie/react-player';
 
 export function Plans() {
     const { t, i18n } = useTranslation();
@@ -92,7 +93,25 @@ export function Plans() {
 
             <main className="w-full pb-24 relative z-10">
                 {/* Header */}
-                <div className="text-center max-w-3xl mx-auto mb-16 px-4">
+                <div className="text-center max-w-3xl mx-auto mb-16 px-4 relative">
+                    {/* Left Lantern - visible on lg+ */}
+                    <div className="absolute top-10 -left-48 hidden lg:block pointer-events-none">
+                        <DotLottiePlayer
+                            src="/src/assets/Den_long_vang.lottie"
+                            autoplay
+                            loop
+                            style={{ width: '160px', height: '160px' }}
+                        />
+                    </div>
+                    {/* Right Lantern - visible on lg+ */}
+                    <div className="absolute top-10 -right-48 hidden lg:block pointer-events-none">
+                        <DotLottiePlayer
+                            src="/src/assets/Den_long_vang.lottie"
+                            autoplay
+                            loop
+                            style={{ width: '160px', height: '160px' }}
+                        />
+                    </div>
                     <h2 className="text-indigo-600 font-bold tracking-wide uppercase text-xs mb-3 bg-indigo-50 inline-block px-3 py-1 rounded-full border border-indigo-100">
                         {t('profile.subscription.pricing')}
                     </h2>

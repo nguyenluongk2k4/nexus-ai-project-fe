@@ -5,6 +5,7 @@ import { Mail, Lock, ArrowRight, TreeDeciduous, Github, Chrome, Sparkles, Star }
 import { useTranslation } from 'react-i18next';
 import { PublicHeader } from '@/shared/components/PublicHeader';
 import logo from '@/assets/logo.svg';
+import { DotLottiePlayer } from '@dotlottie/react-player';
 
 export const LoginPage = () => {
   const { t } = useTranslation();
@@ -52,7 +53,7 @@ export const LoginPage = () => {
           <path d="M50,60 C50,40 70,50 90,30" fill="none" stroke="#7C3AED" strokeWidth="0.3" />
         </svg>
       </div>
-      
+
       <div className="absolute top-0 left-0 w-full z-50">
         <PublicHeader showAuthButtons={false} />
       </div>
@@ -63,7 +64,35 @@ export const LoginPage = () => {
           {/* Glowing Icon */}
           <div className="relative mb-4 group">
             <div className="absolute inset-0 "></div>
-              <img src={logo} alt="NexusAI" className=" h-20" />
+            <img src={logo} alt="NexusAI" className=" h-20" />
+
+            {/* Lantern Animation - Top Right */}
+            <div
+              className="absolute"
+              style={{
+                top: '-60px',
+                right: '-80px',
+                pointerEvents: 'none',
+                zIndex: 10
+              }}
+            >
+              <DotLottiePlayer
+                src="/src/assets/Newyear lantern.lottie"
+                autoplay
+                loop
+                style={{ width: '120px', height: '120px', border: 'none' }}
+              />
+            </div>
+
+            {/* Red Envelope Animation - Left of Logo */}
+            <div className="absolute bottom-1 -left-[90px] pointer-events-none">
+              <DotLottiePlayer
+                src="/src/assets/Li_xi_do.lottie"
+                autoplay
+                loop
+                style={{ width: '80px', height: '80px' }}
+              />
+            </div>
           </div>
           <p className="text-violet-600 text-xs font-bold tracking-[0.2em] uppercase">{t('auth.login.subtitle')}</p>
         </div>
@@ -89,7 +118,8 @@ export const LoginPage = () => {
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Email */}
             <div className="space-y-2 group">
-              <label htmlFor="email" className="text-xs font-bold text-slate-600 uppercase tracking-wider transition-colors group-focus-within:text-violet-600">
+              <label htmlFor
+                ="email" className="text-xs font-bold text-slate-600 uppercase tracking-wider transition-colors group-focus-within:text-violet-600">
                 {t('auth.login.emailLabel')}
               </label>
               <div className="relative">

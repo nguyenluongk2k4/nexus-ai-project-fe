@@ -8,6 +8,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { PublicHeader } from '@/shared/components/PublicHeader';
 import logo from '@/assets/logo.svg';
+import { DotLottiePlayer } from '@dotlottie/react-player';
 
 export const RegisterPage = () => {
   const { t } = useTranslation();
@@ -87,6 +88,26 @@ export const RegisterPage = () => {
           <div className="relative mt-80 mb-4 group">
             <div className="absolute inset-0 "></div>
             <img src={logo} alt="NexusAI" className=" h-20" />
+
+            {/* Peach Blossom Animation - Right of NexusAI */}
+            <div className="absolute -top-4 -right-24 pointer-events-none">
+              <DotLottiePlayer
+                src="/src/assets/Hoa_dao_den_long.lottie"
+                autoplay
+                loop
+                style={{ width: '150px', height: '150px' }}
+              />
+            </div>
+
+            {/* Red Envelope Animation - Left of Tree/Logo */}
+            <div className="absolute bottom-1 -left-28 pointer-events-none">
+              <DotLottiePlayer
+                src="/src/assets/Li_xi_do.lottie"
+                autoplay
+                loop
+                style={{ width: '80px', height: '80px' }}
+              />
+            </div>
           </div>
 
           <p className="text-violet-600 text-xs font-bold tracking-[0.2em] uppercase">{t('auth.register.subtitle')}</p>

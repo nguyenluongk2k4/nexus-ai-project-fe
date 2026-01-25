@@ -27,6 +27,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useProfile } from '../hooks/useProfile';
 import { useAuth } from '@/modules/auth/AuthProvider';
+import { DotLottiePlayer } from '@dotlottie/react-player';
 
 const ACTIVITY_ICONS: Record<string, any> = {
     login: LogIn,
@@ -35,9 +36,6 @@ const ACTIVITY_ICONS: Record<string, any> = {
     forum_post: PenSquare,
     learning: BookOpen,
 };
-
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import fireStreakAnimation from '@/assets/lottile/fire-streak-orange.lottie';
 
 export function Profile() {
     const { t, i18n } = useTranslation();
@@ -151,8 +149,16 @@ export function Profile() {
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div>
+                    <div className="relative">
                         <h1 className="text-3xl md:text-4xl font-extrabold text-purple-950 tracking-tight">{t('profile.title')}</h1>
+                        <div className="absolute -top-4 -right-32 pointer-events-none">
+                            <DotLottiePlayer
+                                src="/src/assets/Hoa_dao_den_long.lottie"
+                                autoplay
+                                loop
+                                style={{ width: '160px', height: '160px' }}
+                            />
+                        </div>
                         <p className="text-slate-600 mt-2 text-lg font-medium">{t('profile.subtitle')}</p>
                     </div>
                 </div>
@@ -343,8 +349,13 @@ export function Profile() {
                             <div className="space-y-6">
                                 <div className="flex items-center justify-between group py-3 border-b border-dashed border-purple-100 last:border-0">
                                     <div className="flex items-center gap-4">
-                                        <div className="p-3 rounded-xl bg-purple-600 text-white shadow-md shadow-purple-200">
-                                            <Clock className="w-5 h-5" />
+                                        <div className="w-14 h-14 flex-none flex items-center justify-center">
+                                            <DotLottiePlayer
+                                                src="/src/assets/Clock Lottie Animation.lottie"
+                                                autoplay
+                                                loop
+                                                style={{ width: '100%', height: '100%' }}
+                                            />
                                         </div>
                                         <span className="font-bold text-slate-600">{t('profile.stats.learningHours')}</span>
                                     </div>
@@ -353,8 +364,13 @@ export function Profile() {
 
                                 <div className="flex items-center justify-between group py-3 border-b border-dashed border-purple-100 last:border-0">
                                     <div className="flex items-center gap-4">
-                                        <div className="p-3 rounded-xl bg-fuchsia-500 text-white shadow-md shadow-fuchsia-200">
-                                            <Award className="w-5 h-5" />
+                                        <div className="w-14 h-14 flex-none flex items-center justify-center">
+                                            <DotLottiePlayer
+                                                src="/src/assets/Award Winning.lottie"
+                                                autoplay
+                                                loop
+                                                style={{ width: '100%', height: '100%' }}
+                                            />
                                         </div>
                                         <span className="font-bold text-slate-600">{t('profile.stats.skillsCompleted')}</span>
                                     </div>
@@ -363,11 +379,11 @@ export function Profile() {
 
                                 <div className="flex items-center justify-between group py-3 border-b border-dashed border-purple-100 last:border-0">
                                     <div className="flex items-center gap-4">
-                                        <div className="p-0 rounded-xl bg-transparent shadow-none w-12 h-12 flex items-center justify-center">
-                                            <DotLottieReact
-                                                src={fireStreakAnimation}
-                                                loop
+                                        <div className="w-14 h-14 flex-none flex items-center justify-center">
+                                            <DotLottiePlayer
+                                                src="/src/assets/Fire Streak Orange.lottie"
                                                 autoplay
+                                                loop
                                                 style={{ width: '100%', height: '100%' }}
                                             />
                                         </div>
@@ -378,8 +394,13 @@ export function Profile() {
 
                                 <div className="flex items-center justify-between group py-3 border-b border-dashed border-purple-100 last:border-0">
                                     <div className="flex items-center gap-4">
-                                        <div className="p-3 rounded-xl bg-cyan-500 text-white shadow-md shadow-cyan-200">
-                                            <MessageSquare className="w-5 h-5" />
+                                        <div className="w-14 h-14 flex-none flex items-center justify-center">
+                                            <DotLottiePlayer
+                                                src="/src/assets/SMS Icon.lottie"
+                                                autoplay
+                                                loop
+                                                style={{ width: '100%', height: '100%' }}
+                                            />
                                         </div>
                                         <span className="font-bold text-slate-600">{t('profile.stats.forumPosts')}</span>
                                     </div>

@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DotLottiePlayer } from '@dotlottie/react-player';
 
 export function Landing() {
   const navigate = useNavigate();
@@ -35,7 +36,28 @@ export function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="relative z-10 space-y-8">
-              <h1 className="font-bold text-6xl md:text-7xl leading-[1.1] text-slate-900">
+              {/* Lottie Animation - Festive Atmosphere */}
+              <div
+                className="absolute"
+                style={{
+                  top: '-200px',
+                  left: '0px',
+                  opacity: 0.7,
+                  pointerEvents: 'none',
+                  zIndex: 0,
+                  width: '350px',
+                  height: '350px'
+                }}
+              >
+                <DotLottiePlayer
+                  src="/src/assets/home/Animation - 1705409067911.lottie"
+                  autoplay
+                  loop
+                  style={{ width: '100%', height: '100%' }}
+                />
+              </div>
+
+              <h1 className="font-bold text-6xl md:text-7xl leading-[1.1] text-slate-900 relative z-10">
                 {t('landing.hero.title')} <span className="italic bg-gradient-to-r from-violet-600 to-amber-600 bg-clip-text text-transparent">{t('landing.hero.titleHighlight')}</span>
               </h1>
               <p className="text-lg text-slate-600 max-w-lg leading-relaxed font-light">
@@ -69,7 +91,7 @@ export function Landing() {
             <div className="relative z-10 h-[500px] lg:h-[650px] flex items-center justify-center">
               <div className="absolute inset-0 bg-violet-500/20 blur-[120px] rounded-full scale-75 animate-pulse"></div>
               <div className="relative w-full h-full max-w-[600px] mx-auto">
-                <svg className="w-full h-full drop-shadow-[0_0_30px_rgba(124,58,237,0.3)]" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+                <svg className="relative z-10 w-full h-full drop-shadow-[0_0_30px_rgba(124,58,237,0.3)]" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
                   <defs>
                     <linearGradient id="trunkGrad" x1="0.5" y1="1" x2="0.5" y2="0">
                       <stop offset="0%" stopColor="#4C1D95" stopOpacity="0" />
@@ -100,7 +122,7 @@ export function Landing() {
                 </svg>
 
                 {/* Floating Achievement Cards */}
-                <div className="absolute top-[20%] right-0 backdrop-blur-md bg-white/70 p-4 rounded-xl shadow-lg animate-float border border-white/50" style={{ animationDelay: '1s' }}>
+                <div className="absolute top-[20%] right-0 backdrop-blur-md bg-white/70 p-4 rounded-xl shadow-lg animate-float border border-white/50" style={{ animationDelay: '1s', zIndex: 20 }}>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600">
                       <Award className="w-5 h-5" />
@@ -110,9 +132,18 @@ export function Landing() {
                       <p className="text-sm font-bold text-slate-900">Neural Networks</p>
                     </div>
                   </div>
+                  {/* Lantern Animation - Aligned with Skill Card */}
+                  <div className="absolute -top-24 -right-14 pointer-events-none">
+                    <DotLottiePlayer
+                      src="/src/assets/Newyear lantern.lottie"
+                      autoplay
+                      loop
+                      style={{ width: '160px', height: '160px' }}
+                    />
+                  </div>
                 </div>
 
-                <div className="absolute bottom-[20%] left-0 backdrop-blur-md bg-white/70 p-4 rounded-xl shadow-lg animate-float border border-white/50" style={{ animationDelay: '2.5s' }}>
+                <div className="absolute bottom-[20%] left-0 backdrop-blur-md bg-white/70 p-4 rounded-xl shadow-lg animate-float border border-white/50" style={{ animationDelay: '2.5s', zIndex: 20 }}>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center text-violet-600">
                       <TrendingUp className="w-5 h-5" />
@@ -143,6 +174,28 @@ export function Landing() {
                 <p className="text-slate-500 font-medium tracking-wide uppercase text-sm">{stat.label}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* New Year 2026 Celebration Section */}
+      <section className="py-20 relative overflow-hidden bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center backdrop-blur-md bg-violet-50/50 rounded-3xl p-12">
+            <div className="flex justify-center mb-2">
+              <DotLottiePlayer
+                src="/src/assets/home/HAPPY NEW YEAR 2026.lottie"
+                autoplay
+                loop
+                style={{ width: '800px', height: '400px', border: 'none' }}
+              />
+            </div>
+            <h2 className="font-bold text-3xl md:text-4xl text-slate-900 mb-4">
+              🎊 Chào Mừng Năm Mới 2026! 🎊
+            </h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              Cùng NexusAI bắt đầu hành trình học tập mới, nâng tầm kỹ năng và chinh phục những đỉnh cao tri thức trong năm mới!
+            </p>
           </div>
         </div>
       </section>

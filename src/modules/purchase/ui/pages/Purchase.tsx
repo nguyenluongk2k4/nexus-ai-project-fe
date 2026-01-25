@@ -151,8 +151,8 @@ export function Purchase() {
                                         key={amount}
                                         onClick={() => selectAmount(amount)}
                                         className={`py-4 px-2 rounded-xl font-bold transition-all shadow-sm ${selectedAmount === amount
-                                                ? 'border-2 border-purple-600 bg-purple-50 text-purple-700'
-                                                : 'border border-slate-200 bg-white hover:border-purple-400 hover:bg-purple-50 hover:text-purple-700 text-slate-700'
+                                            ? 'border-2 border-purple-600 bg-purple-50 text-purple-700'
+                                            : 'border border-slate-200 bg-white hover:border-purple-400 hover:bg-purple-50 hover:text-purple-700 text-slate-700'
                                             }`}
                                     >
                                         {formatCurrency(amount)}
@@ -249,10 +249,10 @@ export function Purchase() {
                         {/* Payment Status Card */}
                         {paymentStatus !== 'idle' && (
                             <div className={`rounded-xl p-6 border ${paymentStatus === 'pending'
-                                    ? 'bg-yellow-50 border-yellow-200'
-                                    : paymentStatus === 'completed'
-                                        ? 'bg-green-50 border-green-200'
-                                        : 'bg-red-50 border-red-200'
+                                ? 'bg-yellow-50 border-yellow-200'
+                                : paymentStatus === 'completed'
+                                    ? 'bg-green-50 border-green-200'
+                                    : 'bg-red-50 border-red-200'
                                 }`}>
                                 <div className="flex items-center gap-3">
                                     {paymentStatus === 'pending' && (

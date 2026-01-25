@@ -4,6 +4,7 @@ import { Home, GitBranch, FileQuestion, Briefcase, TrendingUp, LogOut, MessageSq
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { useTranslation } from 'react-i18next';
 import logo from '@/assets/logo.svg';
+import { DotLottiePlayer } from '@dotlottie/react-player';
 
 export function Navigation() {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ export function Navigation() {
   }, []);
 
   return (
-    <nav 
+    <nav
       className={`
         bg-white border-r border-border min-h-screen p-4 flex flex-col transition-all duration-300 ease-in-out
         ${isCollapsed ? 'w-20' : 'w-64'}
@@ -62,7 +63,7 @@ export function Navigation() {
             <img src={logo} alt="Nexus AI" className="h-16 mb-1" />
           </div>
         )}
-        <button 
+        <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors"
           title={isCollapsed ? "Expand" : "Collapse"}
@@ -71,7 +72,7 @@ export function Navigation() {
         </button>
       </div>
 
-      <div className="flex-1 space-y-1">
+      <div className="flex-1 space-y-1 flex flex-col">
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -93,6 +94,55 @@ export function Navigation() {
             </NavLink>
           );
         })}
+
+        {/* Falling Flowers Animation - Below Forum */}
+        {!isCollapsed && (
+          <div className="flex justify-start -ml-4 -mt-10 mb-2 overflow-visible">
+            <DotLottiePlayer
+              src="/src/assets/home/Animation - 1705409067911.lottie"
+              autoplay
+              loop
+              style={{ width: '250px', height: '250px', border: 'none' }}
+            />
+          </div>
+        )}
+
+        {/* Happy New Year Animation */}
+        {!isCollapsed && (
+          <div className="flex justify-center my-auto relative z-10 py-2">
+            <DotLottiePlayer
+              src="/src/assets/home/HAPPY NEW YEAR 2026.lottie"
+              autoplay
+              loop
+              style={{ width: '280px', height: '140px', border: 'none' }}
+            />
+          </div>
+        )}
+
+        {/* Festive Animations */}
+        {!isCollapsed && (
+          <div className="mt-auto flex flex-col items-center gap-2 pb-4 pt-4 overflow-visible mb-12">
+            {/* Peach Blossom */}
+            <div className="relative w-full flex justify-center">
+              <DotLottiePlayer
+                src="/src/assets/Hoa_dao_den_long.lottie"
+                autoplay
+                loop
+                style={{ width: '240px', height: '240px', border: 'none' }}
+              />
+            </div>
+
+            {/* Red Envelope - Slightly overlapping or just below */}
+            <div className="relative w-full flex justify-center -mt-16">
+              <DotLottiePlayer
+                src="/src/assets/Li_xi_do.lottie"
+                autoplay
+                loop
+                style={{ width: '180px', height: '180px', border: 'none' }}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* User Dropdown Menu */}
@@ -132,17 +182,17 @@ export function Navigation() {
               ${isCollapsed ? 'left-full ml-2' : 'left-0 right-0'}
             `}
             >
-               {/* Adding a user info header in popup for collapsed mode */}
-               {isCollapsed && (
-                 <div className="px-4 py-2 border-b border-gray-100 mb-1">
-                    <p className="text-sm font-medium text-foreground truncate">
-                      {user.fullName || user.username}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {user.email}
-                    </p>
-                 </div>
-               )}
+              {/* Adding a user info header in popup for collapsed mode */}
+              {isCollapsed && (
+                <div className="px-4 py-2 border-b border-gray-100 mb-1">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {user.fullName || user.username}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {user.email}
+                  </p>
+                </div>
+              )}
 
               <button
                 onClick={() => { navigate('/profile'); setIsDropdownOpen(false); }}
