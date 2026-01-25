@@ -6,6 +6,7 @@
 
   export default defineConfig({
     plugins: [react(), tailwindcss()],
+    assetsInclude: ['**/*.lottie'],
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {

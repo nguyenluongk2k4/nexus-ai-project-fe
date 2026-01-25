@@ -36,6 +36,9 @@ const ACTIVITY_ICONS: Record<string, any> = {
     learning: BookOpen,
 };
 
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import fireStreakAnimation from '@/assets/lottile/fire-streak-orange.lottie';
+
 export function Profile() {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
@@ -360,8 +363,13 @@ export function Profile() {
 
                                 <div className="flex items-center justify-between group py-3 border-b border-dashed border-purple-100 last:border-0">
                                     <div className="flex items-center gap-4">
-                                        <div className="p-3 rounded-xl bg-amber-500 text-white shadow-md shadow-amber-200">
-                                            <Flame className="w-5 h-5" />
+                                        <div className="p-0 rounded-xl bg-transparent shadow-none w-12 h-12 flex items-center justify-center">
+                                            <DotLottieReact
+                                                src={fireStreakAnimation}
+                                                loop
+                                                autoplay
+                                                style={{ width: '100%', height: '100%' }}
+                                            />
                                         </div>
                                         <span className="font-bold text-slate-600">{t('profile.stats.streakDays')}</span>
                                     </div>
