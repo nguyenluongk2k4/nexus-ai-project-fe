@@ -7,29 +7,73 @@
 const envApiUrl = import.meta.env.VITE_API_URL;
 const envWsUrl = import.meta.env.VITE_WS_URL;
 
+// Helper to join paths and handle overlaps generically
+const joinUrl = (base: string, path: string): string => {
+  if (!path) return base;
+  if (!base) return path;
+
+  // Clean slashes
+  const cleanBase = base.replace(/\/+$/, '');
+  const cleanPath = path.replace(/^\/+/, '');
+
+  const baseParts = cleanBase.split('/');
+  const pathParts = cleanPath.split('/');
+
+  // Find maximum overlap (e.g., base ends with /chat and path starts with /chat)
+  let overlapCount = 0;
+  const maxOverlap = Math.min(baseParts.length, pathParts.length);
+  
+  for (let i = 1; i <= maxOverlap; i++) {
+    const baseTail = baseParts.slice(-i).join('/');
+    const pathHead = pathParts.slice(0, i).join('/');
+    if (baseTail === pathHead) {
+      overlapCount = i;
+    }
+  }
+
+  const mergedPath = pathParts.slice(overlapCount).join('/');
+  return mergedPath ? `${cleanBase}/${mergedPath}` : cleanBase;
+};
+
 // Helper to determine Base URL
 const getBaseUrl = () => {
-  // CRITICAL FIX: If running on production domain (not localhost), ALWAYS use relative path
-  // This prevents 'localhost:8000' from leaking into production builds via env vars
+  // If we have an override from env
+  if (envApiUrl) {
+    let url = envApiUrl;
+    // CRITICAL for Mixed Content: If env URL is absolute, ensure it matches current protocol
+    if (typeof window !== 'undefined' && url.startsWith('http:')) {
+      if (window.location.protocol === 'https:') {
+         url = url.replace('http:', 'https:');
+      }
+    }
+    return url.endsWith('/api') ? url : joinUrl(url, '/api');
+  }
+
+  // DEFAULT: If on production, use relative path to avoid protocol issues
   if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
       return '/api';
   }
 
-  if (envApiUrl) {
-    // Ensure it ends with /api if provided
-    return envApiUrl.endsWith('/api') ? envApiUrl : `${envApiUrl}/api`;
-  }
-  // Default to relative path for Nginx proxy
   return '/api';
 };
 
 // Helper to determine WS URL
 const getWsBaseUrl = () => {
-  if (envWsUrl) return envWsUrl;
+  if (envWsUrl) {
+    let url = envWsUrl;
+    // Match protocol
+    if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+      url = url.replace('ws:', 'wss:');
+    }
+    return url;
+  }
   
   // Default to current host with upgrading protocol
-  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  return `${protocol}//${window.location.host}/api`;
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${protocol}//${window.location.host}/api`;
+  }
+  return '/api';
 };
 
 export const apiConfig = {
@@ -113,6 +157,7 @@ export const apiConfig = {
       categories: '/forum/categories',
       threads: '/forum/threads',
       posts: '/forum/posts',
+      upload: '/upload', // Explicit upload endpoint
     },
     
     // Jobs Module (placeholders for future)
@@ -122,30 +167,12 @@ export const apiConfig = {
     },
   },
   
-  // Helper methods
+  // Generic builders
   getWsUrl(path: string): string {
-    // Robust fix: Ensure base URL doesn't have trailing /ws if path starts with it (or related)
-    let base = this.wsUrl;
-    // Strip trailing slash
-    if (base.endsWith('/')) base = base.slice(0, -1);
-    
-    // Strip trailing /ws if present (common env var error)
-    if (base.endsWith('/ws')) base = base.slice(0, -3);
-
-    // CRITICAL FIX: Strip trailing /chat if base has it and path starts with it (prevents /chat/chat/ws)
-    if (base.endsWith('/chat') && path.startsWith('/chat')) {
-        base = base.slice(0, -5);
-    }
-    
-    // Prevent double path if env var already includes the full path
-    if (base.endsWith(path)) {
-      return base;
-    }
-    
-    return `${base}${path}`;
+    return joinUrl(this.wsUrl, path);
   },
   
   getHttpUrl(path: string): string {
-    return `${this.baseUrl}${path}`;
+    return joinUrl(this.baseUrl, path);
   }
 };
