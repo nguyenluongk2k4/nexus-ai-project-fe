@@ -53,7 +53,7 @@ export function Navigation() {
   return (
     <nav
       className={`
-        bg-white border-r border-border min-h-screen p-4 flex flex-col transition-all duration-300 ease-in-out
+        bg-white border-r border-border min-h-screen p-4 flex flex-col transition-all duration-300 ease-in-out relative z-50
         ${isCollapsed ? 'w-20' : 'w-64'}
       `}
     >
@@ -72,7 +72,7 @@ export function Navigation() {
         </button>
       </div>
 
-      <div className="flex-1 space-y-1 flex flex-col">
+      <div className="flex-1 space-y-1 flex flex-col overflow-y-auto min-h-0 no-scrollbar">
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -80,7 +80,7 @@ export function Navigation() {
               key={item.id}
               to={item.path}
               className={({ isActive }) => `
-                flex items-center gap-3 px-3 py-3 rounded-xl transition-all font-medium
+                flex items-center gap-3 px-3 py-2.5 [@media(max-height:750px)]:py-1.5 rounded-xl transition-all font-medium
                 ${isActive
                   ? 'bg-gradient-to-r from-violet-50 to-teal-50 text-violet-700'
                   : 'text-muted-foreground hover:bg-accent hover:text-foreground'
@@ -95,59 +95,51 @@ export function Navigation() {
           );
         })}
 
-        {/* Falling Flowers Animation - Below Forum */}
+        {/* Falling Flowers Animation - Hidden on very short screens */}
         {!isCollapsed && (
-          <div className="flex justify-start -ml-4 -mt-10 mb-2 overflow-visible">
+          <div className="flex justify-start -ml-4 mt-0 mb-1 overflow-visible [@media(max-height:620px)]:hidden">
             <DotLottiePlayer
-              src="/assets/home/Animation - 1705409067911.lottie"
+              src="/src/assets/Hoa_dao_den_long.lottie"
               autoplay
               loop
-              style={{ width: '250px', height: '250px', border: 'none' }}
+              style={{ width: '200px', height: '200px', border: 'none' }}
             />
           </div>
         )}
 
-        {/* Happy New Year Animation */}
+        {/* Happy New Year Animation - Hidden on medium-short screens */}
         {!isCollapsed && (
-          <div className="flex justify-center my-auto relative z-10 py-2">
+          <div className="flex justify-center relative z-10 py-1 [@media(max-height:720px)]:hidden">
             <DotLottiePlayer
-              src="/assets/home/HAPPY NEW YEAR 2026.lottie"
+              src="/src/assets/home/HAPPY NEW YEAR 2026.lottie"
               autoplay
               loop
-              style={{ width: '280px', height: '140px', border: 'none' }}
+              style={{ width: '240px', height: '120px', border: 'none' }}
             />
           </div>
         )}
 
-        {/* Festive Animations */}
+        {/* Festive Animations - Hidden first on short screens */}
         {!isCollapsed && (
-          <div className="mt-auto flex flex-col items-center gap-2 pb-4 pt-4 overflow-visible mb-12">
-            {/* Peach Blossom */}
+          <div className="mt-auto flex flex-col items-center gap-1 pb-2 pt-2 overflow-visible mb-8 [@media(max-height:820px)]:hidden -mt-16">
+            {/* Peach Blossom - Smaller */}
             <div className="relative w-full flex justify-center">
               <DotLottiePlayer
-                src="/assets/Hoa_dao_den_long.lottie"
+                src="/src/assets/home/Animation - 1705409067911.lottie"
                 autoplay
                 loop
-                style={{ width: '240px', height: '240px', border: 'none' }}
+                style={{ width: '200px', height: '200px', border: 'none' }}
               />
             </div>
 
-            {/* Red Envelope - Slightly overlapping or just below */}
-            <div className="relative w-full flex justify-center -mt-16">
-              <DotLottiePlayer
-                src="/assets/Li_xi_do.lottie"
-                autoplay
-                loop
-                style={{ width: '180px', height: '180px', border: 'none' }}
-              />
-            </div>
+
           </div>
         )}
       </div>
 
-      {/* User Dropdown Menu */}
+      {/* User Dropdown Menu - Scaled with sidebar */}
       {user && (
-        <div className={`pt-4 relative ${!isCollapsed && 'border-t border-border'}`} ref={dropdownRef}>
+        <div className={`pt-4 relative ${!isCollapsed && 'border-t border-border'} flex-shrink-0`} ref={dropdownRef}>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className={`
@@ -175,12 +167,17 @@ export function Navigation() {
             )}
           </button>
 
-          {/* Dropdown Menu */}
+          {/* Dropdown Menu - Fixed positioning to avoid scaling issues */}
           {isDropdownOpen && (
-            <div className={`
-              absolute bottom-full mb-2 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50 w-56
-              ${isCollapsed ? 'left-full ml-2' : 'left-0 right-0'}
-            `}
+            <div
+              className={`
+                fixed bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50 w-56
+                max-h-80 overflow-y-auto
+              `}
+              style={{
+                bottom: '20px',
+                left: isCollapsed ? '80px' : '20px',
+              }}
             >
               {/* Adding a user info header in popup for collapsed mode */}
               {isCollapsed && (
@@ -230,4 +227,3 @@ export function Navigation() {
     </nav>
   );
 }
-

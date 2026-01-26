@@ -115,14 +115,17 @@ export function Forum() {
   return (
     <div className="flex-1 overflow-auto min-h-screen bg-gradient-to-br from-purple-50 via-violet-50 to-pink-50 relative">
       {/* Animated Background Blobs */}
+      {/* Animated Background Blobs - DISABLED FOR PERFORMANCE */}
+      {/* 
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-purple-200/50 rounded-full mix-blend-multiply filter blur-[100px] opacity-70 animate-blob"></div>
         <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-pink-100/50 rounded-full mix-blend-multiply filter blur-[100px] opacity-60 animate-blob" style={{ animationDelay: '2s' }}></div>
         <div className="absolute top-1/2 left-1/2 w-[700px] h-[700px] bg-violet-200/40 rounded-full mix-blend-multiply filter blur-[120px] opacity-70 animate-blob" style={{ animationDelay: '4s' }}></div>
       </div>
+      */}
 
-      {/* Top Bar with Search - Glassmorphic */}
-      <div className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 border-b border-white/60 shadow-lg shadow-purple-500/5">
+      {/* Top Bar with Search - Optimized for Performance */}
+      <div className="sticky top-0 z-40 bg-white/95 border-b border-slate-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-4">
             {/* Search Bar with shimmer effect */}
@@ -184,7 +187,7 @@ export function Forum() {
                 <article
                   key={post.id}
                   onClick={() => onNavigateToThread(post.id)}
-                  className="group bg-white/80 backdrop-blur-sm rounded-2xl border border-white/60 hover:border-violet-400 hover:shadow-2xl hover:shadow-violet-500/10 transition-all duration-300 cursor-pointer overflow-hidden hover:scale-[1.02] hover:-translate-y-1 animate-fade-in"
+                  className="group bg-white rounded-2xl border border-slate-100 hover:border-violet-400 hover:shadow-2xl hover:shadow-violet-500/10 transition-all duration-300 cursor-pointer overflow-hidden hover:scale-[1.02] hover:-translate-y-1 animate-fade-in"
                   style={{
                     animationDelay: `${index * 100}ms`,
                     transformStyle: 'preserve-3d'
@@ -249,37 +252,32 @@ export function Forum() {
                         </p>
                       </div>
 
-                      {/* Reactions Preview */}
-                      <div className="flex items-center gap-4 mb-4">
-                        {MOCK_REACTIONS.slice(0, 3).map((reaction, idx) => {
-                          const Icon = reaction.icon;
-                          return (
-                            <button
-                              key={idx}
-                              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors group/reaction"
-                            >
-                              <Icon className={`w-4 h-4 ${reaction.color} group-hover/reaction:scale-110 transition-transform`} />
-                              <span className="text-xs font-semibold text-slate-600">{Math.floor(Math.random() * 20) + 5}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {/* Stats Footer */}
+                      {/* Actions & Stats Row */}
                       <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                        <div className="flex gap-5 text-sm font-medium text-slate-500">
-                          <div className="flex items-center gap-2">
-                            <MessageSquare className="w-4 h-4" />
-                            <span>{post.stats.comments} {t('forum.comments')}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Eye className="w-4 h-4" />
-                            <span>{post.stats.views} {t('forum.views')}</span>
+                        <div className="flex items-center gap-4">
+                          {/* Like Button */}
+                          <button className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-violet-50 text-slate-600 hover:text-violet-600 rounded-lg transition-colors group/btn">
+                            <ThumbsUp className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+                            <span className="text-xs font-bold">{post.stats.likes || 0}</span>
+                          </button>
+
+                          {/* Stats */}
+                          <div className="flex items-center gap-4 text-sm font-medium text-slate-500">
+                            <div className="flex items-center gap-1.5 hover:text-violet-600 transition-colors">
+                              <MessageSquare className="w-4 h-4" />
+                              <span>{post.stats.comments} {t('forum.comments').toLowerCase()}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <Eye className="w-4 h-4" />
+                              <span>{post.stats.views} {t('forum.views').toLowerCase()}</span>
+                            </div>
                           </div>
                         </div>
-                        <span className="text-sm font-semibold text-violet-600 group-hover:text-violet-700 flex items-center gap-1">
+
+                        {/* Read More */}
+                        <span className="text-xs font-bold text-violet-600 group-hover:text-violet-700 flex items-center gap-1 uppercase tracking-wide">
                           {t('forum.readMore')}
-                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                         </span>
                       </div>
                     </div>

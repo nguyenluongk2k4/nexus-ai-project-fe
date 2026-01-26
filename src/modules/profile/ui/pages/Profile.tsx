@@ -153,7 +153,7 @@ export function Profile() {
                         <h1 className="text-3xl md:text-4xl font-extrabold text-purple-950 tracking-tight">{t('profile.title')}</h1>
                         <div className="absolute -top-4 -right-32 pointer-events-none">
                             <DotLottiePlayer
-                                src="/assets/Hoa_dao_den_long.lottie"
+                                src="/src/assets/Hoa_dao_den_long.lottie"
                                 autoplay
                                 loop
                                 style={{ width: '160px', height: '160px' }}
@@ -347,66 +347,70 @@ export function Profile() {
                         <div className="bg-white rounded-2xl p-8 shadow-lg border border-purple-100/50">
                             <h3 className="text-xl font-extrabold text-slate-900 mb-8">{t('profile.stats.title')}</h3>
                             <div className="space-y-6">
-                                <div className="flex items-center justify-between group py-3 border-b border-dashed border-purple-100 last:border-0">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-14 h-14 flex-none flex items-center justify-center">
-                                            <DotLottiePlayer
-                                                src="/assets/Clock Lottie Animation.lottie"
-                                                autoplay
-                                                loop
-                                                style={{ width: '100%', height: '100%' }}
-                                            />
-                                        </div>
-                                        <span className="font-bold text-slate-600">{t('profile.stats.learningHours')}</span>
+                                <div className="flex items-center gap-6 group py-2 border-b border-dashed border-purple-100 last:border-0">
+                                    <div className="w-20 h-20 flex-none flex items-center justify-center bg-white rounded-2xl p-4 group-hover:scale-110 transition-transform duration-300">
+                                        <DotLottiePlayer
+                                            src="/src/assets/Clock Lottie Animation.lottie"
+                                            autoplay
+                                            loop
+                                            style={{ width: '100%', height: '100%' }}
+                                        />
                                     </div>
-                                    <span className="font-extrabold text-purple-900 text-xl">{stats?.learningHours || 0}h</span>
+                                    <div className="flex items-center justify-between flex-1">
+                                        <span className="font-bold text-slate-500 text-lg">{t('profile.stats.learningHours')}</span>
+                                        <span className="font-extrabold text-purple-900 text-3xl">{stats?.learningHours || 0}h</span>
+                                    </div>
                                 </div>
 
-                                <div className="flex items-center justify-between group py-3 border-b border-dashed border-purple-100 last:border-0">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-14 h-14 flex-none flex items-center justify-center">
-                                            <DotLottiePlayer
-                                                src="/assets/Award Winning.lottie"
-                                                autoplay
-                                                loop
-                                                style={{ width: '100%', height: '100%' }}
-                                            />
-                                        </div>
-                                        <span className="font-bold text-slate-600">{t('profile.stats.skillsCompleted')}</span>
+                                <div className="flex items-center gap-6 group py-2 border-b border-dashed border-purple-100 last:border-0">
+                                    <div className="w-20 h-20 flex-none flex items-center justify-center bg-white rounded-2xl p-2 group-hover:scale-110 transition-transform duration-300">
+                                        <DotLottiePlayer
+                                            src="/src/assets/Award Winning.lottie"
+                                            autoplay
+                                            loop
+                                            style={{ width: '100%', height: '100%' }}
+                                        />
                                     </div>
-                                    <span className="font-extrabold text-purple-900 text-xl">{stats?.skillsCompleted || 0}</span>
+                                    <div className="flex items-center justify-between flex-1">
+                                        <span className="font-bold text-slate-500 text-lg">{t('profile.stats.skillsCompleted')}</span>
+                                        <span className="font-extrabold text-purple-900 text-3xl">{stats?.skillsCompleted || 0}</span>
+                                    </div>
                                 </div>
 
-                                <div className="flex items-center justify-between group py-3 border-b border-dashed border-purple-100 last:border-0">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-14 h-14 flex-none flex items-center justify-center">
-                                            <DotLottiePlayer
-                                                src="/assets/Fire Streak Orange.lottie"
-                                                autoplay
-                                                loop
-                                                style={{ width: '100%', height: '100%' }}
-                                            />
-                                        </div>
-                                        <span className="font-bold text-slate-600">{t('profile.stats.streakDays')}</span>
+                                <div className="flex items-center gap-6 group py-2 border-b border-dashed border-purple-100 last:border-0">
+                                    <div className="w-20 h-20 flex-none flex items-center justify-center bg-white rounded-2xl p-1 group-hover:scale-110 transition-transform duration-300">
+                                        <DotLottiePlayer
+                                            src="/src/assets/Fire Streak Orange.lottie"
+                                            autoplay
+                                            loop
+                                            style={{ width: '100%', height: '100%' }}
+                                        />
                                     </div>
-                                    <span className="font-extrabold text-purple-900 text-xl">{stats?.streakDays || 0}</span>
+                                    <div className="flex items-center justify-between flex-1">
+                                        <span className="font-bold text-slate-500 text-lg">{t('profile.stats.streakDays')}</span>
+                                        <span className="font-extrabold text-purple-900 text-3xl">{stats?.streakDays || 0}</span>
+                                    </div>
                                 </div>
 
-                                <div className="flex items-center justify-between group py-3 border-b border-dashed border-purple-100 last:border-0">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-14 h-14 flex-none flex items-center justify-center">
-                                            <DotLottiePlayer
-                                                src="/assets/SMS Icon.lottie"
-                                                autoplay
-                                                loop
-                                                style={{ width: '100%', height: '100%' }}
-                                            />
-                                        </div>
-                                        <span className="font-bold text-slate-600">{t('profile.stats.forumPosts')}</span>
+                                <div className="flex items-center gap-6 group py-2 border-b border-dashed border-purple-100 last:border-0">
+                                    <div className="w-20 h-20 flex-none flex items-center justify-center bg-white rounded-2xl p-2 group-hover:scale-110 transition-transform duration-300">
+                                        <DotLottiePlayer
+                                            src="/src/assets/SMS Icon.lottie"
+                                            autoplay
+                                            loop
+                                            style={{ width: '100%', height: '100%' }}
+                                        />
                                     </div>
-                                    <span className="font-extrabold text-purple-900 text-xl">{stats?.forumPosts || 0}</span>
+                                    <div className="flex items-center justify-between flex-1">
+                                        <span className="font-bold text-slate-500 text-lg">{t('profile.stats.forumPosts')}</span>
+                                        <span className="font-extrabold text-purple-900 text-3xl">{stats?.forumPosts || 0}</span>
+                                    </div>
                                 </div>
                             </div>
+
+
+
+
                         </div>
 
                         {/* Balance Card */}

@@ -19,11 +19,14 @@ export function Landing() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-violet-50 to-pink-50 text-slate-900 font-sans antialiased overflow-x-hidden">
       {/* Animated Background Blobs */}
+      {/* Animated Background Blobs - DISABLED FOR PERFORMANCE */}
+      {/* 
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-purple-200/50 rounded-full mix-blend-multiply filter blur-[120px] opacity-70 animate-blob"></div>
         <div className="absolute top-[20%] right-0 w-[600px] h-[600px] bg-pink-100/50 rounded-full mix-blend-multiply filter blur-[100px] opacity-60 animate-blob" style={{ animationDelay: '2s' }}></div>
         <div className="absolute -bottom-32 left-1/3 w-[700px] h-[700px] bg-violet-200/40 rounded-full mix-blend-multiply filter blur-[140px] opacity-70 animate-blob" style={{ animationDelay: '4s' }}></div>
       </div>
+      */}
 
       {/* Header */}
       {/* Header */}
@@ -239,13 +242,13 @@ export function Landing() {
 
           <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
             {/* Large Feature Card - AI Roadmap */}
-            <div className="col-span-1 md:col-span-4 md:row-span-2 backdrop-blur-md bg-white/70 rounded-3xl p-10 border border-white/60 hover:shadow-2xl transition-all">
+            <div className="col-span-1 md:col-span-4 md:row-span-2 bg-white rounded-3xl p-10 border border-slate-100 hover:shadow-2xl transition-all">
               <Brain className="w-14 h-14 text-violet-600 mb-6" />
               <h3 className="font-bold text-3xl text-slate-900 mb-4">{t('landing.features.roadmap.title')}</h3>
               <p className="text-slate-600 max-w-md text-lg mb-8">{t('landing.features.roadmap.desc')}</p>
 
               {/* Enhanced Roadmap Visualization */}
-              <div className="relative h-64 w-full bg-white/50 rounded-xl border border-white/50 p-8 overflow-hidden">
+              <div className="relative h-64 w-full bg-slate-50/50 rounded-xl border border-slate-100 p-8 overflow-hidden">
                 <svg className="w-full h-full" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
                   <defs>
                     <linearGradient id="pathGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -299,7 +302,7 @@ export function Landing() {
             </div>
 
             {/* Small Feature Cards */}
-            <div className="col-span-1 md:col-span-2 backdrop-blur-md bg-white/70 rounded-3xl p-8 border border-white/60 hover:shadow-2xl transition-all">
+            <div className="col-span-1 md:col-span-2 bg-white rounded-3xl p-8 border border-slate-100 hover:shadow-2xl transition-all">
               <TrendingUp className="w-12 h-12 text-purple-600 mb-6" />
               <h3 className="font-bold text-xl text-slate-900 mb-2">{t('landing.features.visual.title')}</h3>
               <p className="text-sm text-slate-600 mb-6">{t('landing.features.visual.desc')}</p>

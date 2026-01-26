@@ -1,0 +1,28 @@
+@keyframes tet-fall {
+    0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+}
+
+@keyframes tet-sway-0 {
+    0%, 100% { transform: translateX(0px); }
+    50% { transform: translateX(50px); }
+}
+
+@keyframes tet-sway-1 {
+    0%, 100% { transform: translateX(0px); }
+    50% { transform: translateX(-50px); }
+}
+
+@keyframes tet-sway-2 {
+    0%, 100% { transform: translateX(0px); }
+    25% { transform: translateX(30px); }
+    75% { transform: translateX(-30px); }
+}
+
+.tet-flower-particle {
+    position: absolute;
+    top: 0;
+    will-change: transform;
+}

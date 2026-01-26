@@ -25,7 +25,7 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 via-violet-50 to-pink-50 min-h-screen w-screen overflow-hidden flex items-center justify-center relative p-6">
+    <div className="bg-gradient-to-br from-purple-50 via-violet-50 to-pink-50 min-h-screen w-screen overflow-y-auto overflow-x-hidden flex flex-col relative">
       {/* Animated Background Blobs */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-200/50 rounded-full mix-blend-multiply filter blur-[100px] opacity-70 animate-blob"></div>
@@ -54,13 +54,13 @@ export const LoginPage = () => {
         </svg>
       </div>
 
-      <div className="absolute top-0 left-0 w-full z-50">
+      <div className="w-full z-50">
         <PublicHeader showAuthButtons={false} />
       </div>
 
-      <div className="w-full max-w-md relative z-10 mt-16">
+      <div className="flex-1 flex flex-col items-center justify-start w-full px-4 pt-4 pb-8 sm:pt-8 md:pt-12 relative z-10">
         {/* Logo & Title */}
-        <div className="flex flex-col items-center justify-center mb-8">
+        <div className="flex flex-col items-center justify-center mb-4 sm:mb-6">
           {/* Glowing Icon */}
           <div className="relative mb-4 group">
             <div className="absolute inset-0 "></div>
@@ -68,37 +68,35 @@ export const LoginPage = () => {
 
             {/* Lantern Animation - Top Right */}
             <div
-              className="absolute"
-              style={{
-                top: '-60px',
-                right: '-80px',
-                pointerEvents: 'none',
-                zIndex: 10
-              }}
+              className="absolute pointer-events-none z-10 top-[-30px] right-[-60px] sm:right-[-90px] md:right-[-120px] transition-all duration-300"
             >
-              <DotLottiePlayer
-                src="/assets/Newyear lantern.lottie"
-                autoplay
-                loop
-                style={{ width: '120px', height: '120px', border: 'none' }}
-              />
+              <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 transition-all duration-300">
+                <DotLottiePlayer
+                  src="/src/assets/Newyear lantern.lottie"
+                  autoplay
+                  loop
+                  style={{ width: '100%', height: '100%', border: 'none' }}
+                />
+              </div>
             </div>
 
             {/* Red Envelope Animation - Left of Logo */}
-            <div className="absolute bottom-1 -left-[90px] pointer-events-none">
-              <DotLottiePlayer
-                src="/assets/Li_xi_do.lottie"
-                autoplay
-                loop
-                style={{ width: '80px', height: '80px' }}
-              />
+            <div className="absolute bottom-0 left-[-50px] sm:left-[-90px] md:left-[-110px] pointer-events-none z-10 transition-all duration-300">
+              <div className="w-14 h-14 sm:w-20 sm:h-20">
+                <DotLottiePlayer
+                  src="/src/assets/Li_xi_do.lottie"
+                  autoplay
+                  loop
+                  style={{ width: '100%', height: '100%' }}
+                />
+              </div>
             </div>
           </div>
           <p className="text-violet-600 text-xs font-bold tracking-[0.2em] uppercase">{t('auth.login.subtitle')}</p>
         </div>
 
         {/* Glass Login Card */}
-        <div className="backdrop-blur-xl bg-white/80 rounded-3xl p-8 sm:p-10 shadow-2xl shadow-violet-500/10 relative overflow-hidden border border-white/60">
+        <div className="backdrop-blur-xl bg-white/80 rounded-3xl p-8 sm:p-12 shadow-2xl shadow-violet-500/10 relative overflow-hidden border border-white/60">
           {/* Top Gradient Line */}
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-violet-600 to-transparent opacity-70"></div>
 
@@ -115,11 +113,10 @@ export const LoginPage = () => {
             </div>
           )}
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6 sm:space-y-8" onSubmit={handleSubmit}>
             {/* Email */}
             <div className="space-y-2 group">
-              <label htmlFor
-                ="email" className="text-xs font-bold text-slate-600 uppercase tracking-wider transition-colors group-focus-within:text-violet-600">
+              <label htmlFor="email" className="text-xs font-bold text-slate-600 uppercase tracking-wider transition-colors group-focus-within:text-violet-600">
                 {t('auth.login.emailLabel')}
               </label>
               <div className="relative">
@@ -202,7 +199,7 @@ export const LoginPage = () => {
           </div>
 
           {/* Social Buttons */}
-          <div className="mt-8 grid grid-cols-2 gap-4">
+          <div className="mt-8 sm:mt-10 grid grid-cols-2 gap-4">
             <button
               type="button"
               className="flex items-center justify-center w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm bg-white/60 backdrop-blur-sm text-sm font-semibold text-slate-700 hover:bg-white hover:border-slate-300 hover:shadow-md transition-all duration-200 group"
