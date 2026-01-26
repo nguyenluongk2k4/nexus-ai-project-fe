@@ -54,9 +54,9 @@ export default function App() {
               <Route
                 path="/*"
                 element={
-                  <div className="flex h-screen w-screen overflow-hidden">
+                  <div className="flex h-screen w-screen overflow-hidden relative">
                     <Navigation />
-                    <main className="flex-1 overflow-auto bg-white">
+                    <main className="flex-1 overflow-auto bg-white relative z-10">
                       <Routes>
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/skilltree" element={<SkillTree />} />

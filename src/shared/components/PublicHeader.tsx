@@ -19,7 +19,7 @@ export function PublicHeader({ showAuthButtons = true, className = '' }: PublicH
   return (
     <header className={`sticky top-0 z-50 py-4 ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="backdrop-blur-md bg-white/70 rounded-full px-6 py-4 flex justify-between items-center shadow-lg border border-white/60">
+        <div className="bg-white/95 rounded-full px-6 py-4 flex justify-between items-center shadow-lg border border-slate-100">
           <div
             className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate('/')}
@@ -27,8 +27,8 @@ export function PublicHeader({ showAuthButtons = true, className = '' }: PublicH
             <img src={logo} alt="NexusAI" className="h-15" />
           </div>
 
-          {/* New Year Banner - Center */}
-          <div className="flex-shrink-0 mx-4">
+          {/* New Year Banner - Desktop */}
+          <div className="flex-shrink-0 mx-4 hidden md:block">
             <DotLottiePlayer
               src="/src/assets/home/Happy new year_banner.lottie"
               autoplay
@@ -36,6 +36,7 @@ export function PublicHeader({ showAuthButtons = true, className = '' }: PublicH
               style={{ width: '280px', height: '80px', border: 'none' }}
             />
           </div>
+
 
           <div className="flex items-center gap-4">
             {showAuthButtons && !user && (

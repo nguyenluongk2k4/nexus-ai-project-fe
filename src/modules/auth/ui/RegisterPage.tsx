@@ -48,7 +48,7 @@ export const RegisterPage = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 via-violet-50 to-pink-50 h-screen w-full overflow-y-auto no-scrollbar flex items-center justify-center relative p-6">
+    <div className="bg-gradient-to-br from-purple-50 via-violet-50 to-pink-50 min-h-screen w-screen overflow-y-auto overflow-x-hidden flex flex-col relative">
       {/* Animated Background Blobs */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-200/50 rounded-full mix-blend-multiply filter blur-[100px] opacity-70 animate-blob"></div>
@@ -77,36 +77,40 @@ export const RegisterPage = () => {
         </svg>
       </div>
 
-      <div className="absolute top-0 left-0 w-full z-50">
+      <div className="w-full z-50">
         <PublicHeader showAuthButtons={false} />
       </div>
 
-      <div className="w-full max-w-md relative z-10 mt-16">
+      <div className="flex-1 flex flex-col items-center justify-start w-full px-4 pt-4 pb-8 sm:pt-8 md:pt-12 relative z-10">
         {/* Logo & Title */}
-        <div className="flex flex-col items-center justify-center mb-8">
+        <div className="flex flex-col items-center justify-center mb-4 sm:mb-6">
           {/* Glowing Icon */}
-          <div className="relative mt-80 mb-4 group">
+          <div className="relative mb-4 group">
             <div className="absolute inset-0 "></div>
             <img src={logo} alt="NexusAI" className=" h-20" />
 
             {/* Peach Blossom Animation - Right of NexusAI */}
-            <div className="absolute -top-4 -right-24 pointer-events-none">
-              <DotLottiePlayer
-                src="/src/assets/Hoa_dao_den_long.lottie"
-                autoplay
-                loop
-                style={{ width: '150px', height: '150px' }}
-              />
+            <div className="absolute top-[-16px] right-[-40px] sm:right-[-120px] md:right-[-140px] pointer-events-none transition-all duration-300">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40">
+                <DotLottiePlayer
+                  src="/src/assets/Hoa_dao_den_long.lottie"
+                  autoplay
+                  loop
+                  style={{ width: '100%', height: '100%' }}
+                />
+              </div>
             </div>
 
             {/* Red Envelope Animation - Left of Tree/Logo */}
-            <div className="absolute bottom-1 -left-28 pointer-events-none">
-              <DotLottiePlayer
-                src="/src/assets/Li_xi_do.lottie"
-                autoplay
-                loop
-                style={{ width: '80px', height: '80px' }}
-              />
+            <div className="absolute bottom-1 left-[-60px] sm:left-[-120px] md:left-[-150px] pointer-events-none transition-all duration-300">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24">
+                <DotLottiePlayer
+                  src="/src/assets/Li_xi_do.lottie"
+                  autoplay
+                  loop
+                  style={{ width: '100%', height: '100%' }}
+                />
+              </div>
             </div>
           </div>
 
@@ -114,7 +118,7 @@ export const RegisterPage = () => {
         </div>
 
         {/* Glass Signup Card */}
-        <div className="backdrop-blur-xl bg-white/80 rounded-3xl p-8 sm:p-10 shadow-2xl shadow-violet-500/10 relative overflow-hidden border border-white/60">
+        <div className="backdrop-blur-xl bg-white/80 rounded-3xl p-8 sm:p-12 shadow-2xl shadow-violet-500/10 relative overflow-hidden border border-white/60">
           {/* Top Gradient Line */}
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-violet-600 to-transparent opacity-70"></div>
 
@@ -128,7 +132,7 @@ export const RegisterPage = () => {
             </div>
           )}
 
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-6 sm:space-y-8" onSubmit={handleSubmit}>
             {/* Username */}
             <div className="space-y-2 group">
               <label htmlFor="username" className="text-xs font-bold text-slate-600 uppercase tracking-wider transition-colors group-focus-within:text-violet-600">
@@ -299,7 +303,7 @@ export const RegisterPage = () => {
           </div>
 
           {/* Social Buttons */}
-          <div className="mt-8 grid grid-cols-2 gap-4">
+          <div className="mt-8 sm:mt-10 grid grid-cols-2 gap-4">
             <button
               type="button"
               className="flex items-center justify-center w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm bg-white/60 backdrop-blur-sm text-sm font-semibold text-slate-700 hover:bg-white hover:border-slate-300 hover:shadow-md transition-all duration-200 group"
