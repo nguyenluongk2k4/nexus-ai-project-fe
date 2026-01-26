@@ -118,7 +118,7 @@ export const RegisterPage = () => {
         </div>
 
         {/* Glass Signup Card */}
-        <div className="backdrop-blur-xl bg-white/80 rounded-3xl p-8 sm:p-12 shadow-2xl shadow-violet-500/10 relative overflow-hidden border border-white/60">
+        <div className="w-full max-w-xl backdrop-blur-xl bg-white/80 rounded-3xl p-8 sm:p-12 shadow-2xl shadow-violet-500/10 relative overflow-hidden border border-white/60">
           {/* Top Gradient Line */}
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-violet-600 to-transparent opacity-70"></div>
 

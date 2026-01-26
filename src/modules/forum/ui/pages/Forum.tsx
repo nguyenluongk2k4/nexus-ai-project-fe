@@ -23,6 +23,7 @@ import {
   Target as TargetIcon,
   Sparkles,
   CheckCircle2,
+  Loader2,
 } from 'lucide-react';
 import { getForumDashboardUseCase } from '../../providers';
 import { ForumPost, ForumCategory, ForumStats } from '../../domain/entities/ForumEntities';
@@ -103,9 +104,9 @@ export function Forum() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-violet-600 mx-auto mb-4"></div>
+      <div className="flex-1 flex items-center justify-center min-h-screen" style={{ backgroundColor: '#faf5ff' }}>
+        <div className="text-center bg-white/50 p-6 rounded-2xl border border-purple-100 shadow-sm">
+          <Loader2 className="w-12 h-12 animate-spin text-purple-600 mx-auto mb-4" />
           <p className="text-slate-500 font-medium">{t('forum.loading')}</p>
         </div>
       </div>
@@ -113,7 +114,14 @@ export function Forum() {
   }
 
   return (
-    <div className="flex-1 overflow-auto min-h-screen bg-gradient-to-br from-purple-50 via-violet-50 to-pink-50 relative">
+    <div 
+        className="flex-1 overflow-auto min-h-screen relative" 
+        style={{
+            backgroundColor: '#faf5ff',
+            backgroundImage: 'radial-gradient(#e9d5ff 1px, transparent 1px)',
+            backgroundSize: '24px 24px'
+        }}
+    >
       {/* Animated Background Blobs */}
       {/* Animated Background Blobs - DISABLED FOR PERFORMANCE */}
       {/* 

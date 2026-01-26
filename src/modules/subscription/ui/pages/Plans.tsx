@@ -65,21 +65,21 @@ export function Plans() {
 
     if (loading) {
         return (
-            <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-100">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+            <div className="flex-1 flex items-center justify-center min-h-screen" style={{ backgroundColor: '#faf5ff' }}>
+                <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
             </div>
         );
     }
 
     return (
-        <div className="flex-1 overflow-auto relative min-h-screen bg-slate-50">
-            {/* Animated Background */}
-            <div className="fixed inset-0 -z-20 bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-100 opacity-80"></div>
-            <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-200 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-pulse"></div>
-                <div className="absolute top-[20%] right-[-5%] w-[400px] h-[400px] bg-blue-200 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-pulse" style={{ animationDelay: '2s' }}></div>
-                <div className="absolute bottom-[-10%] left-[20%] w-[600px] h-[600px] bg-indigo-200 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-pulse" style={{ animationDelay: '4s' }}></div>
-            </div>
+        <div 
+            className="flex-1 overflow-auto relative min-h-screen"
+            style={{
+                backgroundColor: '#faf5ff',
+                backgroundImage: 'radial-gradient(#e9d5ff 1px, transparent 1px)',
+                backgroundSize: '24px 24px'
+            }}
+        >
 
             <div className="max-w-7xl mx-auto px-6 pt-8 pb-4 relative z-10">
                 <button

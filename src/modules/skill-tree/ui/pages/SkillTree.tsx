@@ -469,7 +469,14 @@ export function SkillTree() {
 
     // Main layout - always show with tree canvas (empty or with data)
     return (
-      <div className="flex-1 flex flex-col min-w-0 h-full bg-slate-50">
+      <div 
+        className="flex-1 flex flex-col min-w-0 h-full"
+        style={{
+            backgroundColor: '#faf5ff',
+            backgroundImage: 'radial-gradient(#e9d5ff 1px, transparent 1px)',
+            backgroundSize: '24px 24px'
+        }}
+      >
         {/* Header */}
         <header className="min-h-[3.5rem] border-b border-slate-200 bg-white/80 backdrop-blur-md px-4 md:px-6 flex items-center justify-between z-10 flex-shrink-0 flex-wrap gap-2 py-2 md:py-0">
           <div className="flex items-center gap-2 md:gap-3">

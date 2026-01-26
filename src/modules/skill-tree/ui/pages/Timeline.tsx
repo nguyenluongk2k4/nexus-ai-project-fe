@@ -567,7 +567,14 @@ export function Timeline() {
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <div className="h-full flex flex-col bg-gradient-to-br from-purple-50 via-violet-50 to-pink-50 overflow-hidden relative">
+      <div 
+        className="h-full flex flex-col overflow-hidden relative" 
+        style={{
+            backgroundColor: '#faf5ff',
+            backgroundImage: 'radial-gradient(#e9d5ff 1px, transparent 1px)',
+            backgroundSize: '24px 24px'
+        }}
+      >
         {/* Header */}
         <header className="bg-card z-10 shadow-sm border-b border-border">
           <div className="px-8 py-5 flex justify-between items-center border-b border-border/50">

@@ -152,12 +152,12 @@ export function Profile() {
                     <div className="relative">
                         <h1 className="text-3xl md:text-4xl font-extrabold text-purple-950 tracking-tight">{t('profile.title')}</h1>
                         <div className="absolute -top-4 -right-32 pointer-events-none">
-                            <DotLottiePlayer
+                            {/* <DotLottiePlayer
                                 src="/assets/Hoa_dao_den_long.lottie"
                                 autoplay
                                 loop
                                 style={{ width: '160px', height: '160px' }}
-                            />
+                            /> */}
                         </div>
                         <p className="text-slate-600 mt-2 text-lg font-medium">{t('profile.subtitle')}</p>
                     </div>
@@ -345,10 +345,10 @@ export function Profile() {
                     <div className="lg:col-span-4 space-y-8">
                         {/* Stats Card */}
                         <div className="bg-white rounded-2xl p-8 shadow-lg border border-purple-100/50">
-                            <h3 className="text-xl font-extrabold text-slate-900 mb-8">{t('profile.stats.title')}</h3>
-                            <div className="space-y-6">
+                            <h3 className="text-xl font-extrabold text-slate-900 mb-2">{t('profile.stats.title')}</h3>
+                            <div className="">
                                 <div className="flex items-center gap-6 group py-2 border-b border-dashed border-purple-100 last:border-0">
-                                    <div className="w-20 h-20 flex-none flex items-center justify-center bg-white rounded-2xl p-4 group-hover:scale-110 transition-transform duration-300">
+                                    <div className="w-16 h-16 flex-none flex items-center justify-center bg-white rounded-2xl pl-1 group-hover:scale-110 transition-transform duration-300">
                                         <DotLottiePlayer
                                             src="/assets/Clock Lottie Animation.lottie"
                                             autoplay
@@ -363,7 +363,7 @@ export function Profile() {
                                 </div>
 
                                 <div className="flex items-center gap-6 group py-2 border-b border-dashed border-purple-100 last:border-0">
-                                    <div className="w-20 h-20 flex-none flex items-center justify-center bg-white rounded-2xl p-2 group-hover:scale-110 transition-transform duration-300">
+                                    <div className="w-18 h-18 flex-none flex items-center justify-center bg-white rounded-2xl group-hover:scale-110 transition-transform duration-300">
                                         <DotLottiePlayer
                                             src="/assets/Award Winning.lottie"
                                             autoplay
@@ -378,7 +378,7 @@ export function Profile() {
                                 </div>
 
                                 <div className="flex items-center gap-6 group py-2 border-b border-dashed border-purple-100 last:border-0">
-                                    <div className="w-20 h-20 flex-none flex items-center justify-center bg-white rounded-2xl p-1 group-hover:scale-110 transition-transform duration-300">
+                                    <div className="w-18 h-18 flex-none flex items-center justify-center bg-white rounded-2xl group-hover:scale-110 transition-transform duration-300">
                                         <DotLottiePlayer
                                             src="/assets/Fire Streak Orange.lottie"
                                             autoplay
@@ -393,7 +393,7 @@ export function Profile() {
                                 </div>
 
                                 <div className="flex items-center gap-6 group py-2 border-b border-dashed border-purple-100 last:border-0">
-                                    <div className="w-20 h-20 flex-none flex items-center justify-center bg-white rounded-2xl p-2 group-hover:scale-110 transition-transform duration-300">
+                                    <div className="w-21 h-21 flex-none flex items-center justify-center pl-2 bg-white rounded-2xl group-hover:scale-110 transition-transform duration-300">
                                         <DotLottiePlayer
                                             src="/assets/SMS Icon.lottie"
                                             autoplay
