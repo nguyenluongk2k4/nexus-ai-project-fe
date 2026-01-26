@@ -124,11 +124,25 @@ export const apiConfig = {
   
   // Helper methods
   getWsUrl(path: string): string {
-    // Prevent double path if env var already includes it (common config error)
-    if (this.wsUrl.endsWith(path)) {
-      return this.wsUrl;
+    // Robust fix: Ensure base URL doesn't have trailing /ws if path starts with it (or related)
+    let base = this.wsUrl;
+    // Strip trailing slash
+    if (base.endsWith('/')) base = base.slice(0, -1);
+    
+    // Strip trailing /ws if present (common env var error)
+    if (base.endsWith('/ws')) base = base.slice(0, -3);
+
+    // CRITICAL FIX: Strip trailing /chat if base has it and path starts with it (prevents /chat/chat/ws)
+    if (base.endsWith('/chat') && path.startsWith('/chat')) {
+        base = base.slice(0, -5);
     }
-    return `${this.wsUrl}${path}`;
+    
+    // Prevent double path if env var already includes the full path
+    if (base.endsWith(path)) {
+      return base;
+    }
+    
+    return `${base}${path}`;
   },
   
   getHttpUrl(path: string): string {

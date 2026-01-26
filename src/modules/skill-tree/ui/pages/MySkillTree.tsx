@@ -392,7 +392,14 @@ export function MySkillTree() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-b from-slate-50 to-slate-100 overflow-hidden">
+    <div 
+        className="h-full flex flex-col overflow-hidden" 
+        style={{
+            backgroundColor: '#faf5ff',
+            backgroundImage: 'radial-gradient(#e9d5ff 1px, transparent 1px)',
+            backgroundSize: '24px 24px'
+        }}
+    >
       {/* Inject animation styles */}
       <style dangerouslySetInnerHTML={{ __html: animationStyles }} />
       {/* Header */}

@@ -1,5 +1,5 @@
 export const API_BASE_URL = import.meta.env.VITE_API_URL || '';
-export const WS_BASE_URL = import.meta.env.VITE_WS_URL || `ws://${window.location.host}/api/ws`;
+export const WS_BASE_URL = import.meta.env.VITE_WS_URL || `ws://${window.location.host}/api`;
 
 /** 
  * Helper to build full API URL 
