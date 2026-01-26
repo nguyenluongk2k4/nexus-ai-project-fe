@@ -99,7 +99,7 @@ export function Navigation() {
         {!isCollapsed && (
           <div className="flex justify-start -ml-4 mt-0 mb-1 overflow-visible [@media(max-height:620px)]:hidden">
             <DotLottiePlayer
-              src="/src/assets/Hoa_dao_den_long.lottie"
+              src="/assets/Hoa_dao_den_long.lottie"
               autoplay
               loop
               style={{ width: '200px', height: '200px', border: 'none' }}
@@ -111,7 +111,7 @@ export function Navigation() {
         {!isCollapsed && (
           <div className="flex justify-center relative z-10 py-1 [@media(max-height:720px)]:hidden">
             <DotLottiePlayer
-              src="/src/assets/home/HAPPY NEW YEAR 2026.lottie"
+              src="/assets/home/HAPPY NEW YEAR 2026.lottie"
               autoplay
               loop
               style={{ width: '240px', height: '120px', border: 'none' }}
@@ -125,7 +125,7 @@ export function Navigation() {
             {/* Peach Blossom - Smaller */}
             <div className="relative w-full flex justify-center">
               <DotLottiePlayer
-                src="/src/assets/home/Animation - 1705409067911.lottie"
+                src="/assets/home/Animation - 1705409067911.lottie"
                 autoplay
                 loop
                 style={{ width: '200px', height: '200px', border: 'none' }}

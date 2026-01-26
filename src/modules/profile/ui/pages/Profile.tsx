@@ -153,7 +153,7 @@ export function Profile() {
                         <h1 className="text-3xl md:text-4xl font-extrabold text-purple-950 tracking-tight">{t('profile.title')}</h1>
                         <div className="absolute -top-4 -right-32 pointer-events-none">
                             <DotLottiePlayer
-                                src="/src/assets/Hoa_dao_den_long.lottie"
+                                src="/assets/Hoa_dao_den_long.lottie"
                                 autoplay
                                 loop
                                 style={{ width: '160px', height: '160px' }}
@@ -350,7 +350,7 @@ export function Profile() {
                                 <div className="flex items-center gap-6 group py-2 border-b border-dashed border-purple-100 last:border-0">
                                     <div className="w-20 h-20 flex-none flex items-center justify-center bg-white rounded-2xl p-4 group-hover:scale-110 transition-transform duration-300">
                                         <DotLottiePlayer
-                                            src="/src/assets/Clock Lottie Animation.lottie"
+                                            src="/assets/Clock Lottie Animation.lottie"
                                             autoplay
                                             loop
                                             style={{ width: '100%', height: '100%' }}
@@ -365,7 +365,7 @@ export function Profile() {
                                 <div className="flex items-center gap-6 group py-2 border-b border-dashed border-purple-100 last:border-0">
                                     <div className="w-20 h-20 flex-none flex items-center justify-center bg-white rounded-2xl p-2 group-hover:scale-110 transition-transform duration-300">
                                         <DotLottiePlayer
-                                            src="/src/assets/Award Winning.lottie"
+                                            src="/assets/Award Winning.lottie"
                                             autoplay
                                             loop
                                             style={{ width: '100%', height: '100%' }}
@@ -380,7 +380,7 @@ export function Profile() {
                                 <div className="flex items-center gap-6 group py-2 border-b border-dashed border-purple-100 last:border-0">
                                     <div className="w-20 h-20 flex-none flex items-center justify-center bg-white rounded-2xl p-1 group-hover:scale-110 transition-transform duration-300">
                                         <DotLottiePlayer
-                                            src="/src/assets/Fire Streak Orange.lottie"
+                                            src="/assets/Fire Streak Orange.lottie"
                                             autoplay
                                             loop
                                             style={{ width: '100%', height: '100%' }}
@@ -395,7 +395,7 @@ export function Profile() {
                                 <div className="flex items-center gap-6 group py-2 border-b border-dashed border-purple-100 last:border-0">
                                     <div className="w-20 h-20 flex-none flex items-center justify-center bg-white rounded-2xl p-2 group-hover:scale-110 transition-transform duration-300">
                                         <DotLottiePlayer
-                                            src="/src/assets/SMS Icon.lottie"
+                                            src="/assets/SMS Icon.lottie"
                                             autoplay
                                             loop
                                             style={{ width: '100%', height: '100%' }}
