@@ -7,90 +7,77 @@
 const envApiUrl = import.meta.env.VITE_API_URL;
 const envWsUrl = import.meta.env.VITE_WS_URL;
 
-// Helper to join paths and handle overlaps generically
-const joinUrl = (base: string, path: string): string => {
-  if (!path) return base;
-  if (!base) return path;
+/**
+ * Formats a URL with the correct protocol (http/https or ws/wss) 
+ * and ensures it's absolute for WebSocket constructors.
+ */
+/**
+ * Formats a URL with the correct protocol (http/https or ws/wss) 
+ * and ensures it's absolute for WebSocket constructors.
+ * Also handles protocol downgrading for local dev if needed.
+ */
+const formatUrl = (url: string, isWs: boolean): string => {
+  if (typeof window === 'undefined') return url;
 
-  // Clean slashes
-  const cleanBase = base.replace(/\/+$/, '');
-  const cleanPath = path.replace(/^\/+/, '');
+  const isHttps = window.location.protocol === 'https:';
+  let formatted = url || '';
 
-  const baseParts = cleanBase.split('/');
-  const pathParts = cleanPath.split('/');
+  // 1. If relative (starts with /), make absolute using current host
+  if (formatted.startsWith('/')) {
+    formatted = `${window.location.host}${formatted}`;
+  }
 
-  // Find maximum overlap (e.g., base ends with /chat and path starts with /chat)
-  let overlapCount = 0;
-  const maxOverlap = Math.min(baseParts.length, pathParts.length);
-  
-  for (let i = 1; i <= maxOverlap; i++) {
-    const baseTail = baseParts.slice(-i).join('/');
-    const pathHead = pathParts.slice(0, i).join('/');
-    if (baseTail === pathHead) {
-      overlapCount = i;
+  // 2. Prepend protocol if missing
+  if (formatted && !formatted.includes('://')) {
+    const protocol = isWs 
+      ? (isHttps ? 'wss:' : 'ws:') 
+      : (isHttps ? 'https:' : 'http:');
+    formatted = `${protocol}//${formatted.replace(/^\/+/, '')}`;
+  }
+
+  // 3. Force protocol to match window environment
+  if (formatted.includes('://')) {
+    if (isWs) {
+      if (isHttps && formatted.startsWith('ws://')) formatted = formatted.replace('ws://', 'wss://');
+      if (!isHttps && formatted.startsWith('wss://')) formatted = formatted.replace('wss://', 'ws://');
+    } else {
+      if (isHttps && formatted.startsWith('http://')) formatted = formatted.replace('http://', 'https://');
+      if (!isHttps && formatted.startsWith('https://')) formatted = formatted.replace('https://', 'http://');
     }
   }
 
-  const mergedPath = pathParts.slice(overlapCount).join('/');
-  return mergedPath ? `${cleanBase}/${mergedPath}` : cleanBase;
+  return formatted;
 };
 
 // Helper to determine Base URL
 const getBaseUrl = () => {
-  // If we have an override from env
-  if (envApiUrl) {
-    let url = envApiUrl;
-    // CRITICAL for Mixed Content: If env URL is absolute, ensure it matches current protocol
-    if (typeof window !== 'undefined' && url.startsWith('http:')) {
-      if (window.location.protocol === 'https:') {
-         url = url.replace('http:', 'https:');
-      }
-    }
-    return url.endsWith('/api') ? url : joinUrl(url, '/api');
+  let url = envApiUrl || '/api';
+  
+  // CRITICAL: If they point to localhost:8000 but forget /api, we MUST add it
+  // because the backend serves all logic under /api
+  if (url.includes('localhost:8000') && !url.includes('/api')) {
+    url = url.replace(/\/+$/, '') + '/api';
   }
-
-  // DEFAULT: If on production, use relative path to avoid protocol issues
-  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-      return '/api';
-  }
-
-  return '/api';
+  
+  return formatUrl(url, false);
 };
 
 // Helper to determine WS URL
 const getWsBaseUrl = () => {
-  if (envWsUrl) {
-    let url = envWsUrl;
-    // Match protocol
-    if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
-      url = url.replace('ws:', 'wss:');
-    }
-    return url;
-  }
-  
-  // Default to current host with upgrading protocol
-  if (typeof window !== 'undefined') {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    return `${protocol}//${window.location.host}/api`;
-  }
-  return '/api';
+  const url = envWsUrl || '/api';
+  return formatUrl(url, true);
 };
 
 export const apiConfig = {
-  // Base URLs
   baseUrl: getBaseUrl(),
   wsUrl: getWsBaseUrl(),
   
-  // All API Endpoints
   endpoints: {
-    // Auth Module
     auth: {
       login: '/auth/login',
       register: '/auth/register',
       me: '/auth/me',
     },
-    
-    // Chat Module
     chat: {
       ws: '/chat/ws',
       message: '/chat/message',
@@ -98,8 +85,6 @@ export const apiConfig = {
       sessionMessages: (sessionId: string) => `/chat/sessions/${sessionId}/messages`,
       sessionDelete: (sessionId: string) => `/chat/sessions/${sessionId}`,
     },
-    
-    // Admin Module - Templates
     admin: {
       templates: {
         list: '/admin/templates',
@@ -108,8 +93,6 @@ export const apiConfig = {
         delete: (id: string) => `/admin/templates/${id}`,
         nodes: (templateId: string) => `/admin/templates/${templateId}/nodes`,
       },
-      
-      // Nodes
       nodes: {
         create: '/admin/nodes',
         get: (id: string) => `/admin/nodes/${id}`,
@@ -118,20 +101,14 @@ export const apiConfig = {
         children: (id: string) => `/admin/nodes/${id}/children`,
         resources: (nodeId: string) => `/admin/nodes/${nodeId}/resources`,
       },
-      
-      // Resources
       resources: {
         create: '/admin/resources',
         delete: (id: string) => `/admin/resources/${id}`,
       },
-      
-      // Sync
       sync: {
         rebuild: '/admin/sync/rebuild',
       },
     },
-
-    // Skill Tree Module
     skillTree: {
       nodeResources: (nodeId: string) => `/skill-tree/nodes/${nodeId}/resources`,
       nodeChildren: (nodeId: string) => `/skill-tree/nodes/${nodeId}/children`,
@@ -140,39 +117,43 @@ export const apiConfig = {
       generate: '/skill-tree/generate',
       nodeAlternatives: (nodeId: string) => `/skill-tree/nodes/${encodeURIComponent(nodeId)}/alternatives`,
       swapNode: (sessionId: string) => `/skill-tree/session/${sessionId}/swap`,
-      // My Skill Tree (User's saved tree)
       myTree: '/skill-tree/my-tree',
       saveToMyTree: '/skill-tree/my-tree/save',
       removeFromMyTree: (nodeId: string) => `/skill-tree/my-tree/nodes/${nodeId}`,
     },
-    
-    // Learning Module (placeholders for future)
     learning: {
       progress: '/learning/progress',
       timeline: '/learning/timeline',
     },
-    
-    // Forum Module (placeholders for future)
     forum: {
       categories: '/forum/categories',
       threads: '/forum/threads',
       posts: '/forum/posts',
-      upload: '/upload', // Explicit upload endpoint
+      upload: '/upload',
     },
-    
-    // Jobs Module (placeholders for future)
     jobs: {
       recommendations: '/jobs/recommendations',
       applications: '/jobs/applications',
     },
   },
   
-  // Generic builders
   getWsUrl(path: string): string {
-    return joinUrl(this.wsUrl, path);
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    // If base already has the path, return as is (for full path envs)
+    if (this.wsUrl.includes(cleanPath)) {
+      return this.wsUrl;
+    }
+    return `${this.wsUrl.replace(/\/+$/, '')}${cleanPath}`;
   },
   
   getHttpUrl(path: string): string {
-    return joinUrl(this.baseUrl, path);
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    // If base already has the path, return as is
+    if (this.baseUrl.includes(cleanPath)) {
+      return this.baseUrl;
+    }
+    return `${this.baseUrl.replace(/\/+$/, '')}${cleanPath}`;
   }
 };
+
+
