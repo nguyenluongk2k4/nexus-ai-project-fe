@@ -92,7 +92,7 @@ export const RegisterPage = () => {
             {/* Peach Blossom Animation - Right of NexusAI */}
             <div className="absolute -top-4 -right-24 pointer-events-none">
               <DotLottiePlayer
-                src="/src/assets/Hoa_dao_den_long.lottie"
+                src="/assets/Hoa_dao_den_long.lottie"
                 autoplay
                 loop
                 style={{ width: '150px', height: '150px' }}
@@ -102,7 +102,7 @@ export const RegisterPage = () => {
             {/* Red Envelope Animation - Left of Tree/Logo */}
             <div className="absolute bottom-1 -left-28 pointer-events-none">
               <DotLottiePlayer
-                src="/src/assets/Li_xi_do.lottie"
+                src="/assets/Li_xi_do.lottie"
                 autoplay
                 loop
                 style={{ width: '80px', height: '80px' }}

@@ -99,7 +99,7 @@ export function Navigation() {
         {!isCollapsed && (
           <div className="flex justify-start -ml-4 -mt-10 mb-2 overflow-visible">
             <DotLottiePlayer
-              src="/src/assets/home/Animation - 1705409067911.lottie"
+              src="/assets/home/Animation - 1705409067911.lottie"
               autoplay
               loop
               style={{ width: '250px', height: '250px', border: 'none' }}
@@ -111,7 +111,7 @@ export function Navigation() {
         {!isCollapsed && (
           <div className="flex justify-center my-auto relative z-10 py-2">
             <DotLottiePlayer
-              src="/src/assets/home/HAPPY NEW YEAR 2026.lottie"
+              src="/assets/home/HAPPY NEW YEAR 2026.lottie"
               autoplay
               loop
               style={{ width: '280px', height: '140px', border: 'none' }}
@@ -125,7 +125,7 @@ export function Navigation() {
             {/* Peach Blossom */}
             <div className="relative w-full flex justify-center">
               <DotLottiePlayer
-                src="/src/assets/Hoa_dao_den_long.lottie"
+                src="/assets/Hoa_dao_den_long.lottie"
                 autoplay
                 loop
                 style={{ width: '240px', height: '240px', border: 'none' }}
@@ -135,7 +135,7 @@ export function Navigation() {
             {/* Red Envelope - Slightly overlapping or just below */}
             <div className="relative w-full flex justify-center -mt-16">
               <DotLottiePlayer
-                src="/src/assets/Li_xi_do.lottie"
+                src="/assets/Li_xi_do.lottie"
                 autoplay
                 loop
                 style={{ width: '180px', height: '180px', border: 'none' }}

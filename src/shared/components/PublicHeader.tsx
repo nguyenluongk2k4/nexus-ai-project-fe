@@ -30,7 +30,7 @@ export function PublicHeader({ showAuthButtons = true, className = '' }: PublicH
           {/* New Year Banner - Center */}
           <div className="flex-shrink-0 mx-4">
             <DotLottiePlayer
-              src="/src/assets/home/Happy new year_banner.lottie"
+              src="/assets/home/Happy new year_banner.lottie"
               autoplay
               loop
               style={{ width: '280px', height: '80px', border: 'none' }}

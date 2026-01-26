@@ -77,7 +77,7 @@ export const LoginPage = () => {
               }}
             >
               <DotLottiePlayer
-                src="/src/assets/Newyear lantern.lottie"
+                src="/assets/Newyear lantern.lottie"
                 autoplay
                 loop
                 style={{ width: '120px', height: '120px', border: 'none' }}
@@ -87,7 +87,7 @@ export const LoginPage = () => {
             {/* Red Envelope Animation - Left of Logo */}
             <div className="absolute bottom-1 -left-[90px] pointer-events-none">
               <DotLottiePlayer
-                src="/src/assets/Li_xi_do.lottie"
+                src="/assets/Li_xi_do.lottie"
                 autoplay
                 loop
                 style={{ width: '80px', height: '80px' }}

@@ -50,7 +50,7 @@ export function Landing() {
                 }}
               >
                 <DotLottiePlayer
-                  src="/src/assets/home/Animation - 1705409067911.lottie"
+                  src="/assets/home/Animation - 1705409067911.lottie"
                   autoplay
                   loop
                   style={{ width: '100%', height: '100%' }}
@@ -135,7 +135,7 @@ export function Landing() {
                   {/* Lantern Animation - Aligned with Skill Card */}
                   <div className="absolute -top-24 -right-14 pointer-events-none">
                     <DotLottiePlayer
-                      src="/src/assets/Newyear lantern.lottie"
+                      src="/assets/Newyear lantern.lottie"
                       autoplay
                       loop
                       style={{ width: '160px', height: '160px' }}
@@ -184,7 +184,7 @@ export function Landing() {
           <div className="text-center backdrop-blur-md bg-violet-50/50 rounded-3xl p-12">
             <div className="flex justify-center mb-2">
               <DotLottiePlayer
-                src="/src/assets/home/HAPPY NEW YEAR 2026.lottie"
+                src="/assets/home/HAPPY NEW YEAR 2026.lottie"
                 autoplay
                 loop
                 style={{ width: '800px', height: '400px', border: 'none' }}

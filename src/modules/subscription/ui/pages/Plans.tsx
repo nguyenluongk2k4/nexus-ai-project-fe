@@ -97,7 +97,7 @@ export function Plans() {
                     {/* Left Lantern - visible on lg+ */}
                     <div className="absolute top-10 -left-48 hidden lg:block pointer-events-none">
                         <DotLottiePlayer
-                            src="/src/assets/Den_long_vang.lottie"
+                            src="/assets/Den_long_vang.lottie"
                             autoplay
                             loop
                             style={{ width: '160px', height: '160px' }}
@@ -106,7 +106,7 @@ export function Plans() {
                     {/* Right Lantern - visible on lg+ */}
                     <div className="absolute top-10 -right-48 hidden lg:block pointer-events-none">
                         <DotLottiePlayer
-                            src="/src/assets/Den_long_vang.lottie"
+                            src="/assets/Den_long_vang.lottie"
                             autoplay
                             loop
                             style={{ width: '160px', height: '160px' }}
