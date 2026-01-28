@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useAuth } from '../../../auth/AuthProvider';
 import {
   LearningProgress,
   LearningReminder,
@@ -56,6 +57,7 @@ const LearningProgressContext = createContext<LearningProgressContextType | unde
 
 
 export function LearningProgressProvider({ children }: { children: ReactNode }) {
+  const { isAuthenticated } = useAuth();
   const [progressData, setProgressData] = useState<Map<string, LearningProgress>>(new Map());
   const [reminders, setReminders] = useState<LearningReminder[]>([]);
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
@@ -75,15 +77,17 @@ export function LearningProgressProvider({ children }: { children: ReactNode }) 
 
   // Load data via UseCase
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     const loadData = async () => {
       try {
         const data = await initializeLearningDataUseCase.execute();
-        
+
         // Convert array back to Map for internal state
         const map = new Map<string, LearningProgress>();
         data.progress.forEach(p => map.set(p.resourceId, p));
         setProgressData(map);
-        
+
         setReminders(data.reminders);
         setTimelineItems(data.timeline);
         setStudySessions(data.sessions);
@@ -94,7 +98,7 @@ export function LearningProgressProvider({ children }: { children: ReactNode }) 
     };
 
     loadData();
-  }, []);
+  }, [isAuthenticated]);
 
   // Sync data changes via UseCase
   useEffect(() => {
@@ -328,10 +332,10 @@ export function LearningProgressProvider({ children }: { children: ReactNode }) 
         prev.map((g) =>
           g.date.toDateString() === today.toDateString()
             ? {
-                ...g,
-                completedMinutes: newCompleted,
-                completed: newCompleted >= g.targetMinutes,
-              }
+              ...g,
+              completedMinutes: newCompleted,
+              completed: newCompleted >= g.targetMinutes,
+            }
             : g
         )
       );

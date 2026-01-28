@@ -39,9 +39,9 @@ import { Toaster } from 'sonner';
 
 export default function App() {
   return (
-    <LearningProgressProvider>
-      <Toaster position="top-right" richColors />
-      <AuthProvider>
+    <AuthProvider>
+      <LearningProgressProvider>
+        <Toaster position="top-right" richColors />
         <BrowserRouter>
           <Routes>
             {/* Public Routes */}
@@ -84,7 +84,7 @@ export default function App() {
             </Route>
           </Routes>
         </BrowserRouter>
-      </AuthProvider>
-    </LearningProgressProvider>
+      </LearningProgressProvider>
+    </AuthProvider>
   );
 }

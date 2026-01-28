@@ -42,6 +42,7 @@ import { useLearningProgress } from '@/modules/skill-tree/ui/contexts/LearningPr
 import { TimelineItem, LearningStatus } from '@/modules/skill-tree/domain/types/learning';
 import { AddToTimelineDialog } from '../components/AddToTimelineDialog';
 import { MonthlyCalendarView } from '../components/MonthlyCalendarView';
+import { DailyAgendaDialog } from '../components/DailyAgendaDialog';
 import { useReminder } from '../hooks/useReminder';
 import { learningGateway } from '../../providers';
 
@@ -77,6 +78,7 @@ export function Timeline() {
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showAgenda, setShowAgenda] = useState(false);
   const [filterStatus, setFilterStatus] = useState<LearningStatus | 'all'>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('week');
   const [showMonthPicker, setShowMonthPicker] = useState(false);
@@ -88,6 +90,32 @@ export function Timeline() {
     timelineItems,
     notificationsEnabled
   );
+
+  // Check for daily agenda
+  useEffect(() => {
+    const todayStr = new Date().toDateString();
+    const storageKey = `daily_agenda_viewed_${todayStr}`;
+    const hasViewed = sessionStorage.getItem(storageKey);
+
+    if (!hasViewed) {
+      // Check if there are tasks for today
+      const today = new Date();
+      const todayTasks = timelineItems.filter(item => {
+        const itemDate = new Date(item.scheduledDate);
+        return itemDate.toDateString() === today.toDateString() && item.status !== 'completed';
+      });
+
+      if (todayTasks.length > 0) {
+        setShowAgenda(true);
+      }
+    }
+  }, [timelineItems]);
+
+  const handleCloseAgenda = () => {
+    setShowAgenda(false);
+    const todayStr = new Date().toDateString();
+    sessionStorage.setItem(`daily_agenda_viewed_${todayStr}`, 'true');
+  };
 
   // Get dates for current week
   const weekDates = useMemo(() => {
@@ -152,7 +180,33 @@ export function Timeline() {
     });
   }, [timelineItems, selectedDate, filterStatus]);
 
-  // Group items by time period based on scheduledTime or index
+  // Helper to add minutes to HH:mm string
+  const addMinutes = (timeStr: string, minutes: number) => {
+    const [h, m] = timeStr.split(':').map(Number);
+    const date = new Date();
+    date.setHours(h, m, 0, 0);
+    date.setMinutes(date.getMinutes() + minutes);
+    return date.toTimeString().slice(0, 5);
+  };
+
+  // Helper to format date as YYYY-MM-DD in LOCAL time
+  const formatLocalDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const getDurationMinutes = (priority: 'low' | 'medium' | 'high') => {
+    switch (priority) {
+      case 'high': return 120; // 2 hours
+      case 'medium': return 60; // 1 hour
+      case 'low': return 30;    // 30 mins
+      default: return 60;
+    }
+  };
+
+  // Group items by time period based on scheduledTime
   const groupedItems = useMemo(() => {
     const groups: Record<TimePeriod, TimelineItem[]> = {
       morning: [],
@@ -160,20 +214,26 @@ export function Timeline() {
       evening: [],
     };
 
-    itemsForSelectedDate.forEach((item, index) => {
+    itemsForSelectedDate.forEach((item) => {
       // If item has scheduledTime, use it to determine period
       if (item.scheduledTime) {
         const hour = parseInt(item.scheduledTime.split(':')[0]);
-        if (hour >= 6 && hour < 12) groups.morning.push(item);
+        if (hour >= 0 && hour < 12) groups.morning.push(item);
         else if (hour >= 12 && hour < 18) groups.afternoon.push(item);
         else groups.evening.push(item);
       } else {
-        // Distribute evenly
-        if (index % 3 === 0) groups.morning.push(item);
-        else if (index % 3 === 1) groups.afternoon.push(item);
-        else groups.evening.push(item);
+        // Fallback if no time (shouldn't happen often)
+        groups.morning.push(item);
       }
     });
+
+    // CRITICAL: Sort items by time to ensure correct visual order
+    const compareTime = (a: TimelineItem, b: TimelineItem) =>
+      (a.scheduledTime || '00:00').localeCompare(b.scheduledTime || '00:00');
+
+    groups.morning.sort(compareTime);
+    groups.afternoon.sort(compareTime);
+    groups.evening.sort(compareTime);
 
     return groups;
   }, [itemsForSelectedDate]);
@@ -229,55 +289,122 @@ export function Timeline() {
     const draggedItem = timelineItems.find(item => item.id === active.id as string);
     if (!draggedItem) return;
 
-    // Parse the drop zone ID - format: "period-dateString"
-    const dropId = over.id as string;
-    const [period, ...dateParts] = dropId.split('-');
-    const dateStr = dateParts.join('-'); // Rejoin in case date has dashes
+    // CHECK 1: Is the drop target another Timeline Item? (SWAP LOGIC)
+    const targetItem = timelineItems.find(item => item.id === over.id as string);
 
-    // Determine new scheduled time based on period
-    let newTime = draggedItem.scheduledTime || '08:00';
-    if (period === 'morning') newTime = '08:00';
-    else if (period === 'afternoon') newTime = '14:00';
-    else if (period === 'evening') newTime = '20:00';
+    if (targetItem) {
+      // Perform Swap
+      const draggedTime = draggedItem.scheduledTime;
+      const draggedDate = draggedItem.scheduledDate;
 
-    // Determine new date if dateStr is provided
-    let newDate = draggedItem.scheduledDate;
-    if (dateStr) {
-      newDate = new Date(dateStr);
-    }
+      const targetTime = targetItem.scheduledTime;
+      const targetDate = targetItem.scheduledDate;
 
-    // Check if date actually changed (compare date strings to avoid time component issues)
-    const dateChanged = newDate.toDateString() !== draggedItem.scheduledDate.toDateString();
+      // Optimistic Update
+      updateTimelineItem(draggedItem.id, { scheduledTime: targetTime, scheduledDate: targetDate });
+      updateTimelineItem(targetItem.id, { scheduledTime: draggedTime, scheduledDate: draggedDate });
 
-    // Build update payload - only include fields that changed
-    const updates: any = {
-      scheduledTime: newTime,
-    };
-
-    if (dateChanged) {
-      updates.scheduledDate = newDate.toISOString().split('T')[0];
-    }
-
-    // Call backend API to persist changes
-    try {
-      const success = await (learningGateway as any).updateTimelineItem(
-        draggedItem.id,
-        updates
-      );
-
-      if (success) {
-        // Update local state after successful API call
-        updateTimelineItem(draggedItem.id, {
-          scheduledDate: newDate,
-          scheduledTime: newTime,
-        });
-      } else {
-        console.error('Failed to update timeline item on backend');
-        alert(t('mySkillTree.timeline.errors.add'));
+      try {
+        // API Calls in parallel - USE formatLocalDate
+        await Promise.all([
+          (learningGateway as any).updateTimelineItem(draggedItem.id, {
+            scheduledDate: formatLocalDate(targetDate),
+            scheduledTime: targetTime
+          }),
+          (learningGateway as any).updateTimelineItem(targetItem.id, {
+            scheduledDate: formatLocalDate(draggedDate),
+            scheduledTime: draggedTime
+          })
+        ]);
+      } catch (error) {
+        console.error('Swap failed:', error);
+        alert(t('mySkillTree.timeline.errors.connection'));
+        window.location.reload();
       }
-    } catch (error) {
-      console.error('Error updating timeline item:', error);
-      alert(t('mySkillTree.timeline.errors.connection'));
+      return;
+    }
+
+    // CHECK 2: Is the drop target a Period Column? (SMART SCHEDULE LOGIC)
+    const dropId = over.id as string;
+    if (dropId.includes('-')) {
+      const [period, ...dateParts] = dropId.split('-');
+      const dateStr = dateParts.join('-');
+
+      // Determine target date (Use local date string parsing)
+      let newDate = draggedItem.scheduledDate;
+      if (dateStr) {
+        // Parse YYYY-MM-DD explicitly to local date
+        const [y, m, d] = dateStr.split('-').map(Number);
+        newDate = new Date(y, m - 1, d);
+      }
+
+      const newDateStr = formatLocalDate(newDate);
+
+      // Determine default start time
+      let baseTime = '08:00';
+      if (period === 'afternoon') baseTime = '14:00';
+      else if (period === 'evening') baseTime = '20:00';
+
+      // Calculate smart start time
+      // 1. Get existing items in the target period & date
+      const targetItems = timelineItems.filter(item => {
+        // Same date string match
+        if (formatLocalDate(item.scheduledDate) !== newDateStr) return false;
+
+        // Exclude self
+        if (item.id === draggedItem.id) return false;
+
+        // Check time period
+        const h = parseInt(item.scheduledTime?.split(':')[0] || '0');
+        let p = 'morning';
+        if (h >= 12 && h < 18) p = 'afternoon';
+        if (h >= 18) p = 'evening';
+
+        return p === period;
+      });
+
+      // 2. Sort by time (Crucial for correct "last item" detection)
+      targetItems.sort((a, b) => (a.scheduledTime || '').localeCompare(b.scheduledTime || ''));
+
+      // 3. Find next available slot
+      let newTime = baseTime;
+      if (targetItems.length > 0) {
+        const lastItem = targetItems[targetItems.length - 1];
+        const lastTime = lastItem.scheduledTime || baseTime;
+        const duration = getDurationMinutes(lastItem.priority);
+        newTime = addMinutes(lastTime, duration + 15);
+      }
+
+      // Build update payload
+      const updates: any = {
+        scheduledTime: newTime,
+      };
+
+      const dateChanged = formatLocalDate(draggedItem.scheduledDate) !== newDateStr;
+      if (dateChanged) {
+        updates.scheduledDate = newDateStr;
+      }
+
+      // Call backend API
+      try {
+        const success = await (learningGateway as any).updateTimelineItem(
+          draggedItem.id,
+          updates
+        );
+
+        if (success) {
+          updateTimelineItem(draggedItem.id, {
+            scheduledDate: newDate,
+            scheduledTime: newTime,
+          });
+        } else {
+          console.error('Failed to update timeline item on backend');
+          alert(t('mySkillTree.timeline.errors.add'));
+        }
+      } catch (error) {
+        console.error('Error updating timeline item:', error);
+        alert(t('mySkillTree.timeline.errors.connection'));
+      }
     }
   };
 
@@ -300,9 +427,21 @@ export function Timeline() {
 
   // Draggable Card Component
   const DraggableCard = ({ item, priority, barColor, onStatusChange, onDelete }: any) => {
-    const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    // Make card both draggable AND droppable
+    const { attributes, listeners, setNodeRef: setDraggableRef, transform, isDragging } = useDraggable({
       id: item.id,
     });
+
+    // Use Droppable to accept drops on this item
+    const { setNodeRef: setDroppableRef, isOver } = useDroppable({
+      id: item.id,
+    });
+
+    // Merge refs
+    const setNodeRef = (node: HTMLElement | null) => {
+      setDraggableRef(node);
+      setDroppableRef(node);
+    };
 
     const style = transform
       ? {
@@ -319,7 +458,9 @@ export function Timeline() {
         {...listeners}
         {...attributes}
         className={`
-          bg-card p-5 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 relative border border-transparent hover:border-border group cursor-grab active:cursor-grabbing
+          bg-card p-5 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 relative border 
+          ${isOver ? 'border-primary ring-2 ring-primary/20 scale-[1.02]' : 'border-transparent hover:border-border'} 
+          group cursor-grab active:cursor-grabbing
           ${item.status === 'completed' ? 'opacity-60 grayscale' : ''}
         `}
       >
@@ -409,7 +550,7 @@ export function Timeline() {
         </div>
 
         {/* Droppable Zone */}
-        <DroppableZone id={`${period}-${selectedDate.toDateString()}`}>
+        <DroppableZone id={`${period}-${formatLocalDate(selectedDate)}`}>
           <div className="flex-1 space-y-4 min-h-[150px] pb-4">
             {items.map(item => renderTimelineCard(item, accent.dot))}
 
@@ -772,6 +913,17 @@ export function Timeline() {
           isOpen={showAddDialog}
           onClose={() => setShowAddDialog(false)}
           onSuccess={() => window.location.reload()}
+        />
+
+        {/* Daily Agenda Dialog */}
+        <DailyAgendaDialog 
+          isOpen={showAgenda}
+          onClose={handleCloseAgenda}
+          items={timelineItems.filter(item => {
+            const itemDate = new Date(item.scheduledDate);
+            const today = new Date();
+            return itemDate.toDateString() === today.toDateString() && item.status !== 'completed';
+          })}
         />
 
         {/* Edit Modal */}

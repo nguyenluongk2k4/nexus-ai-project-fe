@@ -522,6 +522,17 @@
         "notifications": {
             "on": "Bật nhắc nhở",
             "off": "Tắt nhắc nhở"
+        },
+        "agenda": {
+            "goodMorning": "Chào buổi sáng",
+            "goodAfternoon": "Chào buổi chiều",
+            "goodEvening": "Chào buổi tối",
+            "summary": "Bạn có {{count}} phiên học hôm nay",
+            "highPriority": "Quan trọng",
+            "schedule": "Lịch trình hôm nay",
+            "empty": "Không có lịch học nào hôm nay.",
+            "later": "Để sau",
+            "start": "Sẵn sàng"
         }
     }
   },

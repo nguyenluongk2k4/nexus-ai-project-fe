@@ -523,6 +523,17 @@
         "notifications": {
             "on": "Enable Reminders",
             "off": "Disable Reminders"
+        },
+        "agenda": {
+            "goodMorning": "Good Morning",
+            "goodAfternoon": "Good Afternoon",
+            "goodEvening": "Good Evening",
+            "summary": "You have {{count}} learning sessions today",
+            "highPriority": "High Priority",
+            "schedule": "Today's Schedule",
+            "empty": "No learning sessions scheduled for today.",
+            "later": "Later",
+            "start": "I'm Ready"
         }
     }
   },
