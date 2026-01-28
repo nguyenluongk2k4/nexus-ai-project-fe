@@ -1,7 +1,7 @@
 import { UploadResponse } from '../domain/entities/UploadResponse';
 import { apiConfig } from "@/shared/config/api.config";
 
-const API_URL = apiConfig.getHttpUrl('/upload');
+const API_URL = apiConfig.getHttpUrl('/upload/');
 
 export class UploadHttpGateway {
   async upload(file: File): Promise<UploadResponse> {
