@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import logo from '@/assets/logo.svg';
+import { useAuth } from '@/modules/auth/AuthProvider';
 import {
   ChevronRight,
   MessageSquare,
@@ -32,6 +33,7 @@ export function SubForum() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
+  const { user } = useAuth();
   const [category, setCategory] = useState<ForumCategory | null>(null);
   const [threads, setThreads] = useState<ForumPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -163,7 +165,7 @@ export function SubForum() {
               <img
                 alt="User Avatar"
                 className="rounded-full bg-white h-full w-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZl2gxLZ2iLLClVdrVyiaRUAJVm_EKFKwPzt7m0rsTXMhSB7IHtYcY9accbQ-_T1RV67Sa15-oL0e44WOiLvjk7axQAPTnWZDKaAXtm--O1DSTyAqAurZ34ONlmm6XhQ8_550sMZbfwlBptKFBzGinPUC7R7xnRifBQSb2LirvJf1goAqWa2VWHh9KTYZWg7CFzQ23hJc9dnzP59pl_7imAy2cK30Eewp_9C8yVODGsCXHNRy5LUuJNhJ_gsNcE-0dnp16YESRqvzz"
+                src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || 'User')}&background=random`}
               />
             </div>
 
@@ -266,8 +268,16 @@ export function SubForum() {
                 {/* Avatar */}
                 <div className="relative shrink-0">
                   <div className="absolute -inset-1 bg-gradient-to-tr from-blue-400 to-purple-400 rounded-full opacity-60 blur-sm group-hover:opacity-100 transition-opacity"></div>
-                  <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-violet-100 to-cyan-100 flex items-center justify-center text-xl border-2 border-white shadow-md">
-                    {thread.author.avatar}
+                  <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-violet-100 to-cyan-100 flex items-center justify-center text-xl border-2 border-white shadow-md overflow-hidden">
+                    {thread.author.avatar ? (
+                      <img
+                        src={thread.author.avatar}
+                        alt={thread.author.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      thread.author.avatar
+                    )}
                   </div>
                 </div>
 

@@ -248,7 +248,7 @@ export function Forum() {
                             <img
                               alt={post.author.name}
                               className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-100"
-                              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=random&bold=true`}
+                              src={post.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=random&bold=true`}
                             />
                             <div className="flex-1">
                               <div className="flex items-center gap-2">

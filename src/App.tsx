@@ -34,6 +34,7 @@ const ProtectedRoute = () => {
 };
 
 import { Toaster } from 'sonner';
+import { GlobalDailyAgenda } from '@/modules/skill-tree/ui/components/GlobalDailyAgenda';
 
 // ... existing code ...
 
@@ -43,6 +44,7 @@ export default function App() {
       <LearningProgressProvider>
         <Toaster position="top-right" richColors />
         <BrowserRouter>
+          <GlobalDailyAgenda />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Landing />} />

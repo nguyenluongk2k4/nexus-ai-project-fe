@@ -465,6 +465,9 @@
         "date": "Date",
         "time": "Time",
         "deadline": "Deadline",
+        "scheduleInfo": "Schedule Information",
+        "notScheduled": "Not Scheduled",
+        "currentStatus": "Current Status",
         "priority": "Priority",
         "status": "Status",
         "priorities": { "low": "Low", "medium": "Medium", "high": "High" },
@@ -489,7 +492,8 @@
             "add": "Error adding to timeline", 
             "connection": "Connection error", 
             "aiParse": "Could not parse request. Please try again.", 
-            "aiConfirm": "Error confirming schedule" 
+            "aiConfirm": "Error confirming schedule",
+            "noUrl": "No learning link available for this resource"
         },
         "periods": {
             "morning": "Morning",

@@ -3,7 +3,7 @@
  * Complete features: Week/Month navigation, full CRUD, time period assignment
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DndContext,
@@ -38,11 +38,11 @@ import {
   BellOff,
   LayoutGrid,
 } from 'lucide-react';
-import { useLearningProgress } from '@/modules/skill-tree/ui/contexts/LearningProgressContext';
+import { useLearningProgress } from '@/modules/skill-tree/ui/hooks/useLearningProgress';
 import { TimelineItem, LearningStatus } from '@/modules/skill-tree/domain/types/learning';
 import { AddToTimelineDialog } from '../components/AddToTimelineDialog';
+import { StudyDialog } from '../components/StudyDialog';
 import { MonthlyCalendarView } from '../components/MonthlyCalendarView';
-import { DailyAgendaDialog } from '../components/DailyAgendaDialog';
 import { useReminder } from '../hooks/useReminder';
 import { learningGateway } from '../../providers';
 
@@ -57,6 +57,7 @@ export function Timeline() {
     timelineItems,
     updateTimelineItem,
     removeFromTimeline,
+    updateProgress,
   } = useLearningProgress();
   const { t, i18n } = useTranslation();
 
@@ -78,11 +79,12 @@ export function Timeline() {
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showAgenda, setShowAgenda] = useState(false);
   const [filterStatus, setFilterStatus] = useState<LearningStatus | 'all'>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('week');
   const [showMonthPicker, setShowMonthPicker] = useState(false);
   const [editingItem, setEditingItem] = useState<TimelineItem | null>(null);
+  const [editFormData, setEditFormData] = useState<Partial<TimelineItem>>({});
+  const [selectedStudyItem, setSelectedStudyItem] = useState<TimelineItem | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   // Reminder hook
@@ -90,32 +92,6 @@ export function Timeline() {
     timelineItems,
     notificationsEnabled
   );
-
-  // Check for daily agenda
-  useEffect(() => {
-    const todayStr = new Date().toDateString();
-    const storageKey = `daily_agenda_viewed_${todayStr}`;
-    const hasViewed = sessionStorage.getItem(storageKey);
-
-    if (!hasViewed) {
-      // Check if there are tasks for today
-      const today = new Date();
-      const todayTasks = timelineItems.filter(item => {
-        const itemDate = new Date(item.scheduledDate);
-        return itemDate.toDateString() === today.toDateString() && item.status !== 'completed';
-      });
-
-      if (todayTasks.length > 0) {
-        setShowAgenda(true);
-      }
-    }
-  }, [timelineItems]);
-
-  const handleCloseAgenda = () => {
-    setShowAgenda(false);
-    const todayStr = new Date().toDateString();
-    sessionStorage.setItem(`daily_agenda_viewed_${todayStr}`, 'true');
-  };
 
   // Get dates for current week
   const weekDates = useMemo(() => {
@@ -173,6 +149,7 @@ export function Timeline() {
   // Filter items for selected date
   const itemsForSelectedDate = useMemo(() => {
     return timelineItems.filter(item => {
+      if (!item.scheduledDate) return false; // Filter out backlog items
       const itemDate = item.scheduledDate;
       const isSameDay = itemDate.toDateString() === selectedDate.toDateString();
       const matchesStatus = filterStatus === 'all' || item.status === filterStatus;
@@ -199,7 +176,7 @@ export function Timeline() {
 
   const getDurationMinutes = (priority: 'low' | 'medium' | 'high') => {
     switch (priority) {
-      case 'high': return 120; // 2 hours
+      case 'high': return 90; // 1.5 hours
       case 'medium': return 60; // 1 hour
       case 'low': return 30;    // 30 mins
       default: return 60;
@@ -242,6 +219,7 @@ export function Timeline() {
   const itemCountByDate = useMemo(() => {
     const counts: Record<string, number> = {};
     timelineItems.forEach(item => {
+      if (!item.scheduledDate) return; // Skip backlog items
       const dateStr = item.scheduledDate.toDateString();
       counts[dateStr] = (counts[dateStr] || 0) + 1;
     });
@@ -272,12 +250,21 @@ export function Timeline() {
     const currentIndex = statusOrder.indexOf(item.status);
     const nextStatus = statusOrder[(currentIndex + 1) % 3];
     updateTimelineItem(item.id, { status: nextStatus });
+    
+    // Sync with Learning Progress (Skill Tree)
+    if (item.resourceId) {
+      updateProgress(item.resourceId, { status: nextStatus });
+    }
   };
 
 
   // Drag and drop handlers
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Requires 8px movement to start drag, allowing clicks on child elements
+      },
+    }),
     useSensor(KeyboardSensor)
   );
 
@@ -408,6 +395,23 @@ export function Timeline() {
     }
   };
 
+  const handleStartLearning = async (item: TimelineItem) => {
+    if (item.status === 'in_progress') return;
+    
+    // Update to in_progress
+    updateTimelineItem(item.id, { status: 'in_progress' });
+    if (item.resourceId) {
+      updateProgress(item.resourceId, { status: 'in_progress' });
+    }
+    
+    // Call API (fire and forget for UI responsiveness)
+    try {
+        await (learningGateway as any).updateTimelineItem(item.id, { status: 'in_progress' });
+    } catch (e) {
+        console.error("Failed to update status", e);
+    }
+  };
+
   const handleDelete = (item: TimelineItem) => {
     if (window.confirm(t('mySkillTree.timeline.actions.deleteConfirm', { name: item.resourceName }))) {
       removeFromTimeline(item.id);
@@ -422,11 +426,21 @@ export function Timeline() {
     };
     const priority = priorityColors[item.priority];
 
-    return <DraggableCard key={item.id} item={item} priority={priority} barColor={barColor} onStatusChange={handleStatusChange} onDelete={handleDelete} />;
+    return (
+        <DraggableCard 
+            key={item.id} 
+            item={item} 
+            priority={priority} 
+            barColor={barColor} 
+            onStatusChange={handleStatusChange} 
+            onDelete={handleDelete}
+            onClick={() => setSelectedStudyItem(item)}
+        />
+    );
   };
 
   // Draggable Card Component
-  const DraggableCard = ({ item, priority, barColor, onStatusChange, onDelete }: any) => {
+  const DraggableCard = ({ item, priority, barColor, onStatusChange, onDelete, onClick }: any) => {
     // Make card both draggable AND droppable
     const { attributes, listeners, setNodeRef: setDraggableRef, transform, isDragging } = useDraggable({
       id: item.id,
@@ -460,9 +474,10 @@ export function Timeline() {
         className={`
           bg-card p-5 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 relative border 
           ${isOver ? 'border-primary ring-2 ring-primary/20 scale-[1.02]' : 'border-transparent hover:border-border'} 
-          group cursor-grab active:cursor-grabbing
+          group cursor-pointer active:cursor-grabbing
           ${item.status === 'completed' ? 'opacity-60 grayscale' : ''}
         `}
+        onClick={onClick}
       >
         {/* Color bar */}
         <div className={`absolute left-0 top-6 bottom-6 w-1 rounded-r-full ${barColor}`} />
@@ -473,16 +488,20 @@ export function Timeline() {
             {t(`mySkillTree.timeline.priorities.${item.priority}`)}
           </span>
 
-          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex gap-1">
             <button
-              onClick={(e) => { e.stopPropagation(); setEditingItem(item); }}
-              className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
+              onClick={(e) => { e.stopPropagation(); setEditingItem(item); setEditFormData({ ...item }); }}
+              onPointerDown={(e) => e.stopPropagation()}
+              className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors relative z-10"
+              title={t('mySkillTree.timeline.actions.edit')}
             >
               <Edit3 className="w-4 h-4" />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); handleDelete(item); }}
-              className="p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors"
+              onPointerDown={(e) => e.stopPropagation()}
+              className="p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors relative z-10"
+              title={t('common.delete')}
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -595,6 +614,48 @@ export function Timeline() {
     );
   };
 
+  const handleSaveEdit = async () => {
+    if (!editingItem) return;
+
+    try {
+      // 1. Prepare payload for API
+      const payload: any = {
+        status: editFormData.status,
+        priority: editFormData.priority,
+        scheduledTime: editFormData.scheduledTime,
+      };
+
+      if (editFormData.scheduledDate) {
+        payload.scheduledDate = formatLocalDate(new Date(editFormData.scheduledDate));
+      }
+
+      if (editFormData.deadline) {
+        payload.deadline = editFormData.deadline;
+      }
+
+      // 2. Call API
+      const success = await (learningGateway as any).updateTimelineItem(editingItem.id, payload);
+      
+      if (!success) {
+        throw new Error('Backend update failed');
+      }
+
+      // 3. Update Local Context
+      updateTimelineItem(editingItem.id, editFormData as any);
+      
+      // Sync with Learning Progress (Skill Tree)
+      if (editingItem.resourceId && editFormData.status) {
+        updateProgress(editingItem.resourceId, { status: editFormData.status });
+      }
+
+      // 4. Close Modal
+      setEditingItem(null);
+    } catch (error) {
+      console.error('Failed to save changes:', error);
+      alert(t('mySkillTree.timeline.errors.connection'));
+    }
+  };
+
   // Edit Modal
   const renderEditModal = () => {
     if (!editingItem) return null;
@@ -619,10 +680,10 @@ export function Timeline() {
               <label className="block text-sm font-medium text-foreground mb-1">{t('mySkillTree.timeline.date')}</label>
               <input
                 type="date"
-                defaultValue={editingItem.scheduledDate.toISOString().split('T')[0]}
+                value={editFormData.scheduledDate ? new Date(editFormData.scheduledDate).toISOString().split('T')[0] : ''}
                 onChange={(e) => {
-                  const newDate = new Date(e.target.value);
-                  updateTimelineItem(editingItem.id, { scheduledDate: newDate });
+                  const newDate = e.target.value ? new Date(e.target.value) : undefined;
+                  setEditFormData(prev => ({ ...prev, scheduledDate: newDate }));
                 }}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               />
@@ -632,9 +693,9 @@ export function Timeline() {
               <label className="block text-sm font-medium text-foreground mb-1">{t('mySkillTree.timeline.time')}</label>
               <input
                 type="time"
-                defaultValue={editingItem.scheduledTime || '08:00'}
+                value={editFormData.scheduledTime || '08:00'}
                 onChange={(e) => {
-                  updateTimelineItem(editingItem.id, { scheduledTime: e.target.value });
+                  setEditFormData(prev => ({ ...prev, scheduledTime: e.target.value }));
                 }}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               />
@@ -644,10 +705,10 @@ export function Timeline() {
               <label className="block text-sm font-medium text-foreground mb-1">{t('mySkillTree.timeline.deadline')}</label>
               <input
                 type="date"
-                defaultValue={editingItem.deadline?.toISOString().split('T')[0] || ''}
+                value={editFormData.deadline ? new Date(editFormData.deadline).toISOString().split('T')[0] : ''}
                 onChange={(e) => {
                   const newDeadline = e.target.value ? new Date(e.target.value) : undefined;
-                  updateTimelineItem(editingItem.id, { deadline: newDeadline });
+                  setEditFormData(prev => ({ ...prev, deadline: newDeadline }));
                 }}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               />
@@ -656,9 +717,9 @@ export function Timeline() {
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">{t('mySkillTree.timeline.priority')}</label>
               <select
-                defaultValue={editingItem.priority}
+                value={editFormData.priority}
                 onChange={(e) => {
-                  updateTimelineItem(editingItem.id, { priority: e.target.value as 'low' | 'medium' | 'high' });
+                  setEditFormData(prev => ({ ...prev, priority: e.target.value as 'low' | 'medium' | 'high' }));
                 }}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               >
@@ -671,9 +732,9 @@ export function Timeline() {
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">{t('mySkillTree.timeline.status')}</label>
               <select
-                defaultValue={editingItem.status}
+                value={editFormData.status}
                 onChange={(e) => {
-                  updateTimelineItem(editingItem.id, { status: e.target.value as LearningStatus });
+                  setEditFormData(prev => ({ ...prev, status: e.target.value as LearningStatus }));
                 }}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               >
@@ -692,10 +753,7 @@ export function Timeline() {
               {t('mySkillTree.timeline.close')}
             </button>
             <button
-              onClick={() => {
-                setEditingItem(null);
-                window.location.reload();
-              }}
+              onClick={handleSaveEdit}
               className="flex-1 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
             >
               {t('mySkillTree.timeline.save')}
@@ -710,8 +768,8 @@ export function Timeline() {
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <div className="h-full flex flex-col bg-gradient-to-br from-purple-50 via-violet-50 to-pink-50 overflow-hidden relative">
         {/* Header */}
-        <header className="bg-card z-10 shadow-sm border-b border-border">
-          <div className="px-8 py-5 flex justify-between items-center border-b border-border/50">
+        <header className="bg-card z-10 shadow-sm border-b border-border flex-shrink-0">
+          <div className="px-4 md:px-8 py-4 md:py-5 flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-border/50 gap-4">
             {/* Left: Title */}
             <div className="flex flex-col">
               <h1 className="text-2xl font-bold tracking-tight text-foreground">{t('mySkillTree.timeline.title')}</h1>
@@ -735,9 +793,9 @@ export function Timeline() {
             </div>
 
             {/* Right: Actions & Nav */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3 flex-wrap lg:flex-nowrap w-full lg:w-auto justify-end">
               {/* View Mode Toggle */}
-              <div className="flex items-center bg-muted/50 p-1 rounded-lg border border-border/50">
+              <div className="flex items-center bg-muted/50 p-1 rounded-lg border border-border/50 flex-shrink-0">
                 <button
                   onClick={() => setViewMode('week')}
                   className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${viewMode === 'week'
@@ -825,8 +883,8 @@ export function Timeline() {
 
           {/* Week View: Floating Cards */}
           {viewMode === 'week' && (
-            <div className="px-8 py-6 overflow-x-auto border-b border-border bg-muted/20">
-              <div className="flex justify-between min-w-[800px] items-end">
+            <div className="px-4 md:px-8 py-4 md:py-6 overflow-x-auto border-b border-border bg-muted/20 no-scrollbar">
+              <div className="flex md:justify-between gap-3 md:gap-0 min-w-full md:min-w-[800px] items-end pb-2">
                 {weekDates.map((date) => {
                   const { dayName, dayNumber } = formatDate(date);
                   const selected = isSelected(date);
@@ -836,8 +894,8 @@ export function Timeline() {
                   // Active Day Card
                   if (selected) {
                     return (
-                      <div key={date.toISOString()} className="relative flex flex-col items-center cursor-pointer -mt-2 z-10">
-                        <div className="bg-card rounded-xl shadow-lg border-t-4 border-primary px-10 py-4 transform -translate-y-2 min-w-[140px] flex flex-col items-center">
+                      <div key={date.toISOString()} className="relative flex flex-col items-center cursor-pointer -mt-2 z-10 flex-shrink-0">
+                        <div className="bg-card rounded-xl shadow-lg border-t-4 border-primary px-6 md:px-10 py-3 md:py-4 transform -translate-y-1 md:-translate-y-2 min-w-[100px] md:min-w-[140px] flex flex-col items-center">
                           {today && (
                             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-card px-3">
                               <span className="text-[10px] font-bold text-primary uppercase tracking-widest whitespace-nowrap">{t('mySkillTree.timeline.view.today')}</span>
@@ -859,7 +917,7 @@ export function Timeline() {
                     <div
                       key={date.toISOString()}
                       onClick={() => setSelectedDate(date)}
-                      className="flex flex-col items-center group cursor-pointer pb-2 hover:-translate-y-1 transition-transform"
+                      className="flex flex-col items-center group cursor-pointer pb-2 hover:-translate-y-1 transition-transform flex-shrink-0 min-w-[60px]"
                     >
                       <span className="text-xs font-semibold text-muted-foreground mb-2 uppercase">{dayName}</span>
                       <span className={`text-2xl font-medium ${today ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'} transition-colors`}>
@@ -880,9 +938,10 @@ export function Timeline() {
         </header>
 
         {/* Main content - Conditional rendering based on view mode */}
-        <div className="flex-1 overflow-x-auto overflow-y-auto p-6 lg:p-8">
+        <div className="flex-1 overflow-x-hidden overflow-y-auto bg-transparent">
+          <div className="p-4 md:p-6 lg:p-8 h-full">
           {viewMode === 'week' ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full min-w-[1000px]">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-auto lg:h-full pb-20 lg:pb-0">
               {renderTimePeriodColumn('morning')}
               {renderTimePeriodColumn('afternoon')}
               {renderTimePeriodColumn('evening')}
@@ -898,6 +957,7 @@ export function Timeline() {
               }}
             />
           )}
+          </div>
         </div>
 
         {/* Floating add button for mobile */}
@@ -915,19 +975,16 @@ export function Timeline() {
           onSuccess={() => window.location.reload()}
         />
 
-        {/* Daily Agenda Dialog */}
-        <DailyAgendaDialog 
-          isOpen={showAgenda}
-          onClose={handleCloseAgenda}
-          items={timelineItems.filter(item => {
-            const itemDate = new Date(item.scheduledDate);
-            const today = new Date();
-            return itemDate.toDateString() === today.toDateString() && item.status !== 'completed';
-          })}
-        />
-
         {/* Edit Modal */}
         {renderEditModal()}
+
+        {/* Study Dialog */}
+        <StudyDialog
+            isOpen={!!selectedStudyItem}
+            onClose={() => setSelectedStudyItem(null)}
+            item={selectedStudyItem}
+            onStartLearning={handleStartLearning}
+        />
       </div>
     </DndContext>
   );

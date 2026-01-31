@@ -20,7 +20,7 @@ export function Navigation() {
   };
 
   const navItems = [
-    // { id: 'dashboard', label: t('nav.dashboard'), icon: Home, path: '/dashboard' },
+    { id: 'dashboard', label: t('nav.dashboard'), icon: Home, path: '/dashboard' },
     { id: 'skilltree', label: t('nav.skilltree'), icon: GitBranch, path: '/skilltree' },
     // { id: 'quiz', label: t('nav.quiz'), icon: FileQuestion, path: '/quiz' },
     // { id: 'jobs', label: t('nav.jobs'), icon: Briefcase, path: '/jobs' },
@@ -28,6 +28,8 @@ export function Navigation() {
     { id: 'timeline', label: t('nav.timeline'), icon: Calendar, path: '/timeline' },
     // { id: 'chat', label: 'Chat', icon: MessageSquare, path: '/chat' },
     { id: 'forum', label: t('nav.forum'), icon: Users, path: '/forum' },
+
+    
   ];
 
   const handleLogout = () => {

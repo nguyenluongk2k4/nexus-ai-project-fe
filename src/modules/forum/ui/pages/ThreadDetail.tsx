@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '@/modules/auth/AuthProvider';
 import { ChevronRight, ThumbsUp, MessageSquare, Share2, Bookmark, Clock, Reply, MoreHorizontal, Send, Image as ImageIcon, Code, Eye, Award } from 'lucide-react';
 import { getThreadDetailsUseCase, addCommentUseCase, likePostUseCase } from '../../providers';
 import { ForumPost, ForumComment } from '../../domain/entities/ForumEntities';
@@ -53,7 +54,7 @@ function CommentItem({
             <img
               alt={comment.author.name}
               className={`${depth > 0 ? 'w-8 h-8' : 'w-10 h-10'} rounded-full object-cover border border-white shadow-sm`}
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author.name)}&background=random`}
+              src={comment.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author.name)}&background=random`}
             />
           </div>
           <div className="flex-1">
@@ -149,6 +150,7 @@ function CommentItem({
 export function ThreadDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { t, i18n } = useTranslation();
   const [post, setPost] = useState<ForumPost | null>(null);
   const [comments, setComments] = useState<ForumComment[]>([]);
@@ -304,7 +306,7 @@ export function ThreadDetail() {
                         <img
                           alt={post.author.name}
                           className="w-14 h-14 rounded-full object-cover border-2 border-white"
-                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=random`}
+                          src={post.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=random`}
                         />
                       </div>
                       <span className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full shadow-sm"></span>
@@ -359,8 +361,8 @@ export function ThreadDetail() {
                     <button
                       onClick={handleLike}
                       className={`flex-1 sm:flex-none flex items-center gap-2 px-5 py-2.5 rounded-xl shadow-lg transition-all active:scale-95 ${isLiked
-                          ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-violet-500/30 hover:shadow-violet-500/50 hover:-translate-y-0.5'
-                          : 'bg-white border border-slate-200 text-slate-600 hover:border-violet-400 hover:text-violet-500 hover:shadow-md'
+                        ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-violet-500/30 hover:shadow-violet-500/50 hover:-translate-y-0.5'
+                        : 'bg-white border border-slate-200 text-slate-600 hover:border-violet-400 hover:text-violet-500 hover:shadow-md'
                         }`}
                     >
 
@@ -468,7 +470,7 @@ export function ThreadDetail() {
                 <img
                   alt="Me"
                   className="w-10 h-10 rounded-full border border-slate-200 object-cover"
-                  src="https://ui-avatars.com/api/?name=User&background=random"
+                  src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || 'User')}&background=random`}
                 />
                 <div className="flex-1">
                   <form onSubmit={handleSubmitReply}>

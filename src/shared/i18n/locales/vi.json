@@ -464,6 +464,9 @@
         "date": "Ngày học",
         "time": "Giờ học",
         "deadline": "Hạn chót",
+        "scheduleInfo": "Thông tin lịch học",
+        "notScheduled": "Chưa xếp lịch",
+        "currentStatus": "Trạng thái",
         "priority": "Độ ưu tiên",
         "status": "Trạng thái",
         "priorities": { "low": "Thấp", "medium": "Trung bình", "high": "Cao" },
@@ -488,7 +491,8 @@
             "add": "Lỗi khi thêm vào lịch", 
             "connection": "Lỗi kết nối", 
             "aiParse": "Không thể phân tích yêu cầu. Vui lòng thử lại.", 
-            "aiConfirm": "Lỗi khi xác nhận lịch" 
+            "aiConfirm": "Lỗi khi xác nhận lịch",
+            "noUrl": "Chưa có liên kết học tập cho tài liệu này"
         },
         "periods": {
             "morning": "Buổi sáng",
