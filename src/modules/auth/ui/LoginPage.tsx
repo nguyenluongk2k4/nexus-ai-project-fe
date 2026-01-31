@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../AuthProvider';
+import { useAuth, authGateway } from '../AuthProvider';
 import { Mail, Lock, ArrowRight, TreeDeciduous, Github, Chrome, Sparkles, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PublicHeader } from '@/shared/components/PublicHeader';
@@ -20,6 +20,15 @@ export const LoginPage = () => {
       navigate('/dashboard');
     } catch (err) {
       // Error handled by AuthProvider
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const url = await authGateway.getGoogleLoginUrl();
+      window.location.href = url;
+    } catch (err) {
+      console.error("Google login failed", err);
     }
   };
 
@@ -52,7 +61,7 @@ export const LoginPage = () => {
           <path d="M50,60 C50,40 70,50 90,30" fill="none" stroke="#7C3AED" strokeWidth="0.3" />
         </svg>
       </div>
-      
+
       <div className="absolute top-0 left-0 w-full z-50">
         <PublicHeader showAuthButtons={false} />
       </div>
@@ -63,7 +72,7 @@ export const LoginPage = () => {
           {/* Glowing Icon */}
           <div className="relative mb-4 group">
             <div className="absolute inset-0 "></div>
-              <img src={logo} alt="NexusAI" className=" h-20" />
+            <img src={logo} alt="NexusAI" className=" h-20" />
           </div>
           <p className="text-violet-600 text-xs font-bold tracking-[0.2em] uppercase">{t('auth.login.subtitle')}</p>
         </div>
@@ -171,10 +180,12 @@ export const LoginPage = () => {
             </div>
           </div>
 
+
           {/* Social Buttons */}
           <div className="mt-8 grid grid-cols-2 gap-4">
             <button
               type="button"
+              onClick={handleGoogleLogin}
               className="flex items-center justify-center w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm bg-white/60 backdrop-blur-sm text-sm font-semibold text-slate-700 hover:bg-white hover:border-slate-300 hover:shadow-md transition-all duration-200 group"
             >
               <Chrome className="h-5 w-5 mr-2 text-slate-600 group-hover:text-violet-600 group-hover:scale-110 transition-all" />

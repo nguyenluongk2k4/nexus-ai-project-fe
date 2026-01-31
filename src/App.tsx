@@ -21,6 +21,7 @@ import { LearningProgressProvider } from '@/modules/skill-tree/ui/contexts/Learn
 import { AuthProvider, useAuth } from '@/modules/auth/AuthProvider';
 import { LoginPage } from '@/modules/auth/ui/LoginPage';
 import { RegisterPage } from '@/modules/auth/ui/RegisterPage';
+import { GoogleCallbackPage } from '@/modules/auth/ui/GoogleCallbackPage';
 
 // Protected Route Wrapper
 const ProtectedRoute = () => {
@@ -47,6 +48,7 @@ export default function App() {
             {/* Public Routes */}
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth/callback" element={<GoogleCallbackPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
             {/* Protected App Routes */}
