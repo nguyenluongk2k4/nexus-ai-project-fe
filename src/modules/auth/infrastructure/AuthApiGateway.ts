@@ -58,6 +58,7 @@ export class AuthApiGateway implements AuthGateway {
         fullName: data.user.full_name,
         avatarUrl: data.user.avatar_url,
         isActive: data.user.is_active,
+        balance: data.user.balance,
         createdAt: data.user.created_at,
         lastLoginAt: data.user.last_login_at,
       }
@@ -91,6 +92,7 @@ export class AuthApiGateway implements AuthGateway {
         fullName: data.user.full_name,
         avatarUrl: data.user.avatar_url,
         isActive: data.user.is_active,
+        balance: data.user.balance,
         createdAt: data.user.created_at,
         lastLoginAt: data.user.last_login_at,
       }
@@ -108,6 +110,7 @@ export class AuthApiGateway implements AuthGateway {
       fullName: response.full_name,
       avatarUrl: response.avatar_url,
       isActive: response.is_active,
+      balance: response.balance,
       createdAt: response.created_at,
       lastLoginAt: response.last_login_at,
     };

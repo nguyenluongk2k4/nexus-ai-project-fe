@@ -27,6 +27,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useProfile } from '../hooks/useProfile';
 import { useAuth } from '@/modules/auth/AuthProvider';
+import { DotLottiePlayer } from '@dotlottie/react-player';
 
 const ACTIVITY_ICONS: Record<string, any> = {
     login: LogIn,
@@ -148,8 +149,16 @@ export function Profile() {
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div>
+                    <div className="relative">
                         <h1 className="text-3xl md:text-4xl font-extrabold text-purple-950 tracking-tight">{t('profile.title')}</h1>
+                        <div className="absolute -top-4 -right-32 pointer-events-none">
+                            {/* <DotLottiePlayer
+                                src="/assets/Hoa_dao_den_long.lottie"
+                                autoplay
+                                loop
+                                style={{ width: '160px', height: '160px' }}
+                            /> */}
+                        </div>
                         <p className="text-slate-600 mt-2 text-lg font-medium">{t('profile.subtitle')}</p>
                     </div>
                 </div>
@@ -336,48 +345,72 @@ export function Profile() {
                     <div className="lg:col-span-4 space-y-8">
                         {/* Stats Card */}
                         <div className="bg-white rounded-2xl p-8 shadow-lg border border-purple-100/50">
-                            <h3 className="text-xl font-extrabold text-slate-900 mb-8">{t('profile.stats.title')}</h3>
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between group py-3 border-b border-dashed border-purple-100 last:border-0">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 rounded-xl bg-purple-600 text-white shadow-md shadow-purple-200">
-                                            <Clock className="w-5 h-5" />
-                                        </div>
-                                        <span className="font-bold text-slate-600">{t('profile.stats.learningHours')}</span>
+                            <h3 className="text-xl font-extrabold text-slate-900 mb-2">{t('profile.stats.title')}</h3>
+                            <div className="">
+                                <div className="flex items-center gap-6 group py-2 border-b border-dashed border-purple-100 last:border-0">
+                                    <div className="w-16 h-16 flex-none flex items-center justify-center bg-white rounded-2xl pl-1 group-hover:scale-110 transition-transform duration-300">
+                                        <DotLottiePlayer
+                                            src="/assets/Clock Lottie Animation.lottie"
+                                            autoplay
+                                            loop
+                                            style={{ width: '100%', height: '100%' }}
+                                        />
                                     </div>
-                                    <span className="font-extrabold text-purple-900 text-xl">{stats?.learningHours || 0}h</span>
+                                    <div className="flex items-center justify-between flex-1">
+                                        <span className="font-bold text-slate-500 text-lg">{t('profile.stats.learningHours')}</span>
+                                        <span className="font-extrabold text-purple-900 text-3xl">{stats?.learningHours || 0}h</span>
+                                    </div>
                                 </div>
 
-                                <div className="flex items-center justify-between group py-3 border-b border-dashed border-purple-100 last:border-0">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 rounded-xl bg-fuchsia-500 text-white shadow-md shadow-fuchsia-200">
-                                            <Award className="w-5 h-5" />
-                                        </div>
-                                        <span className="font-bold text-slate-600">{t('profile.stats.skillsCompleted')}</span>
+                                <div className="flex items-center gap-6 group py-2 border-b border-dashed border-purple-100 last:border-0">
+                                    <div className="w-18 h-18 flex-none flex items-center justify-center bg-white rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                                        <DotLottiePlayer
+                                            src="/assets/Award Winning.lottie"
+                                            autoplay
+                                            loop
+                                            style={{ width: '100%', height: '100%' }}
+                                        />
                                     </div>
-                                    <span className="font-extrabold text-purple-900 text-xl">{stats?.skillsCompleted || 0}</span>
+                                    <div className="flex items-center justify-between flex-1">
+                                        <span className="font-bold text-slate-500 text-lg">{t('profile.stats.skillsCompleted')}</span>
+                                        <span className="font-extrabold text-purple-900 text-3xl">{stats?.skillsCompleted || 0}</span>
+                                    </div>
                                 </div>
 
-                                <div className="flex items-center justify-between group py-3 border-b border-dashed border-purple-100 last:border-0">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 rounded-xl bg-amber-500 text-white shadow-md shadow-amber-200">
-                                            <Flame className="w-5 h-5" />
-                                        </div>
-                                        <span className="font-bold text-slate-600">{t('profile.stats.streakDays')}</span>
+                                <div className="flex items-center gap-6 group py-2 border-b border-dashed border-purple-100 last:border-0">
+                                    <div className="w-18 h-18 flex-none flex items-center justify-center bg-white rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                                        <DotLottiePlayer
+                                            src="/assets/Fire Streak Orange.lottie"
+                                            autoplay
+                                            loop
+                                            style={{ width: '100%', height: '100%' }}
+                                        />
                                     </div>
-                                    <span className="font-extrabold text-purple-900 text-xl">{stats?.streakDays || 0}</span>
+                                    <div className="flex items-center justify-between flex-1">
+                                        <span className="font-bold text-slate-500 text-lg">{t('profile.stats.streakDays')}</span>
+                                        <span className="font-extrabold text-purple-900 text-3xl">{stats?.streakDays || 0}</span>
+                                    </div>
                                 </div>
 
-                                <div className="flex items-center justify-between group py-3 border-b border-dashed border-purple-100 last:border-0">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 rounded-xl bg-cyan-500 text-white shadow-md shadow-cyan-200">
-                                            <MessageSquare className="w-5 h-5" />
-                                        </div>
-                                        <span className="font-bold text-slate-600">{t('profile.stats.forumPosts')}</span>
+                                <div className="flex items-center gap-6 group py-2 border-b border-dashed border-purple-100 last:border-0">
+                                    <div className="w-21 h-21 flex-none flex items-center justify-center pl-2 bg-white rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                                        <DotLottiePlayer
+                                            src="/assets/SMS Icon.lottie"
+                                            autoplay
+                                            loop
+                                            style={{ width: '100%', height: '100%' }}
+                                        />
                                     </div>
-                                    <span className="font-extrabold text-purple-900 text-xl">{stats?.forumPosts || 0}</span>
+                                    <div className="flex items-center justify-between flex-1">
+                                        <span className="font-bold text-slate-500 text-lg">{t('profile.stats.forumPosts')}</span>
+                                        <span className="font-extrabold text-purple-900 text-3xl">{stats?.forumPosts || 0}</span>
+                                    </div>
                                 </div>
                             </div>
+
+
+
+
                         </div>
 
                         {/* Balance Card */}

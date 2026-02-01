@@ -20,7 +20,7 @@ interface ChatTabProps {
   currentSessionId: string | null;
   onSelectSession: (id: string) => void;
   onNewChat: () => void;
-  
+
   // Upload Props
   uploadFile?: (file: File) => Promise<UploadResponse>;
   attachments?: UploadResponse[];
@@ -90,22 +90,20 @@ export function ChatTab({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${
-            status === 'idle' ? 'bg-emerald-500' : 
+          <div className={`w-2 h-2 rounded-full ${status === 'idle' ? 'bg-emerald-500' :
             status === 'connecting' || status === 'thinking' ? 'bg-amber-500 animate-pulse' : 'bg-red-500'
-          }`} />
+            }`} />
           <span className="text-xs font-medium text-slate-500">
-            {status === 'idle' ? 'Sẵn sàng' : 
-             status === 'connecting' ? 'Đang kết nối...' : 
-             status === 'thinking' ? 'Đang suy nghĩ...' : 'Lỗi kết nối'}
+            {status === 'idle' ? 'Sẵn sàng' :
+              status === 'connecting' ? 'Đang kết nối...' :
+                status === 'thinking' ? 'Đang suy nghĩ...' : 'Lỗi kết nối'}
           </span>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowHistory(!showHistory)}
-            className={`p-1.5 rounded-lg transition-colors ${
-              showHistory ? 'bg-indigo-100 text-indigo-600' : 'hover:bg-slate-100 text-slate-500'
-            }`}
+            className={`p-1.5 rounded-lg transition-colors ${showHistory ? 'bg-indigo-100 text-indigo-600' : 'hover:bg-slate-100 text-slate-500'
+              }`}
           >
             <History className="w-4 h-4" />
           </button>
@@ -146,9 +144,8 @@ export function ChatTab({
                     onSelectSession(session.id);
                     setShowHistory(false);
                   }}
-                  className={`w-full text-left px-4 py-2 text-xs hover:bg-slate-100 flex items-center gap-2 ${
-                    currentSessionId === session.id ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600'
-                  }`}
+                  className={`w-full text-left px-4 py-2 text-xs hover:bg-slate-100 flex items-center gap-2 ${currentSessionId === session.id ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600'
+                    }`}
                 >
                   <MessageSquare className="w-3 h-3 flex-shrink-0" />
                   <span className="truncate">{session.title || 'Cuộc trò chuyện mới'}</span>
@@ -184,36 +181,34 @@ export function ChatTab({
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[85%] rounded-2xl px-4 py-2 ${
-                  msg.role === 'user'
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-slate-100 text-slate-800'
-                }`}
+                className={`max-w-[85%] rounded-2xl px-4 py-2 ${msg.role === 'user'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-slate-100 text-slate-800'
+                  }`}
               >
                 {/* Message Attachments */}
                 {msg.attachments && msg.attachments.length > 0 && (
                   <div className={`flex flex-wrap gap-2 mb-2 ${msg.role === 'user' ? 'text-white' : 'text-slate-800'}`}>
                     {msg.attachments.map((att, idx) => (
-                      <a 
+                      <a
                         key={idx}
                         href={att.file_uri}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`flex items-center gap-2 p-2 rounded-lg text-xs font-medium transition-colors ${
-                          msg.role === 'user' 
-                            ? 'bg-white/20 hover:bg-white/30' 
-                            : 'bg-white border border-slate-200 hover:bg-slate-50'
-                        }`}
+                        className={`flex items-center gap-2 p-2 rounded-lg text-xs font-medium transition-colors ${msg.role === 'user'
+                          ? 'bg-white/20 hover:bg-white/30'
+                          : 'bg-white border border-slate-200 hover:bg-slate-50'
+                          }`}
                         title={att.filename}
                       >
-                         {att.mime_type.startsWith('image/') ? (
-                           <div className="w-5 h-5 rounded overflow-hidden flex-shrink-0 bg-black/10">
-                              <img src={att.file_uri} alt={att.filename} className="w-full h-full object-cover" />
-                           </div>
-                         ) : (
-                           <FileText className="w-4 h-4 flex-shrink-0" />
-                         )}
-                         <span className="truncate max-w-[120px]">{att.filename}</span>
+                        {att.mime_type.startsWith('image/') ? (
+                          <div className="w-5 h-5 rounded overflow-hidden flex-shrink-0 bg-black/10">
+                            <img src={att.file_uri} alt={att.filename} className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <FileText className="w-4 h-4 flex-shrink-0" />
+                        )}
+                        <span className="truncate max-w-[120px]">{att.filename}</span>
                       </a>
                     ))}
                   </div>
@@ -235,87 +230,87 @@ export function ChatTab({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="p-3 border-t border-slate-200">
-        
-        {/* Attachment Tokens */}
-        {attachments.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-2 px-3">
-            {attachments.map((file, index) => (
-              <div 
-                key={index} 
-                className="group relative flex items-center gap-3 bg-white border border-slate-200 shadow-sm rounded-xl p-3 min-w-[200px] max-w-[240px] animate-in fade-in zoom-in duration-200 hover:shadow-md transition-shadow"
-              >
-                {file.mime_type.startsWith('image/') ? (
-                  <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-100">
-                    <img src={file.file_uri} alt={file.display_name} className="w-full h-full object-cover" />
-                  </div>
-                ) : (
-                  <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 text-orange-600">
-                     <FileText className="w-5 h-5" />
-                  </div>
-                )}
-                
-                <div className="flex flex-col overflow-hidden">
-                  <span className="text-xs font-semibold text-slate-800 truncate" title={file.filename}>
-                    {file.display_name || file.filename}
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-medium">
-                    {file.token_count > 0 ? `${file.token_count.toLocaleString()} tokens` : `${(file.size_bytes / 1024).toFixed(1)} KB`}
-                  </span>
-                </div>
-
-                <button 
-                  onClick={() => removeAttachment && removeAttachment(index)}
-                  className="absolute -top-2 -right-2 w-5 h-5 bg-white text-slate-400 border border-slate-200 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors shadow-sm"
+      {/* Input - matched height and structure with SkillTree bottom bar */}
+      <div className="h-[64px] border-t border-slate-200 bg-white flex flex-col justify-center flex-shrink-0">
+        <div className="px-4">
+          {/* Attachment Tokens */}
+          {attachments.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2">
+              {attachments.map((file, index) => (
+                <div
+                  key={index}
+                  className="group relative flex items-center gap-3 bg-white border border-slate-200 shadow-sm rounded-xl p-3 min-w-[200px] max-w-[240px] animate-in fade-in zoom-in duration-200 hover:shadow-md transition-shadow"
                 >
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-        
-        {/* Hidden File Input */}
-        <input 
-          type="file" 
-          ref={fileInputRef}
-          className="hidden"
-          onChange={handleFileSelect}
-        />
+                  {file.mime_type.startsWith('image/') ? (
+                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-100">
+                      <img src={file.file_uri} alt={file.display_name} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 text-orange-600">
+                      <FileText className="w-5 h-5" />
+                    </div>
+                  )}
 
-        <div className="flex items-center gap-2 bg-slate-100 rounded-xl px-3 py-2">
-          {/* Upload Button */}
-          {uploadFile && (
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading || status === 'error'}
-              className={`p-1.5 rounded-lg transition-colors flex-shrink-0 ${
-                isUploading 
-                  ? 'bg-slate-200 text-slate-400 cursor-wait' 
-                  : 'hover:bg-slate-200 text-slate-500 hover:text-slate-700'
-              }`}
-              title="Upload file"
-            >
-               {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
-            </button>
+                  <div className="flex flex-col overflow-hidden">
+                    <span className="text-xs font-semibold text-slate-800 truncate" title={file.filename}>
+                      {file.display_name || file.filename}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-medium">
+                      {file.token_count > 0 ? `${file.token_count.toLocaleString()} tokens` : `${(file.size_bytes / 1024).toFixed(1)} KB`}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => removeAttachment && removeAttachment(index)}
+                    className="absolute -top-2 -right-2 w-5 h-5 bg-white text-slate-400 border border-slate-200 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors shadow-sm"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
+
+          {/* Hidden File Input */}
           <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Hỏi về kỹ năng..."
-            className="flex-1 bg-transparent text-sm focus:outline-none placeholder:text-slate-400"
-            disabled={status === 'error' || status === 'thinking'}
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handleFileSelect}
           />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim() || status === 'error' || status === 'thinking'}
-            className="p-1.5 bg-indigo-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-700 transition-colors"
-          >
-            <Send className="w-4 h-4" />
-          </button>
+
+          <div className="flex items-center gap-2 bg-slate-100 rounded-xl px-3 py-2">
+            {/* Upload Button */}
+            {uploadFile && (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading || status === 'error'}
+                className={`p-1.5 rounded-lg transition-colors flex-shrink-0 ${isUploading
+                    ? 'bg-slate-200 text-slate-400 cursor-wait'
+                    : 'hover:bg-slate-200 text-slate-500 hover:text-slate-700'
+                  }`}
+                title="Upload file"
+              >
+                {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
+              </button>
+            )}
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Hỏi về kỹ năng..."
+              className="flex-1 bg-transparent text-sm focus:outline-none placeholder:text-slate-400"
+              disabled={status === 'error' || status === 'thinking'}
+            />
+            <button
+              onClick={handleSend}
+              disabled={!input.trim() || status === 'error' || status === 'thinking'}
+              className="p-1.5 bg-indigo-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-700 transition-colors"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

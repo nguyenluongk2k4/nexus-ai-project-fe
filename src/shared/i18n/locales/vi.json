@@ -16,6 +16,11 @@
       "yesterday": "Hôm qua"
     }
   },
+  "header": {
+    "greeting": "Chào {{name}}!",
+    "subtitle": "Tiếp tục hành trình học tập của bạn",
+    "streak": "STREAK"
+  },
   "landing": {
     "header": {
       "signIn": "Đăng nhập",
@@ -38,17 +43,38 @@
       "label": "HOẠT ĐỘNG NHƯ THẾ NÀO",
       "title": "Lộ Trình Học Tập Của Bạn",
       "subtitle": "Bắt đầu hành trình học tập cá nhân hóa chỉ với 4 bước đơn giản.",
-      "step1": { "title": "Chia sẻ mục tiêu", "desc": "Cho chúng tôi biết sở thích và định hướng nghề nghiệp của bạn." },
-      "step2": { "title": "AI tạo lộ trình", "desc": "AI sẽ phân tích và tạo ra chương trình học riêng cho bạn." },
-      "step3": { "title": "Học & Phát triển", "desc": "Theo sát lộ trình và xem cây kỹ năng của bạn lớn lên từng ngày." },
-      "step4": { "title": "Mở khóa cơ hội", "desc": "Khám phá các công việc phù hợp với năng lực mới của bạn." }
+      "step1": {
+        "title": "Chia sẻ mục tiêu",
+        "desc": "Cho chúng tôi biết sở thích và định hướng nghề nghiệp của bạn."
+      },
+      "step2": {
+        "title": "AI tạo lộ trình",
+        "desc": "AI sẽ phân tích và tạo ra chương trình học riêng cho bạn."
+      },
+      "step3": {
+        "title": "Học & Phát triển",
+        "desc": "Theo sát lộ trình và xem cây kỹ năng của bạn lớn lên từng ngày."
+      },
+      "step4": {
+        "title": "Mở khóa cơ hội",
+        "desc": "Khám phá các công việc phù hợp với năng lực mới của bạn."
+      }
     },
     "features": {
       "title": "Tại sao chọn NexusAI?",
       "subtitle": "Mọi thứ bạn cần để tăng tốc hành trình của mình.",
-      "roadmap": { "title": "Lộ trình AI", "desc": "AI phân tích hàng triệu mô tả công việc để xây dựng lộ trình thích ứng năng động." },
-      "visual": { "title": "Tiến độ trực quan", "desc": "Xem cây kỹ năng của bạn phát triển theo thời gian thực." },
-      "career": { "title": "Định hướng nghề nghiệp", "desc": "Kết nối kỹ năng với các vai trò đang tuyển dụng." }
+      "roadmap": {
+        "title": "Lộ trình AI",
+        "desc": "AI phân tích hàng triệu mô tả công việc để xây dựng lộ trình thích ứng năng động."
+      },
+      "visual": {
+        "title": "Tiến độ trực quan",
+        "desc": "Xem cây kỹ năng của bạn phát triển theo thời gian thực."
+      },
+      "career": {
+        "title": "Định hướng nghề nghiệp",
+        "desc": "Kết nối kỹ năng với các vai trò đang tuyển dụng."
+      }
     },
     "testimonials": {
       "title": "Học viên nói gì về chúng tôi",
@@ -60,10 +86,14 @@
     "faq": {
       "title": "Câu hỏi thường gặp",
       "subtitle": "Mọi thứ bạn cần biết",
-      "q1": "NexusAI - AI Skill Tree là gì?", "a1": "AI Skill Tree là nền tảng lộ trình học tập tiên tiến giúp bạn làm chủ kỹ năng mới hiệu quả bằng AI.",
-      "q2": "Nó có miễn phí không?", "a2": "Chúng tôi cung cấp gói Free hào phóng. Gói Pro mở khóa không giới hạn cây và phân tích nâng cao.",
-      "q3": "AI cá nhân hóa hoạt động ra sao?", "a3": "AI của chúng tôi phân tích kiến thức hiện tại của bạn và đối chiếu với hàng triệu dữ liệu từ các chuyên gia thành công.",
-      "q4": "Tôi có thể chỉnh sửa lộ trình không?", "a4": "Chắc chắn rồi. Bạn có toàn quyền kiểm soát để thêm, bớt hoặc sắp xếp lại các học phần."
+      "q1": "NexusAI - AI Skill Tree là gì?",
+      "a1": "AI Skill Tree là nền tảng lộ trình học tập tiên tiến giúp bạn làm chủ kỹ năng mới hiệu quả bằng AI.",
+      "q2": "Nó có miễn phí không?",
+      "a2": "Chúng tôi cung cấp gói Free hào phóng. Gói Pro mở khóa không giới hạn cây và phân tích nâng cao.",
+      "q3": "AI cá nhân hóa hoạt động ra sao?",
+      "a3": "AI của chúng tôi phân tích kiến thức hiện tại của bạn và đối chiếu với hàng triệu dữ liệu từ các chuyên gia thành công.",
+      "q4": "Tôi có thể chỉnh sửa lộ trình không?",
+      "a4": "Chắc chắn rồi. Bạn có toàn quyền kiểm soát để thêm, bớt hoặc sắp xếp lại các học phần."
     },
     "cta": {
       "title": "Sẵn sàng bắt đầu hành trình?",
@@ -83,26 +113,26 @@
     "subtitle": "Khám phá & Phát triển",
     "dashboard": "Bảng điều khiển",
     "dashboardPage": {
-        "welcome": "Chào mừng trở lại, {{name}}",
-        "subtitle": "Theo dõi tiến độ học tập và tiếp tục hành trình của bạn",
-        "weeklyActivity": "Hoạt động tuần này",
-        "weeklyActivitySub": "Số giờ học tập",
-        "skillProgress": "Tiến độ kỹ năng",
-        "skillProgressSub": "Cấp độ kỹ năng hiện tại",
-        "recentActivity": "Hoạt động gần đây",
-        "metrics": {
-            "studyTime": "Thời gian học",
-            "skillsEarned": "Kỹ năng đạt được",
-            "goalsCompleted": "Mục tiêu hoàn thành",
-            "thisWeek": "Tuần này",
-            "totalBadges": "Tổng huy hiệu",
-            "monthlyTarget": "Mục tiêu tháng"
-        },
-        "activity": {
-            "completedQuiz": "Đã làm Quiz",
-            "earnedBadge": "Nhận huy hiệu",
-            "finishedCourse": "Hoàn thành khóa học"
-        }
+      "welcome": "Chào mừng trở lại, {{name}}",
+      "subtitle": "Theo dõi tiến độ học tập và tiếp tục hành trình của bạn",
+      "weeklyActivity": "Hoạt động tuần này",
+      "weeklyActivitySub": "Số giờ học tập",
+      "skillProgress": "Tiến độ kỹ năng",
+      "skillProgressSub": "Cấp độ kỹ năng hiện tại",
+      "recentActivity": "Hoạt động gần đây",
+      "metrics": {
+        "studyTime": "Thời gian học",
+        "skillsEarned": "Kỹ năng đạt được",
+        "goalsCompleted": "Mục tiêu hoàn thành",
+        "thisWeek": "Tuần này",
+        "totalBadges": "Tổng huy hiệu",
+        "monthlyTarget": "Mục tiêu tháng"
+      },
+      "activity": {
+        "completedQuiz": "Đã làm Quiz",
+        "earnedBadge": "Nhận huy hiệu",
+        "finishedCourse": "Hoàn thành khóa học"
+      }
     },
     "skilltree": "Cây kỹ năng",
     "quiz": "Trắc nghiệm",
@@ -120,85 +150,85 @@
     "activeStatus": "Đang hoạt động",
     "copyId": "Copy ID",
     "form": {
-        "fullName": "TÊN ĐẦY ĐỦ",
-        "username": "USERNAME",
-        "email": "EMAIL",
-        "joinDate": "NGÀY THAM GIA",
-        "fullNamePlaceholder": "Nhập tên của bạn",
-        "usernameHint": "Username không thể thay đổi"
+      "fullName": "TÊN ĐẦY ĐỦ",
+      "username": "USERNAME",
+      "email": "EMAIL",
+      "joinDate": "NGÀY THAM GIA",
+      "fullNamePlaceholder": "Nhập tên của bạn",
+      "usernameHint": "Username không thể thay đổi"
     },
     "buttons": {
-        "save": "Lưu thay đổi",
-        "changePassword": "Đổi mật khẩu",
-        "retry": "Thử lại",
-        "saving": "Đang lưu...",
-        "viewAll": "Xem tất cả"
+      "save": "Lưu thay đổi",
+      "changePassword": "Đổi mật khẩu",
+      "retry": "Thử lại",
+      "saving": "Đang lưu...",
+      "viewAll": "Xem tất cả"
     },
     "messages": {
-        "saveSuccess": "Đã lưu thay đổi thành công!",
-        "saveError": "Không thể lưu thay đổi"
+      "saveSuccess": "Đã lưu thay đổi thành công!",
+      "saveError": "Không thể lưu thay đổi"
     },
     "history": {
-        "title": "Lịch sử hoạt động"
+      "title": "Lịch sử hoạt động"
     },
     "stats": {
-        "title": "Thống kê của tôi",
-        "learningHours": "Số giờ học",
-        "skillsCompleted": "Skills hoàn thành",
-        "streakDays": "Streak days",
-        "forumPosts": "Bài viết forum"
+      "title": "Thống kê của tôi",
+      "learningHours": "Số giờ học",
+      "skillsCompleted": "Skills hoàn thành",
+      "streakDays": "Streak days",
+      "forumPosts": "Bài viết forum"
     },
     "balance": {
-        "title": "Số dư tài khoản",
-        "available": "Số dư khả dụng",
-        "current": "Số dư hiện tại",
-        "deposit": "Nạp tiền ngay"
+      "title": "Số dư tài khoản",
+      "available": "Số dư khả dụng",
+      "current": "Số dư hiện tại",
+      "deposit": "Nạp tiền ngay"
     },
     "subscription": {
-        "title": "Gói đăng ký",
-        "upgradeHint": "Nâng cấp để trải nghiệm tốt hơn",
-        "expires": "Hết hạn: {{date}}",
-        "upgrade": "Nâng cấp",
-        "manage": "Quản lý gói",
-        "freeHint": "Nâng cấp để trải nghiệm tốt hơn",
-        "pricing": "Bảng giá",
-        "titleNew": "Gói dịch vụ dành cho đội ngũ hiện đại",
-        "subtitleNew": "Chọn gói phù hợp với quy mô của bạn. Giá cả minh bạch, không phí ẩn.",
-        "monthly": "Theo tháng",
-        "yearly": "Theo năm",
-        "savePercent": "Giảm 17%",
-        "mostPopular": "Phổ biến nhất",
-        "currentPlan": "Gói hiện tại",
-        "features": "Tính năng",
-        "faq": {
-            "title": "Câu hỏi thường gặp",
-            "changePlan": {
-                "q": "Tôi có thể đổi gói sau không?",
-                "a": "Có, bạn có thể nâng cấp hoặc hạ cấp gói bất cứ lúc nào. Thay đổi sẽ được tính theo tỷ lệ."
-            },
-            "freeTrial": {
-                "q": "Có dùng thử miễn phí không?",
-                "a": "Chúng tôi cung cấp gói Free để trải nghiệm. Bạn có thể nâng cấp bất cứ lúc nào."
-            },
-            "payment": {
-                "q": "Chấp nhận phương thức thanh toán nào?",
-                "a": "Thanh toán được trừ từ số dư tài khoản. Bạn có thể nạp tiền qua ngân hàng hoặc ví điện tử."
-            },
-            "security": {
-                "q": "Dữ liệu của tôi có an toàn không?",
-                "a": "Bảo mật là ưu tiên hàng đầu. Chúng tôi sử dụng mã hóa AES-256."
-            }
+      "title": "Gói đăng ký",
+      "upgradeHint": "Nâng cấp để trải nghiệm tốt hơn",
+      "expires": "Hết hạn: {{date}}",
+      "upgrade": "Nâng cấp",
+      "manage": "Quản lý gói",
+      "freeHint": "Nâng cấp để trải nghiệm tốt hơn",
+      "pricing": "Bảng giá",
+      "titleNew": "Gói dịch vụ dành cho đội ngũ hiện đại",
+      "subtitleNew": "Chọn gói phù hợp với quy mô của bạn. Giá cả minh bạch, không phí ẩn.",
+      "monthly": "Theo tháng",
+      "yearly": "Theo năm",
+      "savePercent": "Giảm 17%",
+      "mostPopular": "Phổ biến nhất",
+      "currentPlan": "Gói hiện tại",
+      "features": "Tính năng",
+      "faq": {
+        "title": "Câu hỏi thường gặp",
+        "changePlan": {
+          "q": "Tôi có thể đổi gói sau không?",
+          "a": "Có, bạn có thể nâng cấp hoặc hạ cấp gói bất cứ lúc nào. Thay đổi sẽ được tính theo tỷ lệ."
         },
-        "trustedBy": "Được tin dùng bởi các tổ chức hàng đầu",
-        "footerNote": "Thanh toán được trừ từ số dư tài khoản.",
-        "perMonth": "/tháng",
-        "perYear": "/năm",
-        "free": "Miễn phí",
-        "select": "Chọn {{plan}}",
-        "default": "Gói mặc định",
-        "confirm": "Xác nhận mua",
-        "current": "Gói hiện tại",
-        "processing": "Đang xử lý..."
+        "freeTrial": {
+          "q": "Có dùng thử miễn phí không?",
+          "a": "Chúng tôi cung cấp gói Free để trải nghiệm. Bạn có thể nâng cấp bất cứ lúc nào."
+        },
+        "payment": {
+          "q": "Chấp nhận phương thức thanh toán nào?",
+          "a": "Thanh toán được trừ từ số dư tài khoản. Bạn có thể nạp tiền qua ngân hàng hoặc ví điện tử."
+        },
+        "security": {
+          "q": "Dữ liệu của tôi có an toàn không?",
+          "a": "Bảo mật là ưu tiên hàng đầu. Chúng tôi sử dụng mã hóa AES-256."
+        }
+      },
+      "trustedBy": "Được tin dùng bởi các tổ chức hàng đầu",
+      "footerNote": "Thanh toán được trừ từ số dư tài khoản.",
+      "perMonth": "/tháng",
+      "perYear": "/năm",
+      "free": "Miễn phí",
+      "select": "Chọn {{plan}}",
+      "default": "Gói mặc định",
+      "confirm": "Xác nhận mua",
+      "current": "Gói hiện tại",
+      "processing": "Đang xử lý..."
     },
     "footer": "© 2026 Learning Platform. All rights reserved."
   },
@@ -242,12 +272,12 @@
     },
     "currency": "VNĐ",
     "success": {
-        "title": "Nạp tiền thành công!",
-        "subtitle": "Số tiền đã được cộng vào tài khoản của bạn",
-        "viewBalance": "Xem số dư",
-        "home": "Về trang chủ",
-        "redirect": "Tự động chuyển về trang hồ sơ sau 10 giây...",
-        "transactionCode": "Mã giao dịch"
+      "title": "Nạp tiền thành công!",
+      "subtitle": "Số tiền đã được cộng vào tài khoản của bạn",
+      "viewBalance": "Xem số dư",
+      "home": "Về trang chủ",
+      "redirect": "Tự động chuyển về trang hồ sơ sau 10 giây...",
+      "transactionCode": "Mã giao dịch"
     }
   },
   "forum": {
@@ -297,10 +327,10 @@
       "hotTags": "Chủ đề nóng",
       "liveActivity": "Đang diễn ra",
       "sponsored": {
-         "tag": "Được tài trợ",
-         "title": "Sự kiện Tech 2026",
-         "desc": "Tham gia ngay để nhận vé Early Bird.",
-         "button": "Tìm hiểu thêm"
+        "tag": "Được tài trợ",
+        "title": "Sự kiện Tech 2026",
+        "desc": "Tham gia ngay để nhận vé Early Bird.",
+        "button": "Tìm hiểu thêm"
       },
       "relatedThreads": "Chủ đề liên quan"
     },
@@ -365,12 +395,12 @@
         "label": "Sắp xếp:",
         "newest": "Mới nhất",
         "mostLiked": "Nhiều like nhất",
-      "oldest": "Cũ nhất"
+        "oldest": "Cũ nhất"
       }
     },
     "pagination": {
-        "prev": "Trang trước",
-        "next": "Trang sau"
+      "prev": "Trang trước",
+      "next": "Trang sau"
     }
   },
   "mySkillTree": {
@@ -395,16 +425,14 @@
       "role": "Thành viên cốt lõi"
     },
     "stats": {
-        "xp": "XP",
-        "nodes": "Kỹ năng"
+      "xp": "XP",
+      "nodes": "Kỹ năng"
     },
-
     "status": {
       "notStarted": "Chưa bắt đầu",
       "inProgress": "Đang học",
       "completed": "Hoàn thành"
     },
-
     "panel": {
       "description": "Mô tả",
       "resources": "Tài liệu học tập",
@@ -433,41 +461,147 @@
       "finished": "Đã xong",
       "markFinished": "Xong?",
       "levels": {
-          "medium": "Trung bình",
-          "high": "Cao"
+        "medium": "Trung bình",
+        "high": "Cao"
       },
       "types": {
-          "course": "Khóa học",
-          "selfStudy": "Tự học",
-          "weeks": "Tuần",
-          "hours": "Giờ"
+        "course": "Khóa học",
+        "selfStudy": "Tự học",
+        "weeks": "Tuần",
+        "hours": "Giờ"
       },
       "status": {
-          "focusing": "Đang tập trung",
-          "completed": "Hoàn thành",
-          "locked": "Chưa mở khóa",
-          "notStarted": "Chưa học",
-          "inProgress": "Đang học"
+        "focusing": "Đang tập trung",
+        "completed": "Hoàn thành",
+        "locked": "Chưa mở khóa",
+        "notStarted": "Chưa học",
+        "inProgress": "Đang học"
       }
     },
     "toasts": {
-        "loadError": "Không thể tải skill tree của bạn"
+      "loadError": "Không thể tải skill tree của bạn"
     },
     "timeline": {
-        "title": "Lịch Học Cá Nhân",
-        "subtitle": "Quản lý tiến độ học tập",
-        "addTitle": "Thêm vào Lịch Học",
+      "title": "Lịch Học Cá Nhân",
+      "subtitle": "Quản lý tiến độ học tập",
+      "addTitle": "Thêm vào Lịch Học",
+      "manual": "Thủ công",
+      "ai": "AI Tự động",
+      "selectResource": "Chọn tài liệu học",
+      "selectPlaceholder": "-- Chọn tài liệu --",
+      "date": "Ngày học",
+      "time": "Giờ học",
+      "deadline": "Hạn chót",
+      "priority": "Độ ưu tiên",
+      "status": "Trạng thái",
+      "priorities": {
+        "low": "Thấp",
+        "medium": "Trung bình",
+        "high": "Cao"
+      },
+      "statuses": {
+        "not_started": "Chưa bắt đầu",
+        "in_progress": "Đang học",
+        "completed": "Hoàn thành"
+      },
+      "aiPromptLabel": "Mô tả thời gian rảnh của bạn",
+      "aiPromptPlaceholder": "Ví dụ: Tôi rảnh 8h tối các ngày thứ 2, 4, 6",
+      "aiHint": "AI sẽ phân tích và tự động xếp lịch học cho bạn",
+      "generate": "Tạo lịch học",
+      "analyzing": "Đang phân tích...",
+      "aiunderstood": "AI đã hiểu:",
+      "days": "Các ngày",
+      "duration": "Thời lượng",
+      "suggestions": "Lịch học đề xuất",
+      "confirm": "Xác nhận lịch học",
+      "cancel": "Hủy",
+      "add": "Thêm vào lịch",
+      "save": "Lưu thay đổi",
+      "close": "Đóng",
+      "success": "Đã thêm vào lịch thành công",
+      "errors": {
+        "fetch": "Lỗi khi tải tài liệu",
+        "add": "Lỗi khi thêm vào lịch",
+        "connection": "Lỗi kết nối",
+        "aiParse": "Không thể phân tích yêu cầu. Vui lòng thử lại.",
+        "aiConfirm": "Lỗi khi xác nhận lịch"
+      },
+      "periods": {
+        "morning": "Buổi sáng",
+        "afternoon": "Buổi chiều",
+        "evening": "Buổi tối"
+      },
+      "stats": {
+        "total": "Tổng số",
+        "inProgress": "Đang học",
+        "completed": "Hoàn thành",
+        "tasks": "Tasks"
+      },
+      "view": {
+        "week": "Tuần",
+        "month": "Tháng",
+        "today": "Hôm nay",
+        "prevWeek": "Tuần trước",
+        "nextWeek": "Tuần sau",
+        "prevMonth": "Tháng trước",
+        "nextMonth": "Tháng sau"
+      },
+      "empty": {
+        "title": "Chưa có hoạt động",
+        "subtitle": "Khoảng thời gian trống để nghỉ ngơi!"
+      },
+      "actions": {
+        "addActivity": "Thêm hoạt động",
+        "edit": "Chỉnh sửa lịch học",
+        "deleteConfirm": "Xác nhận xóa \"{{name}}\" khỏi lịch học?"
+      },
+      "notifications": {
+        "on": "Bật nhắc nhở",
+        "off": "Tắt nhắc nhở"
+      }
+    }
+  },
+  "skillTree": {
+    "button": {
+      "save": "Lưu"
+    },
+    "manageNode": "Quản lý Node",
+    "page": {
+      "backToSkills": "Quay lại Skills",
+      "back": "Quay lại",
+      "nodes": "nodes",
+      "loading": "Đang tải...",
+      "saved": "Đã lưu!",
+      "saving": "Đang lưu...",
+      "saveToMyTree": "Lưu vào My Tree",
+      "creatingTree": "Đang tạo Skill Tree...",
+      "analyzing": "AI đang phân tích và chọn lộ trình phù hợp",
+      "title": "Skill Tree",
+      "instruction1": "Sử dụng chat bên phải để hỏi về lộ trình học tập.",
+      "instruction2": "AI sẽ tự động tạo skill tree phù hợp với bạn.",
+      "chatToStart": "Chat để bắt đầu",
+      "nodeLegend": "Node",
+      "nodesCount": "nodes"
+    },
+    "rightPanel": {
+      "tabs": {
+        "chat": "Trò chuyện",
+        "resource": "Tài liệu"
+      },
+      "timeline": {
+        "title": "Thêm vào Lịch Học",
         "manual": "Thủ công",
         "ai": "AI Tự động",
         "selectResource": "Chọn tài liệu học",
         "selectPlaceholder": "-- Chọn tài liệu --",
         "date": "Ngày học",
-        "time": "Giờ học",
         "deadline": "Hạn chót",
         "priority": "Độ ưu tiên",
-        "status": "Trạng thái",
-        "priorities": { "low": "Thấp", "medium": "Trung bình", "high": "Cao" },
-        "statuses": { "not_started": "Chưa bắt đầu", "in_progress": "Đang học", "completed": "Hoàn thành" },
+        "priorities": {
+          "low": "Thấp",
+          "medium": "Trung bình",
+          "high": "Cao"
+        },
         "aiPromptLabel": "Mô tả thời gian rảnh của bạn",
         "aiPromptPlaceholder": "Ví dụ: Tôi rảnh 8h tối các ngày thứ 2, 4, 6",
         "aiHint": "AI sẽ phân tích và tự động xếp lịch học cho bạn",
@@ -475,187 +609,102 @@
         "analyzing": "Đang phân tích...",
         "aiunderstood": "AI đã hiểu:",
         "days": "Các ngày",
+        "time": "Giờ học",
         "duration": "Thời lượng",
         "suggestions": "Lịch học đề xuất",
         "confirm": "Xác nhận lịch học",
         "cancel": "Hủy",
         "add": "Thêm vào lịch",
-        "save": "Lưu thay đổi",
-        "close": "Đóng",
         "success": "Đã thêm vào lịch thành công",
-        "errors": { 
-            "fetch": "Lỗi khi tải tài liệu", 
-            "add": "Lỗi khi thêm vào lịch", 
-            "connection": "Lỗi kết nối", 
-            "aiParse": "Không thể phân tích yêu cầu. Vui lòng thử lại.", 
-            "aiConfirm": "Lỗi khi xác nhận lịch" 
+        "errors": {
+          "fetch": "Lỗi khi tải tài liệu",
+          "add": "Lỗi khi thêm vào lịch",
+          "connection": "Lỗi kết nối",
+          "aiParse": "Không thể phân tích yêu cầu. Vui lòng thử lại.",
+          "aiConfirm": "Lỗi khi xác nhận lịch"
+        }
+      },
+      "nodeManagement": {
+        "title": "Quản lý Node",
+        "subtitle": "Thay thế node bằng các lựa chọn khác và xem trước cấu trúc",
+        "currentActive": "Node Đang Chọn",
+        "preview": {
+          "title": "Xem trước: Cây con mới",
+          "clear": "Xóa xem trước",
+          "previewing": "Đang xem:",
+          "noSubNodes": "Không tìm thấy node con"
         },
-        "periods": {
-            "morning": "Buổi sáng",
-            "afternoon": "Buổi chiều",
-            "evening": "Buổi tối"
-        },
-        "stats": {
-            "total": "Tổng số",
-            "inProgress": "Đang học",
-            "completed": "Hoàn thành",
-            "tasks": "Tasks"
-        },
-        "view": {
-            "week": "Tuần",
-            "month": "Tháng",
-            "today": "Hôm nay",
-            "prevWeek": "Tuần trước",
-            "nextWeek": "Tuần sau",
-            "prevMonth": "Tháng trước",
-            "nextMonth": "Tháng sau"
-        },
-        "empty": {
-            "title": "Chưa có hoạt động",
-            "subtitle": "Khoảng thời gian trống để nghỉ ngơi!"
+        "alternatives": {
+          "title": "Các Node Thay Thế",
+          "refresh": "Làm mới",
+          "empty": "Không tìm thấy lựa chọn thay thế",
+          "swapTo": "Đổi sang"
         },
         "actions": {
-            "addActivity": "Thêm hoạt động",
-            "edit": "Chỉnh sửa lịch học",
-            "deleteConfirm": "Xác nhận xóa \"{{name}}\" khỏi lịch học?"
+          "close": "Đóng",
+          "preview": "Xem trước",
+          "swap": "Đổi Node"
         },
-        "notifications": {
-            "on": "Bật nhắc nhở",
-            "off": "Tắt nhắc nhở"
-        }
-    }
-  },
-  "skillTree": {
-      "button": {
-        "save": "Lưu"
-      },
-      "manageNode": "Quản lý Node",
-      "page": {
-        "backToSkills": "Quay lại Skills",
-        "back": "Quay lại",
-        "nodes": "nodes",
-        "loading": "Đang tải...",
-        "saved": "Đã lưu!",
-        "saving": "Đang lưu...",
-        "saveToMyTree": "Lưu vào My Tree",
-        "creatingTree": "Đang tạo Skill Tree...",
-        "analyzing": "AI đang phân tích và chọn lộ trình phù hợp",
-        "title": "Skill Tree",
-        "instruction1": "Sử dụng chat bên phải để hỏi về lộ trình học tập.",
-        "instruction2": "AI sẽ tự động tạo skill tree phù hợp với bạn.",
-        "chatToStart": "Chat để bắt đầu",
-        "nodeLegend": "Node",
-        "nodesCount": "nodes"
-      },
-      "rightPanel": {
-        "tabs": {
-            "chat": "Trò chuyện",
-            "resource": "Tài liệu"
-        },
-        "timeline": {
-            "title": "Thêm vào Lịch Học",
-            "manual": "Thủ công",
-            "ai": "AI Tự động",
-            "selectResource": "Chọn tài liệu học",
-            "selectPlaceholder": "-- Chọn tài liệu --",
-            "date": "Ngày học",
-            "deadline": "Hạn chót",
-            "priority": "Độ ưu tiên",
-            "priorities": {
-                "low": "Thấp",
-                "medium": "Trung bình",
-                "high": "Cao"
-            },
-            "aiPromptLabel": "Mô tả thời gian rảnh của bạn",
-            "aiPromptPlaceholder": "Ví dụ: Tôi rảnh 8h tối các ngày thứ 2, 4, 6",
-            "aiHint": "AI sẽ phân tích và tự động xếp lịch học cho bạn",
-            "generate": "Tạo lịch học",
-            "analyzing": "Đang phân tích...",
-            "aiunderstood": "AI đã hiểu:",
-            "days": "Các ngày",
-            "time": "Giờ học",
-            "duration": "Thời lượng",
-            "suggestions": "Lịch học đề xuất",
-            "confirm": "Xác nhận lịch học",
-            "cancel": "Hủy",
-            "add": "Thêm vào lịch",
-            "success": "Đã thêm vào lịch thành công",
-            "errors": {
-                "fetch": "Lỗi khi tải tài liệu",
-                "add": "Lỗi khi thêm vào lịch",
-                "connection": "Lỗi kết nối",
-                "aiParse": "Không thể phân tích yêu cầu. Vui lòng thử lại.",
-                "aiConfirm": "Lỗi khi xác nhận lịch"
-            }
-        },
-        "nodeManagement": {
-            "title": "Quản lý Node",
-            "subtitle": "Thay thế node bằng các lựa chọn khác và xem trước cấu trúc",
-            "currentActive": "Node Đang Chọn",
-            "preview": {
-                "title": "Xem trước: Cây con mới",
-                "clear": "Xóa xem trước",
-                "previewing": "Đang xem:",
-                "noSubNodes": "Không tìm thấy node con"
-            },
-            "alternatives": {
-                "title": "Các Node Thay Thế",
-                "refresh": "Làm mới",
-                "empty": "Không tìm thấy lựa chọn thay thế",
-                "swapTo": "Đổi sang"
-            },
-            "actions": {
-                "close": "Đóng",
-                "preview": "Xem trước",
-                "swap": "Đổi Node"
-            },
-            "errors": {
-                "load": "Không thể tải các node thay thế",
-                "swap": "Không thể đổi node",
-                "session": "Cần có Session ID"
-            }
+        "errors": {
+          "load": "Không thể tải các node thay thế",
+          "swap": "Không thể đổi node",
+          "session": "Cần có Session ID"
         }
       }
+    }
   },
   "auth": {
     "login": {
-        "title": "Chào mừng trở lại",
-        "subtitle": "Đăng nhập để tiếp tục phát triển bản thân.",
-        "emailLabel": "Địa chỉ Email",
-        "passwordLabel": "Mật khẩu",
-        "forgotPassword": "Quên mật khẩu?",
-        "rememberMe": "Ghi nhớ đăng nhập",
-        "signInButton": "Đăng nhập",
-        "signingIn": "Đang đăng nhập...",
-        "orContinueWith": "Hoặc tiếp tục với",
-        "dontHaveAccount": "Chưa có tài khoản?",
-        "signUpLink": "Đăng ký miễn phí",
-        "backToLanding": "Về trang chủ",
-        "success": "Đăng nhập thành công"
+      "title": "Chào mừng trở lại",
+      "subtitle": "Đăng nhập để tiếp tục phát triển bản thân.",
+      "emailLabel": "Địa chỉ Email",
+      "passwordLabel": "Mật khẩu",
+      "forgotPassword": "Quên mật khẩu?",
+      "rememberMe": "Ghi nhớ đăng nhập",
+      "signInButton": "Đăng nhập",
+      "signingIn": "Đang đăng nhập...",
+      "orContinueWith": "Hoặc tiếp tục với",
+      "dontHaveAccount": "Chưa có tài khoản?",
+      "signUpLink": "Đăng ký miễn phí",
+      "backToLanding": "Về trang chủ",
+      "success": "Đăng nhập thành công"
     },
     "register": {
-        "title": "Tạo tài khoản mới",
-        "subtitle": "Tham gia AI Skill Tree để bắt đầu hành trình của bạn.",
-        "usernameLabel": "Tên đăng nhập",
-        "fullNameLabel": "Họ và tên",
-        "emailLabel": "Địa chỉ Email",
-        "passwordLabel": "Mật khẩu",
-        "confirmPasswordLabel": "Xác nhận mật khẩu",
-        "termsAgreement": "Tôi đồng ý với",
-        "terms": "Điều khoản",
-        "and": "và",
-        "privacy": "Chính sách quyền riêng tư",
-        "signUpButton": "Đăng ký",
-        "creatingAccount": "Đang tạo tài khoản...",
-        "orContinueWith": "Hoặc tiếp tục với",
-        "alreadyHaveAccount": "Đã có tài khoản?",
-        "signInLink": "Đăng nhập tại đây",
-        "backToLanding": "Về trang chủ",
-        "passwordsDoNotMatch": "Mật khẩu không khớp!"
+      "title": "Tạo tài khoản mới",
+      "subtitle": "Tham gia AI Skill Tree để bắt đầu hành trình của bạn.",
+      "usernameLabel": "Tên đăng nhập",
+      "fullNameLabel": "Họ và tên",
+      "emailLabel": "Địa chỉ Email",
+      "passwordLabel": "Mật khẩu",
+      "confirmPasswordLabel": "Xác nhận mật khẩu",
+      "termsAgreement": "Tôi đồng ý với",
+      "terms": "Điều khoản",
+      "and": "và",
+      "privacy": "Chính sách quyền riêng tư",
+      "signUpButton": "Đăng ký",
+      "creatingAccount": "Đang tạo tài khoản...",
+      "orContinueWith": "Hoặc tiếp tục với",
+      "alreadyHaveAccount": "Đã có tài khoản?",
+      "signInLink": "Đăng nhập tại đây",
+      "backToLanding": "Về trang chủ",
+      "passwordsDoNotMatch": "Mật khẩu không khớp!"
     },
     "logout": {
-        "success": "Đăng xuất thành công"
+      "success": "Đăng xuất thành công"
     }
+  },
+  "missions": {
+    "title": "DANH SÁCH NHIỆM VỤ",
+    "loading": "Đang tải dữ liệu...",
+    "event_progress": "TIẾN ĐỘ NHIỆM VỤ",
+    "coins": "XU",
+    "available_missions": "Nhiệm vụ khả dụng",
+    "all": "TẤT CẢ",
+    "incomplete": "CHƯA XONG",
+    "reward": "Phần thưởng",
+    "view_calendar": "Xem lịch đầy đủ",
+    "ready_to_claim": "Sẵn sàng nhận thưởng",
+    "reward_claimed": "Đã nhận thưởng thành công!",
+    "claim_failed": "Nhận thưởng thất bại, vui lòng thử lại."
   }
-
 }

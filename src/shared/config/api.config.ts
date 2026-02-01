@@ -12,7 +12,7 @@ const getBaseUrl = () => {
   // CRITICAL FIX: If running on production domain (not localhost), ALWAYS use relative path
   // This prevents 'localhost:8000' from leaking into production builds via env vars
   if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-      return '/api';
+    return '/api';
   }
 
   if (envApiUrl) {
@@ -25,10 +25,18 @@ const getBaseUrl = () => {
 
 // Helper to determine WS URL
 const getWsBaseUrl = () => {
-  if (envWsUrl) return envWsUrl;
-  
-  // Default to current host with upgrading protocol
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+
+  if (envWsUrl) {
+    // If it's already a full URL, use as is
+    if (envWsUrl.startsWith('ws://') || envWsUrl.startsWith('wss://')) {
+      return envWsUrl;
+    }
+    // If it's just a host/path, add protocol
+    return `${protocol}//${envWsUrl}`;
+  }
+
+  // Default to current host with upgrading protocol
   return `${protocol}//${window.location.host}/api`;
 };
 
@@ -36,7 +44,7 @@ export const apiConfig = {
   // Base URLs
   baseUrl: getBaseUrl(),
   wsUrl: getWsBaseUrl(),
-  
+
   // All API Endpoints
   endpoints: {
     // Auth Module
@@ -45,7 +53,7 @@ export const apiConfig = {
       register: '/auth/register',
       me: '/auth/me',
     },
-    
+
     // Chat Module
     chat: {
       ws: '/chat/ws',
@@ -54,7 +62,7 @@ export const apiConfig = {
       sessionMessages: (sessionId: string) => `/chat/sessions/${sessionId}/messages`,
       sessionDelete: (sessionId: string) => `/chat/sessions/${sessionId}`,
     },
-    
+
     // Admin Module - Templates
     admin: {
       templates: {
@@ -64,7 +72,7 @@ export const apiConfig = {
         delete: (id: string) => `/admin/templates/${id}`,
         nodes: (templateId: string) => `/admin/templates/${templateId}/nodes`,
       },
-      
+
       // Nodes
       nodes: {
         create: '/admin/nodes',
@@ -74,13 +82,13 @@ export const apiConfig = {
         children: (id: string) => `/admin/nodes/${id}/children`,
         resources: (nodeId: string) => `/admin/nodes/${nodeId}/resources`,
       },
-      
+
       // Resources
       resources: {
         create: '/admin/resources',
         delete: (id: string) => `/admin/resources/${id}`,
       },
-      
+
       // Sync
       sync: {
         rebuild: '/admin/sync/rebuild',
@@ -101,27 +109,27 @@ export const apiConfig = {
       saveToMyTree: '/skill-tree/my-tree/save',
       removeFromMyTree: (nodeId: string) => `/skill-tree/my-tree/nodes/${nodeId}`,
     },
-    
+
     // Learning Module (placeholders for future)
     learning: {
       progress: '/learning/progress',
       timeline: '/learning/timeline',
     },
-    
+
     // Forum Module (placeholders for future)
     forum: {
       categories: '/forum/categories',
       threads: '/forum/threads',
       posts: '/forum/posts',
     },
-    
+
     // Jobs Module (placeholders for future)
     jobs: {
       recommendations: '/jobs/recommendations',
       applications: '/jobs/applications',
     },
   },
-  
+
   // Helper methods
   getWsUrl(path: string): string {
     // Prevent double path if env var already includes it (common config error)
@@ -130,7 +138,7 @@ export const apiConfig = {
     }
     return `${this.wsUrl}${path}`;
   },
-  
+
   getHttpUrl(path: string): string {
     return `${this.baseUrl}${path}`;
   }
