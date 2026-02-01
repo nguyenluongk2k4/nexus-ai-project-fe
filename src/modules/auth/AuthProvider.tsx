@@ -13,7 +13,7 @@ interface AuthContextType extends AuthState {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Singleton gateway
-const authGateway = new AuthApiGateway();
+export const authGateway = new AuthApiGateway();
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({
@@ -26,7 +26,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check auth on mount
   useEffect(() => {
     const checkAuth = async () => {
+      // Small delay to avoid race condition with other requests on page load
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       const token = localStorage.getItem("token");
+
       if (!token) {
         setState(s => ({ ...s, isLoading: false }));
         return;

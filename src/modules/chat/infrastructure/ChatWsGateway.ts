@@ -37,16 +37,16 @@ export class ChatWsGateway implements ChatGateway {
             break;
           case 'status':
             onStatusChange(data.status as ConnectionStatus);
-            
+
             // Handle loading state based on status
             if (data.status === 'thinking') {
-                treeNodeService.setLoading(true);
+              treeNodeService.setLoading(true);
             } else if (data.status === 'idle') {
-               // Only turn off if not waiting for Tree Stream (HTTP)
-               const isTreeStreaming = (window as any).__treeStreamingActive;
-               if (!isTreeStreaming) {
-                 treeNodeService.setLoading(false);
-               }
+              // Only turn off if not waiting for Tree Stream (HTTP)
+              const isTreeStreaming = (window as any).__treeStreamingActive;
+              if (!isTreeStreaming) {
+                treeNodeService.setLoading(false);
+              }
             }
             break;
           case 'bot_message':
@@ -57,10 +57,10 @@ export class ChatWsGateway implements ChatGateway {
               if (possibleTreeData.status === 'done' && Array.isArray(possibleTreeData.nodes) && possibleTreeData.nodes.length > 0) {
                 isTreeData = true;
                 console.log(`🌳 [WS] Tree data received (${possibleTreeData.nodes.length} nodes)`);
-                
+
                 // Update tree nodes - this will also reset loading
                 treeNodeService.setNodes(possibleTreeData.nodes as TreeNodeData[]);
-                
+
                 // Add a user-friendly message instead of JSON
                 onMessage({
                   id: crypto.randomUUID(),
@@ -76,7 +76,7 @@ export class ChatWsGateway implements ChatGateway {
               // Not JSON - this is a normal text chat message
               // Do nothing with tree loading - waiting for explicit tree events
             }
-            
+
             // Only add normal text messages to chat (skip tree JSON)
             if (!isTreeData) {
               onMessage({
@@ -93,19 +93,19 @@ export class ChatWsGateway implements ChatGateway {
           case 'tree_generating':
             // SET FLAG IMMEDIATELY to block tree_nodes from socket
             (window as any).__treeStreamingActive = true;
-            
+
             // Backend thông báo sẽ generate tree -> Frontend dùng HTTP streaming thay vì socket
             console.log(`🌳 [WS] tree_generating received, setting streaming flag and triggering HTTP...`);
             treeNodeService.setLoading(true);
-            
+
             // Clear any existing nodes to prevent duplicates
             treeNodeService.clear();
-            
+
             // Dispatch event để SkillTree component gọi HTTP streaming
-            window.dispatchEvent(new CustomEvent('trigger-tree-stream', { 
-              detail: { 
-                sessionId: data.session_id, 
-                message: data.message 
+            window.dispatchEvent(new CustomEvent('trigger-tree-stream', {
+              detail: {
+                sessionId: data.session_id,
+                message: data.message
               }
             }));
             break;
@@ -134,7 +134,7 @@ export class ChatWsGateway implements ChatGateway {
             // Tree was generated/updated - trigger refetch via API
             treeNodeService.setLoading(false);
             // Emit an event that SkillTree can listen to for refetch
-            window.dispatchEvent(new CustomEvent('tree-updated', { 
+            window.dispatchEvent(new CustomEvent('tree-updated', {
               detail: { sessionId: data.session_id, nodeCount: data.node_count }
             }));
             console.log(`🌳 [WS] Tree updated with ${data.node_count} nodes, triggering refetch...`);
@@ -142,6 +142,7 @@ export class ChatWsGateway implements ChatGateway {
           case 'error':
             onError(data.message || 'Lỗi từ máy chủ');
             onStatusChange('error');
+            treeNodeService.setError(data.message || 'Lỗi từ máy chủ');
             break;
         }
       } catch (e) {
@@ -152,16 +153,18 @@ export class ChatWsGateway implements ChatGateway {
     this.ws.onerror = () => {
       onStatusChange('error');
       onError('Không kết nối được tới máy chủ');
+      treeNodeService.setError('Không kết nối được tới máy chủ');
     };
 
     this.ws.onclose = () => {
       onStatusChange('error');
+      treeNodeService.setLoading(false);
     };
   }
 
   sendMessage(text: string, sessionId: string | null, attachments: any[] = []): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      
+
       const token = localStorage.getItem('token');
       this.ws.send(JSON.stringify({
         type: 'user_message',

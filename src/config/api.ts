@@ -1,5 +1,6 @@
 export const API_BASE_URL = import.meta.env.VITE_API_URL || '';
-export const WS_BASE_URL = import.meta.env.VITE_WS_URL || `ws://${window.location.host}/api/ws`;
+const getWsProtocol = () => window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+export const WS_BASE_URL = import.meta.env.VITE_WS_URL || `${getWsProtocol()}//${window.location.host}/api/chat/ws`;
 
 /** 
  * Helper to build full API URL 
