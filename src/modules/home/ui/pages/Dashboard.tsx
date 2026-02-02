@@ -33,56 +33,7 @@ export function Dashboard() {
 
   return (
     <div className="flex-1 bg-gradient-to-br from-slate-50 via-violet-50/30 to-slate-100 min-h-screen overflow-auto">
-      <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
-
-        ============ HEADER ============
-        <header className="mb-6 lg:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            {/* Greeting */}
-            <div className="flex items-center gap-4">
-              {/* Avatar */}
-              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold shadow-lg">
-                {displayName.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold text-slate-800">
-                  {t('dashboard.greeting', { defaultValue: 'Chào' })} {displayName}! 👋
-                </h1>
-                <p className="text-sm text-slate-500">
-                  {t('dashboard.subtitle', { defaultValue: 'Tiếp tục hành trình học tập của bạn' })}
-                </p>
-              </div>
-            </div>
-
-            {/* Streak Badge & Actions */}
-            <div className="flex items-center gap-3">
-              {/* Streak Badge */}
-              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-100 to-amber-100 border border-orange-200 rounded-xl">
-                <span className="text-xl">🔥</span>
-                <div>
-                  <div className="text-lg font-bold text-orange-600">{stats.streak}</div>
-                  <div className="text-[10px] text-orange-500 uppercase tracking-wider font-medium">
-                    {t('dashboard.streak', { defaultValue: 'Streak' })}
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons - Hidden on mobile */}
-              <div className="hidden sm:flex items-center gap-2">
-                <button className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-violet-600 hover:border-violet-200 transition-colors">
-                  <Bell className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => navigate('/settings')}
-                  className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-violet-600 hover:border-violet-200 transition-colors"
-                >
-                  <Settings className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </header>
-
+      <div className="mx-auto p-4 md:p-6 lg:p-8">
         {/* ============ QUICK STATS (Mobile Only) ============ */}
         <div className="block lg:hidden mb-6">
           <QuickStatsCard

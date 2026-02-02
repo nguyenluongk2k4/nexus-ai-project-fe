@@ -69,22 +69,22 @@ export function MySkillTree() {
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState<'chat' | 'resource'>('resource');
-  
+
   // Dummy chat hook for RightPanel compatibility (MyTree doesn't use chat session)
   const chatProps = useChat({ disableNavigation: true });
 
   // Camera Y position - pans up as user goes deeper into tree (Candy Crush style)
   const cameraY = useMemo(() => {
     // Height check: Screen is 80 units. 2/3 is ~53 units.
-    
+
     if (focusedBranch?.skillId) {
       // Viewing knowledge level (Level 3 at y=10)
       // Tree roughly spans y=10 to y=70 (Height 60 > 53) -> Pan needed
       // Pan to -20 to show: Knowledge(10->30), Skill(30->50), Ability(50->70)
       // Root(70->90) will be scrolled off
       return -20;
-    } 
-    
+    }
+
     // Viewing skills level (Level 2 at y=30)
     // Tree spans y=30 to y=70 (Height 40 < 53) -> No pan needed
     return 0;
@@ -113,7 +113,7 @@ export function MySkillTree() {
   const getNodeColor = (level: number, status: string) => {
     if (status === 'completed') return { bg: '#10b981', border: '#059669' };
     if (status === 'in_progress') return { bg: '#f59e0b', border: '#d97706' };
-    
+
     switch (level) {
       case 0: return { bg: '#6366f1', border: '#4f46e5' }; // indigo - root
       case 1: return { bg: '#8b5cf6', border: '#7c3aed' }; // purple - abilities
@@ -133,7 +133,7 @@ export function MySkillTree() {
     // Smoother organic curve with control points spread out
     const midY = (fromY + toY) / 2;
     const controlSpread = Math.abs(toX - fromX) * 0.4;
-    
+
     // Create natural S-curve
     return `M ${fromX} ${fromY} 
             C ${fromX} ${fromY + (midY - fromY) * 0.5}, 
@@ -144,34 +144,31 @@ export function MySkillTree() {
   // Build maps for efficient graph traversal
   const { childrenByParent, parentByChild } = useMemo(() => {
     if (!tree || !Array.isArray(tree.edges)) return { childrenByParent: {}, parentByChild: {} };
-    
+
     const children: Record<string, string[]> = {};
     const parents: Record<string, string> = {};
-    
+
     tree.edges.forEach(edge => {
       if (!edge.source || !edge.target) return;
       // Children map
       if (!children[edge.source]) children[edge.source] = [];
       children[edge.source].push(edge.target);
-      
+
       // Parent map (assuming tree structure with single parent)
       parents[edge.target] = edge.source;
     });
-    
+
     return { childrenByParent: children, parentByChild: parents };
   }, [tree]);
 
   // Handle node click with robust focus/expand logic
   const handleNodeClick = (node: UserSkillNode & { x: number; y: number }, e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log('🖱️ NODE CLICK:', node.name, node.level, node.id);
-    console.log('   Current Focus:', { focusedRootId, focusedBranch });
-    
     // 1. Basic selection for Right Panel
     setSelectedNodeId(node.id);
-    setActiveTab('resource'); 
+    setActiveTab('resource');
     setRightPanelCollapsed(false);
-    
+
     // 2. Focus Logic
     if (node.level === 0) {
       // --- ROOT CLICK ---
@@ -187,32 +184,25 @@ export function MySkillTree() {
     } else if (node.level === 1) {
       // --- ABILITY CLICK ---
       const parentId = parentByChild[node.id];
-      console.log('   Parent Root ID:', parentId);
-      
+
       if (focusedBranch?.abilityId === node.id) {
-         if (focusedBranch.skillId) {
-           console.log('   Action: Collapse Skills (Keep Ability)');
-           setFocusedBranch({ abilityId: node.id });
-         } else {
-           console.log('   Action: Collapse Ability');
-           setFocusedBranch(null);
-         }
+        if (focusedBranch.skillId) {
+          setFocusedBranch({ abilityId: node.id });
+        } else {
+          setFocusedBranch(null);
+        }
       } else {
-         console.log('   Action: Expand Ability');
-         setFocusedBranch({ abilityId: node.id });
-         if (parentId) setFocusedRootId(parentId);
+        setFocusedBranch({ abilityId: node.id });
+        if (parentId) setFocusedRootId(parentId);
       }
     } else if (node.level === 2) {
       // --- SKILL CLICK ---
       const parentAbilityId = parentByChild[node.id];
       const rootId = parentAbilityId ? parentByChild[parentAbilityId] : null;
-      console.log('   Parent Ability:', parentAbilityId, 'Grandparent Root:', rootId);
 
       if (focusedBranch?.skillId === node.id) {
-        console.log('   Action: Collapse Knowledge');
         setFocusedBranch({ abilityId: parentAbilityId });
       } else {
-        console.log('   Action: Expand Skill');
         setFocusedBranch({ abilityId: parentAbilityId, skillId: node.id });
         if (rootId) setFocusedRootId(rootId);
       }
@@ -222,25 +212,25 @@ export function MySkillTree() {
   // Get visible nodes based on focus state (progressive reveal)
   const visibleNodes = useMemo(() => {
     if (!tree || !Array.isArray(tree.nodes)) return [];
-    
+
     // Get root nodes - filter by focusedRootId if set
     let rootNodes = tree.nodes.filter(n => n.level === 0);
     if (focusedRootId) {
       // Only show the focused root, hide siblings
       rootNodes = rootNodes.filter(n => n.id === focusedRootId);
     }
-    
+
     let visible = [...rootNodes];
-    
+
     if (focusedBranch?.abilityId) {
       // Ability is focused - only show that ability (hide siblings)
       const ability = tree.nodes.find(n => n.id === focusedBranch.abilityId);
       if (ability) {
         visible.push(ability);
-        
+
         // Show skills under this ability
         const abilityChildren = childrenByParent[ability.id] || [];
-        
+
         if (focusedBranch.skillId) {
           // Skill is focused - only show that skill (hide siblings)
           const skill = tree.nodes.find(n => n.id === focusedBranch.skillId);
@@ -266,31 +256,31 @@ export function MySkillTree() {
       const abilities = tree.nodes.filter(n => n.level === 1);
       visible.push(...abilities);
     }
-    
+
     return visible;
   }, [tree, focusedRootId, focusedBranch, childrenByParent]);
 
   // Position nodes for tree layout (inverted pyramid - root at bottom)
   const positionedNodes = useMemo(() => {
     if (!visibleNodes.length) return [];
-    
+
     const byLevel: Record<number, (UserSkillNode & { x?: number; y?: number })[]> = {};
     visibleNodes.forEach(n => {
       const level = typeof n.level === 'number' ? n.level : 3; // Default to lowest if missing
       if (!byLevel[level]) byLevel[level] = [];
       byLevel[level].push({ ...n });
     });
-    
+
     // Y positions (root at bottom, knowledge at top)
     const levelY: Record<number, number> = { 0: 70, 1: 50, 2: 30, 3: 10 };
-    
+
     const result: (UserSkillNode & { x: number; y: number })[] = [];
-    
+
     Object.keys(byLevel).forEach(levelStr => {
       const level = parseInt(levelStr);
       const nodesAtLevel = byLevel[level];
       const count = nodesAtLevel.length;
-      
+
       nodesAtLevel.forEach((node, idx) => {
         let x = 50;
         if (count === 1) {
@@ -304,7 +294,7 @@ export function MySkillTree() {
           const startX = (100 - totalWidth) / 2;
           x = count > 1 ? startX + (totalWidth / (count - 1)) * idx : 50;
         }
-        
+
         result.push({
           ...node,
           x,
@@ -312,7 +302,7 @@ export function MySkillTree() {
         });
       });
     });
-    
+
     return result;
     return result;
   }, [visibleNodes]);
@@ -353,7 +343,7 @@ export function MySkillTree() {
       <div className="flex h-full items-center justify-center bg-slate-50">
         <div className="text-center">
           <p className="text-red-500 mb-4">{error}</p>
-          <button 
+          <button
             onClick={loadMyTree}
             className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
           >
@@ -405,10 +395,10 @@ export function MySkillTree() {
             <span className="text-sm text-slate-500">
               {completedNodes}/{totalNodes} {t('mySkillTree.completed')}
             </span>
-            
+
             {/* Back button when focused */}
             {(focusedRootId || focusedBranch) && (
-              <button 
+              <button
                 onClick={() => {
                   if (focusedBranch?.skillId) {
                     setFocusedBranch({ abilityId: focusedBranch.abilityId });
@@ -423,7 +413,7 @@ export function MySkillTree() {
                 ← {t('common.back')}
               </button>
             )}
-          </div>       
+          </div>
           <button
             onClick={() => navigate('/skilltree')}
             className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors flex items-center gap-2"
@@ -438,176 +428,176 @@ export function MySkillTree() {
       <div className="flex-1 flex overflow-hidden">
         {/* Tree Area */}
         <div className="flex-1 relative overflow-hidden">
-        {/* Zoom Controls */}
-        <div className="absolute bottom-4 left-4 bg-white rounded-xl shadow-lg border border-slate-200 z-20">
-          <button 
-            onClick={() => setZoomLevel(Math.min(150, zoomLevel + 10))}
-            className="p-2 hover:bg-slate-100 rounded-t-xl border-b"
-          >
-            <Plus className="w-4 h-4 text-slate-600" />
-          </button>
-          <button 
-            onClick={() => setZoomLevel(Math.max(50, zoomLevel - 10))}
-            className="p-2 hover:bg-slate-100 rounded-b-xl"
-          >
-            <Minus className="w-4 h-4 text-slate-600" />
-          </button>
-        </div>
+          {/* Zoom Controls */}
+          <div className="absolute bottom-4 left-4 bg-white rounded-xl shadow-lg border border-slate-200 z-20">
+            <button
+              onClick={() => setZoomLevel(Math.min(150, zoomLevel + 10))}
+              className="p-2 hover:bg-slate-100 rounded-t-xl border-b"
+            >
+              <Plus className="w-4 h-4 text-slate-600" />
+            </button>
+            <button
+              onClick={() => setZoomLevel(Math.max(50, zoomLevel - 10))}
+              className="p-2 hover:bg-slate-100 rounded-b-xl"
+            >
+              <Minus className="w-4 h-4 text-slate-600" />
+            </button>
+          </div>
 
-        {/* SVG Tree Visualization */}
-        <svg 
-          className="w-full h-full transition-all duration-500 ease-out" 
-          viewBox={`0 ${cameraY} 100 80`}
-          style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'center bottom' }}
-        >
-          {/* Central trunk - lines from each root node (level 0) to bottom center */}
-          {(() => {
-            const rootNodes = positionedNodes.filter(n => n.level === 0);
-            const trunkY = 78;
-            const trunkX = 50;
-            
-            if (rootNodes.length === 0) return null;
-            
-            return (
-              <>
-                {/* Main vertical trunk */}
-                <line
-                  x1={trunkX} y1={trunkY}
-                  x2={trunkX} y2={trunkY - 5}
-                  stroke="#6366f1"
-                  strokeWidth="1"
-                  className="path-animate"
-                />
-                
-                {/* Lines from trunk to each root node */}
-                {rootNodes.map((rootNode) => {
-                  const colors = getNodeColor(rootNode.level, rootNode.status);
-                  return (
-                    <path
-                      key={`trunk-${rootNode.id}`}
-                      d={generateTrunkPath(trunkX, trunkY - 5, rootNode.x, rootNode.y + 3)}
-                      fill="none"
-                      stroke={colors.border}
-                      strokeWidth="0.6"
-                      className="path-animate"
-                    />
-                  );
-                })}
-              </>
-            );
-          })()}
+          {/* SVG Tree Visualization */}
+          <svg
+            className="w-full h-full transition-all duration-500 ease-out"
+            viewBox={`0 ${cameraY} 100 80`}
+            style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'center bottom' }}
+          >
+            {/* Central trunk - lines from each root node (level 0) to bottom center */}
+            {(() => {
+              const rootNodes = positionedNodes.filter(n => n.level === 0);
+              const trunkY = 78;
+              const trunkX = 50;
 
-          {/* Connection Paths - from parent to children */}
-          {positionedNodes.map(node => {
-            const children = childrenByParent[node.id] || [];
-            return children.map(childId => {
-              const child = positionedNodes.find(n => n.id === childId);
-              if (!child) return null;
-              
-              const colors = getNodeColor(child.level, child.status);
+              if (rootNodes.length === 0) return null;
+
               return (
-                <path
-                  key={`${node.id}-${childId}`}
-                  d={generatePath(node.x, node.y, child.x, child.y)}
-                  fill="none"
-                  stroke={colors.border}
-                  strokeWidth="0.5"
-                  className="path-animate"
-                />
-              );
-            });
-          })}
-
-          {/* Nodes */}
-          {positionedNodes.map(node => {
-            const isSelected = selectedNodeId === node.id;
-            const hasChildren = (childrenByParent[node.id] || []).length > 0;
-            const isExpanded = (node.level === 0 && focusedBranch?.abilityId) ||
-                              (node.level === 1 && focusedBranch?.abilityId === node.id) ||
-                              (node.level === 2 && focusedBranch?.skillId === node.id);
-            const colors = getNodeColor(node.level, node.status);
-            const size = node.level === 0 ? 6 : node.level === 1 ? 5 : 4;
-            const radius = size / 2;
-
-            return (
-              <g
-                key={node.id}
-                transform={`translate(${node.x}, ${node.y})`}
-                onClick={(e) => handleNodeClick(node, e)}
-                className="cursor-pointer"
-              >
-                {/* Glow effect for selected/expanded */}
-                {(isSelected || isExpanded) && (
-                  <circle
-                    r={radius + 1.5}
-                    fill="none"
-                    stroke={colors.bg}
-                    strokeWidth="0.3"
-                    opacity="0.5"
-                    className="animate-pulse"
+                <>
+                  {/* Main vertical trunk */}
+                  <line
+                    x1={trunkX} y1={trunkY}
+                    x2={trunkX} y2={trunkY - 5}
+                    stroke="#6366f1"
+                    strokeWidth="1"
+                    className="path-animate"
                   />
-                )}
 
-                {/* Main circle */}
-                <circle
-                  r={radius}
-                  fill={colors.bg}
-                  stroke={isSelected ? '#fff' : colors.border}
-                  strokeWidth={isSelected ? '0.5' : '0.3'}
-                  className="transition-all hover:opacity-90"
-                />
+                  {/* Lines from trunk to each root node */}
+                  {rootNodes.map((rootNode) => {
+                    const colors = getNodeColor(rootNode.level, rootNode.status);
+                    return (
+                      <path
+                        key={`trunk-${rootNode.id}`}
+                        d={generateTrunkPath(trunkX, trunkY - 5, rootNode.x, rootNode.y + 3)}
+                        fill="none"
+                        stroke={colors.border}
+                        strokeWidth="0.6"
+                        className="path-animate"
+                      />
+                    );
+                  })}
+                </>
+              );
+            })()}
 
-                {/* Icon inside */}
-                <text
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fill="white"
-                  fontSize={node.level === 0 ? '2' : '1.5'}
-                  fontWeight="bold"
+            {/* Connection Paths - from parent to children */}
+            {positionedNodes.map(node => {
+              const children = childrenByParent[node.id] || [];
+              return children.map(childId => {
+                const child = positionedNodes.find(n => n.id === childId);
+                if (!child) return null;
+
+                const colors = getNodeColor(child.level, child.status);
+                return (
+                  <path
+                    key={`${node.id}-${childId}`}
+                    d={generatePath(node.x, node.y, child.x, child.y)}
+                    fill="none"
+                    stroke={colors.border}
+                    strokeWidth="0.5"
+                    className="path-animate"
+                  />
+                );
+              });
+            })}
+
+            {/* Nodes */}
+            {positionedNodes.map(node => {
+              const isSelected = selectedNodeId === node.id;
+              const hasChildren = (childrenByParent[node.id] || []).length > 0;
+              const isExpanded = (node.level === 0 && focusedBranch?.abilityId) ||
+                (node.level === 1 && focusedBranch?.abilityId === node.id) ||
+                (node.level === 2 && focusedBranch?.skillId === node.id);
+              const colors = getNodeColor(node.level, node.status);
+              const size = node.level === 0 ? 6 : node.level === 1 ? 5 : 4;
+              const radius = size / 2;
+
+              return (
+                <g
+                  key={node.id}
+                  transform={`translate(${node.x}, ${node.y})`}
+                  onClick={(e) => handleNodeClick(node, e)}
+                  className="cursor-pointer"
                 >
-                  {node.level === 0 ? '🧠' : node.level === 1 ? '⭐' : node.level === 2 ? '💡' : '📖'}
-                </text>
+                  {/* Glow effect for selected/expanded */}
+                  {(isSelected || isExpanded) && (
+                    <circle
+                      r={radius + 1.5}
+                      fill="none"
+                      stroke={colors.bg}
+                      strokeWidth="0.3"
+                      opacity="0.5"
+                      className="animate-pulse"
+                    />
+                  )}
 
-                {/* Label */}
-                <text
-                  y={radius + 2.5}
-                  textAnchor="middle"
-                  fill="#475569"
-                  fontSize="1.4"
-                  fontWeight="600"
-                  className="uppercase tracking-wider"
-                >
-                  {node.name.length > 12 ? node.name.substring(0, 10) + '...' : node.name}
-                </text>
-
-                {/* Expand indicator - show if has children and not fully expanded */}
-                {hasChildren && !isExpanded && (
-                  <text
-                    y={radius + 4.5}
-                    textAnchor="middle"
+                  {/* Main circle */}
+                  <circle
+                    r={radius}
                     fill={colors.bg}
-                    fontSize="0.9"
+                    stroke={isSelected ? '#fff' : colors.border}
+                    strokeWidth={isSelected ? '0.5' : '0.3'}
+                    className="transition-all hover:opacity-90"
+                  />
+
+                  {/* Icon inside */}
+                  <text
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="white"
+                    fontSize={node.level === 0 ? '2' : '1.5'}
                     fontWeight="bold"
                   >
-                    + {t('mySkillTree.node.clickToExpand')}
+                    {node.level === 0 ? '🧠' : node.level === 1 ? '⭐' : node.level === 2 ? '💡' : '📖'}
                   </text>
-                )}
 
-                {/* Expanded indicator */}
-                {isExpanded && (
+                  {/* Label */}
                   <text
-                    y={radius + 4.5}
+                    y={radius + 2.5}
                     textAnchor="middle"
-                    fill={colors.bg}
-                    fontSize="0.9"
+                    fill="#475569"
+                    fontSize="1.4"
+                    fontWeight="600"
+                    className="uppercase tracking-wider"
                   >
-                    ▼
+                    {node.name.length > 12 ? node.name.substring(0, 10) + '...' : node.name}
                   </text>
-                )}
-              </g>
-            );
-          })}
-        </svg>
+
+                  {/* Expand indicator - show if has children and not fully expanded */}
+                  {hasChildren && !isExpanded && (
+                    <text
+                      y={radius + 4.5}
+                      textAnchor="middle"
+                      fill={colors.bg}
+                      fontSize="0.9"
+                      fontWeight="bold"
+                    >
+                      + {t('mySkillTree.node.clickToExpand')}
+                    </text>
+                  )}
+
+                  {/* Expanded indicator */}
+                  {isExpanded && (
+                    <text
+                      y={radius + 4.5}
+                      textAnchor="middle"
+                      fill={colors.bg}
+                      fontSize="0.9"
+                    >
+                      ▼
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+          </svg>
         </div>
 
         {/* Right Panel with Tabs (Replaces ResourcePanel) */}
@@ -615,19 +605,19 @@ export function MySkillTree() {
           selectedNode={selectedNodeAdapter as any}
           getNodeStatus={(node) => node.status as any}
           // Pass dummy chat props to satisfy interface but they won't be used actively
-          messages={[]} 
+          messages={[]}
           status="idle"
           error={null}
-          onClearError={() => {}}
-          onSend={() => {}}
+          onClearError={() => { }}
+          onSend={() => { }}
           sessions={[]}
           sessionsLoading={false}
           hasMore={false}
-          onLoadMore={async () => {}}
+          onLoadMore={async () => { }}
           loadingMore={false}
           currentSessionId={null}
-          onSelectSession={() => {}}
-          onNewChat={() => {}}
+          onSelectSession={() => { }}
+          onNewChat={() => { }}
           isCollapsed={rightPanelCollapsed}
           onToggleCollapse={() => setRightPanelCollapsed(!rightPanelCollapsed)}
           activeTab={activeTab}
@@ -642,9 +632,9 @@ export function MySkillTree() {
           {/* User Info */}
           <div className="flex items-center gap-4">
             {user?.avatarUrl ? (
-              <img 
-                src={user.avatarUrl} 
-                alt={user.fullName || user.username || t('common.user')} 
+              <img
+                src={user.avatarUrl}
+                alt={user.fullName || user.username || t('common.user')}
                 className="w-10 h-10 rounded-full object-cover"
               />
             ) : (
@@ -674,11 +664,10 @@ export function MySkillTree() {
               <button
                 key={tab}
                 onClick={() => setActiveFilter(tab)}
-                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
-                  activeFilter === tab
-                    ? 'bg-white text-indigo-600 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
+                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${activeFilter === tab
+                  ? 'bg-white text-indigo-600 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+                  }`}
               >
                 {tab === 'knowledge' && <BookOpen className="w-4 h-4" />}
                 {tab === 'skills' && <Brain className="w-4 h-4" />}

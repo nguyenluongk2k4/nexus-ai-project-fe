@@ -9,8 +9,8 @@ import { NodeTooltip } from '../components/NodeTooltip';
 import { treeState$, TreeNodeData, TreeState, treeNodeService } from '../../domain/services/treeNodeService';
 import { skillTreeGateway } from '../../providers';
 import { Settings } from 'lucide-react';
-import logo from '@/assets/logo.svg';
-
+import { useAuth } from '@/modules/auth/AuthProvider';
+const logo = '/logo.png';
 // Node types for different states
 type NodeStatus = 'completed' | 'in-progress' | 'locked';
 
@@ -19,6 +19,7 @@ interface TreeNode extends SkillNode {
 }
 
 export function SkillTree() {
+  const { user } = useAuth();
   // Subscribe to tree state Observable
   const [treeState, setTreeState] = useState<TreeState>({ nodes: [], loading: false, error: null });
   const { t } = useTranslation();
@@ -78,6 +79,7 @@ export function SkillTree() {
     type: string;
     level: number;
     description?: string;
+    icon?: string;
   } | null>(null);
 
   // Tooltip state
@@ -195,6 +197,7 @@ export function SkillTree() {
         type: node.type,
         level: node.level,
         originalNodeId: node.originalNodeId, // NEW: Preserve original mapping
+        icon: node.icon, // NEW: Map icon from service
         x: 50, // Default for session nodes (repositioned later)
         y: 10 + (node.level * 20),
         status: ((node.metadata as any)?.status === 'completed' || (node.metadata as any)?.status === 'unlocked')
@@ -218,6 +221,7 @@ export function SkillTree() {
       fullName: node.fullName || node.label,
       type: node.type || 'skill',
       level: node.level,
+      icon: node.icon,
       x: node.x, // Preserve Mock Layout position
       y: node.y,
       status: node.status,
@@ -442,7 +446,8 @@ export function SkillTree() {
       fullName: node.fullName,
       type: node.type || 'skill', // Use type from node or default
       level: node.level,
-      description: node.nodeData?.description
+      description: node.nodeData?.description,
+      icon: node.icon,
     });
     setManagementModalOpen(true);
   };
@@ -470,6 +475,28 @@ export function SkillTree() {
   // Main layout - always show with tree canvas (empty or with data)
   return (
     <div className="flex-1 flex flex-col min-w-0 h-full bg-slate-50">
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        @keyframes nodePopIn {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        
+        @keyframes pathDraw {
+          0% { stroke-dashoffset: 100; opacity: 0; }
+          100% { stroke-dashoffset: 0; opacity: 1; }
+        }
+        
+        .node-animate {
+          animation: nodePopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        
+        .path-animate {
+          stroke-dasharray: 100;
+          stroke-dashoffset: 100;
+          animation: pathDraw 0.8s ease-out 0.4s forwards;
+        }
+      `}} />
       <div className="flex-1 flex overflow-hidden relative md:static">
         {/* Left Content Area: Canvas + Footer */}
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -542,16 +569,23 @@ export function SkillTree() {
                         const target = nodeMap.get(targetId);
                         if (!target) return null;
 
+                        const isTargetActive = (node.level === 0 && focusedBranch?.abilityId === targetId) ||
+                          (node.level === 1 && focusedBranch?.abilityId === node.id) ||
+                          (node.level === 2 && focusedBranch?.skillId === node.id);
+
                         return (
-                          <path
-                            key={`${node.id}-${targetId}`}
-                            d={generatePath(node.x, node.y, target.x, target.y)}
-                            fill="none"
-                            stroke="#6366f1"
-                            strokeWidth="0.5"
-                            strokeLinecap="round"
-                            opacity={0.5}
-                          />
+                          <g key={`${node.id}-${targetId}`}>
+                            {/* Connection Line */}
+                            <path
+                              d={generatePath(node.x, node.y, target.x, target.y)}
+                              fill="none"
+                              stroke={"#818cf8"}
+                              strokeWidth={isTargetActive ? "0.4" : "0.2"}
+                              strokeLinecap="round"
+                              opacity={isTargetActive ? 1 : 0.6}
+                              className="path-animate"
+                            />
+                          </g>
                         );
                       })
                     );
@@ -564,8 +598,10 @@ export function SkillTree() {
                     const isExpanded = (node.level === 1 && focusedBranch?.abilityId === node.id) ||
                       (node.level === 2 && focusedBranch?.skillId === node.id);
 
-                    // Node sizes based on level
-                    const size = node.level === 0 ? 6 : node.level === 1 ? 5 : 4;
+                    // Node sizes based on level (hierarchical: higher level => larger size)
+                    const size = node.level === 0 ? 8 :
+                      node.level === 1 ? 7 :
+                        node.level === 2 ? 6 : 5;
                     const radius = size / 2;
 
                     return (
@@ -579,90 +615,180 @@ export function SkillTree() {
                           setTooltipPosition({ x: rect.left + rect.width / 2, y: rect.top });
                         }}
                         onMouseLeave={() => setHoveredNode(null)}
-                        className="cursor-pointer"
-                        style={{ transition: 'all 0.3s ease' }}
+                        className="cursor-pointer node-animate"
+                        style={{ transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}
                       >
-                        {/* Placeholder pulse animation */}
-                        {!isFilled && (
-                          <circle
-                            r={radius + 1}
-                            fill="none"
-                            stroke="#6366f1"
-                            strokeWidth="0.2"
-                            opacity="0.3"
-                            className="animate-pulse"
-                          />
+                        {/* LEVEL 0: ROOT (Avatar with Pulse) */}
+                        {node.level === 0 && (
+                          <g>
+                            {/* Pulse Rings */}
+                            <circle r={radius + 3} fill="none" stroke="#6366f1" strokeWidth="0.1" opacity="0.2" className="animate-ping" style={{ animationDuration: '3s' }} />
+                            <circle r={radius + 1.5} fill="none" stroke="#6366f1" strokeWidth="0.2" opacity="0.5" />
+
+                            {/* Main Avatar Circle */}
+                            <circle
+                              r={radius}
+                              fill="white"
+                              stroke="#818cf8"
+                              strokeWidth="0.4"
+                              filter="url(#subtleShadow)"
+                            />
+
+                            {/* Avatar Image */}
+                            <image
+                              href={user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || user?.username || 'User')}&background=random`}
+                              x={-radius * 0.9}
+                              y={-radius * 0.9}
+                              width={size * 0.9}
+                              height={size * 0.9}
+                              clipPath="url(#avatarClip)"
+                            />
+                          </g>
                         )}
 
-                        {/* Main node */}
-                        <rect
-                          x={-radius}
-                          y={-radius}
-                          width={size}
-                          height={size}
-                          rx={size * 0.3}
-                          fill={isFilled ? '#6366f1' : '#f1f5f9'}
-                          stroke={isSelected ? '#6366f1' : isFilled ? 'transparent' : '#cbd5e1'}
-                          strokeWidth={isFilled ? '0.3' : '0.2'}
-                          strokeDasharray={isFilled ? 'none' : '0.5,0.5'}
-                          className="transition-all hover:opacity-90"
-                        />
+                        {/* LEVEL 1: ABILITY (Circular instead of distinct card) */}
+                        {node.level === 1 && (
+                          <g>
+                            {/* Outer Glow Ring for Abilities */}
+                            <circle
+                              r={radius + 0.3}
+                              fill="none"
+                              stroke={isExpanded ? "#818cf8" : "#c7d2fe"}
+                              strokeWidth="0.15"
+                              opacity="0.5"
+                            />
 
-                        {/* Node content */}
-                        {node.icon ? (
-                          <image
-                            href={node.icon}
-                            x={-radius * 0.7}
-                            y={-radius * 0.7}
-                            width={size * 0.7}
-                            height={size * 0.7}
-                            preserveAspectRatio="xMidYMid slice"
-                          />
-                        ) : (
-                          <text
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                            fill={isFilled ? 'white' : '#94a3b8'}
-                            fontSize={isFilled ? '1.5' : '2'}
-                            fontWeight="bold"
-                          >
-                            {isFilled ? (node.level === 0 ? '🧠' : '✓') : '?'}
-                          </text>
+                            {/* Main Circle Background */}
+                            <circle
+                              r={radius}
+                              fill="white"
+                              stroke={isExpanded ? "#818cf8" : "#c7d2fe"}
+                              strokeWidth="0.3"
+                              filter="url(#subtleShadow)"
+                            />
+
+                            {/* Icon or Symbol */}
+                            {node.icon ? (
+                              <image
+                                href={node.icon}
+                                x={-radius * 0.6}
+                                y={-radius * 0.6}
+                                width={size * 0.6}
+                                height={size * 0.6}
+                                preserveAspectRatio="xMidYMid meet"
+                              />
+                            ) : (
+                              <text textAnchor="middle" dominantBaseline="middle" fill="#6366f1" fontSize="2" fontWeight="bold">
+                                {node.label.charAt(0)}
+                              </text>
+                            )}
+                          </g>
                         )}
 
-                        {/* Label */}
-                        <text
-                          y={radius + 2.5}
-                          textAnchor="middle"
-                          fill={isFilled ? '#6366f1' : '#94a3b8'}
-                          fontSize="1.5"
-                          fontWeight={isFilled ? '600' : '400'}
-                        >
-                          {node.label}
-                        </text>
+                        {/* LEVEL 2: SKILL (Circular Progress) */}
+                        {
+                          node.level === 2 && (
+                            <g>
+                              {/* Outer Glow */}
+                              {isFilled && <circle r={radius + 0.5} fill="#6366f1" opacity="0.1" filter="url(#blurFilter)" />}
 
-                        {/* Active indicator */}
-                        {isExpanded && (
-                          <text
-                            y={radius + 4.5}
-                            textAnchor="middle"
-                            fill="#6366f1"
-                            fontSize="1"
-                            fontWeight="bold"
-                          >
-                            ▼ EXPANDED
-                          </text>
-                        )}
+                              {/* Progress Ring Background */}
+                              <circle r={radius} fill="white" stroke="#e2e8f0" strokeWidth="0.2" filter="url(#subtleShadow)" />
+
+                              {/* Icon */}
+                              {node.icon ? (
+                                <image
+                                  href={node.icon}
+                                  x={-radius * 0.6}
+                                  y={-radius * 0.6}
+                                  width={size * 0.6}
+                                  height={size * 0.6}
+                                  clipPath="circle(40% at 50% 50%)"
+                                />
+                              ) : (
+                                <text textAnchor="middle" dominantBaseline="middle" fill="#94a3b8" fontSize="1.5">⚡</text>
+                              )}
+
+                              {/* Active/Filled Border */}
+                              {isFilled && (
+                                <circle
+                                  r={radius}
+                                  fill="none"
+                                  stroke={isSelected ? "#a5b4fc" : "#6366f1"}
+                                  strokeWidth="0.3"
+                                  strokeDasharray={`${radius * 4} ${radius * 2}`} // Dash effect
+                                  className="animate-spin-slow"
+                                  style={{ transformOrigin: 'center', animationDuration: '20s' }}
+                                />
+                              )}
+                            </g>
+                          )
+                        }
+
+                        {/* LEVEL 3: KNOWLEDGE (Satellite) */}
+                        {
+                          node.level === 3 && (
+                            <g>
+                              <circle
+                                r={radius}
+                                fill="white"
+                                stroke={isFilled ? "#818cf8" : "#e2e8f0"}
+                                strokeWidth="0.2"
+                                filter="url(#subtleShadow)"
+                              />
+                              {node.icon ? (
+                                <image
+                                  href={node.icon}
+                                  x={-radius * 0.6}
+                                  y={-radius * 0.6}
+                                  width={size * 0.6}
+                                  height={size * 0.6}
+                                />
+                              ) : (
+                                <circle r={0.5} fill={isFilled ? "#818cf8" : "#cbd5e1"} />
+                              )}
+                            </g>
+                          )
+                        }
+
+                        {/* Label - Reduced font size and centered position */}
+                        <foreignObject x={-10} y={radius + 1.2} width={20} height={10}>
+                          <div className={`text-center text-[2.0px] font-medium leading-tight ${isSelected ? 'text-indigo-600 font-bold' : 'text-slate-500'}`}>
+                            {node.label}
+                          </div>
+                        </foreignObject>
+
+
                       </g>
                     );
                   })}
 
                   {/* Gradient definitions */}
                   <defs>
-                    <radialGradient id="glowGradient">
-                      <stop offset="0%" stopColor="#6366f1" stopOpacity="0.5" />
-                      <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
-                    </radialGradient>
+                    <clipPath id="avatarClip">
+                      <circle cx="0" cy="0" r="2.4" />
+                    </clipPath>
+
+                    {/* Subtle Drop Shadow */}
+                    <filter id="subtleShadow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feGaussianBlur in="SourceAlpha" stdDeviation="0.2" result="blur" />
+                      <feOffset in="blur" dx="0.1" dy="0.1" result="offsetBlur" />
+                      <feFlood floodColor="#cbd5e1" floodOpacity="0.4" result="offsetColor" />
+                      <feComposite in="offsetColor" in2="offsetBlur" operator="in" />
+                      <feMerge>
+                        <feMergeNode />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+
+                    <linearGradient id="edgeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#f8fafc" />
+                      <stop offset="100%" stopColor="#818cf8" />
+                    </linearGradient>
+
+                    <filter id="blurFilter">
+                      <feGaussianBlur stdDeviation="0.4" />
+                    </filter>
                   </defs>
                 </svg>
               </>
@@ -759,32 +885,36 @@ export function SkillTree() {
           isUploading={isUploading}
           removeAttachment={removeAttachment}
         />
-      </div>
+      </div >
 
       {/* Node Management Modal */}
-      {managementNode && (
-        <NodeManagementModal
-          isOpen={managementModalOpen}
-          onClose={handleCloseManagementModal}
-          node={managementNode}
-          sessionId={currentSessionId || undefined}
-          onNodeUpdated={() => {
-            if (currentSessionId) {
-              loadSessionTree(currentSessionId);
-            }
-          }}
-          treeNodes={treeState.nodes}
-        />
-      )}
+      {
+        managementNode && (
+          <NodeManagementModal
+            isOpen={managementModalOpen}
+            onClose={handleCloseManagementModal}
+            node={managementNode}
+            sessionId={currentSessionId || undefined}
+            onNodeUpdated={() => {
+              if (currentSessionId) {
+                loadSessionTree(currentSessionId);
+              }
+            }}
+            treeNodes={treeState.nodes}
+          />
+        )
+      }
 
       {/* Tooltip */}
-      {hoveredNode && (
-        <NodeTooltip
-          node={hoveredNode}
-          position={tooltipPosition}
-          progress={hoveredNode.nodeData?.progress}
-        />
-      )}
-    </div>
+      {
+        hoveredNode && (
+          <NodeTooltip
+            node={hoveredNode}
+            position={tooltipPosition}
+            progress={hoveredNode.nodeData?.progress}
+          />
+        )
+      }
+    </div >
   );
 }

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { GitBranch, Calendar, Users, FileQuestion, ChevronDown, Home } from 'lucide-react';
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { useTranslation } from 'react-i18next';
-import logo from '@/assets/logo.svg';
+const logo = '/logo.png';
 
 export function Navigation() {
   const { user } = useAuth();
@@ -57,7 +57,7 @@ export function Navigation() {
               className={({ isActive }) => `
                 flex items-center gap-3 px-3 py-3 rounded-xl transition-all font-medium
                 ${isActive
-                  ? 'bg-gradient-to-r from-violet-50 to-teal-50 text-violet-700'
+                  ? 'bg-violet-50 text-violet-700'
                   : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                 }
                 ${isCollapsed ? 'justify-center' : ''}
