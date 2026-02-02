@@ -27,6 +27,7 @@ export interface TreeNodeData {
   parentId?: string | null;
   level: number;
   originalNodeId?: string; // NEW: Track mapping to template node
+  icon?: string; // NEW: Icon from DB
   filled: boolean; // false = placeholder, true = has real data
   metadata?: {
     difficultyLevel?: string;
@@ -74,26 +75,26 @@ export const treeNodeService = {
    */
   updateNodes(newNodes: TreeNodeData[]) {
     const current = treeState$.getValue();
-    
+
     // If empty, just set nodes
     if (current.nodes.length === 0) {
       this.setNodes(newNodes);
       return;
     }
-    
+
     // Merge: update existing by ID, add new ones
     const nodeMap = new Map(current.nodes.map(n => [n.id, n]));
-    
+
     newNodes.forEach(newNode => {
       nodeMap.set(newNode.id, { ...newNode, filled: true });
     });
-    
+
     treeState$.next({
       nodes: Array.from(nodeMap.values()),
       loading: false,
       error: null
     });
-    
+
     console.log('🌳 [TreeNode] Updated nodes, total:', nodeMap.size);
   },
 
@@ -166,14 +167,14 @@ export const treeNodeService = {
   updateNodeConnections(nodeId: string, connectionIds: string[]) {
     const current = treeState$.getValue();
     const nodeMap = new Map(current.nodes.map(n => [n.id, n]));
-    
+
     if (nodeMap.has(nodeId)) {
       const node = nodeMap.get(nodeId)!;
       const existingConnections = (node as any).connections || [];
       // Merge: add new connections without duplicates
       const mergedConnections = [...new Set([...existingConnections, ...connectionIds])];
       nodeMap.set(nodeId, { ...node, connections: mergedConnections } as any);
-      
+
       treeState$.next({
         ...current,
         nodes: Array.from(nodeMap.values())
