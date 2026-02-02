@@ -7,10 +7,10 @@ import { ChatHistoryDialog } from '../components/ChatSessionList';
 import { CHAT_SUGGESTIONS, CHAT_CONFIG } from '@/modules/chat/domain/constants';
 
 export function Chat() {
-  const { 
-    messages, 
-    status, 
-    error, 
+  const {
+    messages,
+    status,
+    error,
     send,
     sessions,
     sessionsLoading,
@@ -18,7 +18,7 @@ export function Chat() {
     loadMoreSessions,
     loadingMore
   } = useChat();
-  
+
   const [input, setInput] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -46,7 +46,7 @@ export function Chat() {
   return (
     <div className="flex-1 flex flex-col h-full min-h-0 bg-gray-50">
       {/* History Dialog */}
-      <ChatHistoryDialog 
+      <ChatHistoryDialog
         isOpen={historyOpen}
         onClose={() => setHistoryOpen(false)}
         sessions={sessions}
@@ -76,7 +76,7 @@ export function Chat() {
               </div>
             </div>
           </div>
-          
+
           {/* History Button */}
           <button
             onClick={() => setHistoryOpen(true)}
@@ -115,7 +115,7 @@ export function Chat() {
               </div>
             </div>
           )}
-          
+
           {messages.map((m) => (
             <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
               {m.role === 'user' && (
@@ -181,7 +181,7 @@ export function Chat() {
                           code({ node, className, children, ...props }) {
                             const content = String(children);
                             const isInline = !className || !className.includes('language-');
-                            
+
                             if (isInline) {
                               return (
                                 <code {...props} className="bg-violet-100 text-violet-800 rounded px-1.5 py-0.5 font-mono text-xs">
@@ -212,7 +212,7 @@ export function Chat() {
               )}
             </div>
           ))}
-          
+
           {status === 'thinking' && (
             <div className="flex items-start gap-3 animate-in fade-in duration-300">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-violet-600 flex items-center justify-center text-white font-semibold text-sm">
@@ -224,11 +224,25 @@ export function Chat() {
               </div>
             </div>
           )}
-          
+
           {error && (
             <div className="flex justify-center">
-              <div className="px-4 py-2 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+              <div className="px-4 py-2 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm font-medium shadow-sm animate-in fade-in zoom-in duration-200">
                 ⚠️ {error}
+              </div>
+            </div>
+          )}
+
+          {status === 'connecting' && (
+            <div className="flex justify-center">
+              <div className="max-w-md w-full px-6 py-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl text-center space-y-2 shadow-sm animate-in fade-in slide-in-from-top-4">
+                <div className="flex items-center justify-center gap-2 font-bold mb-1">
+                  <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+                  Dịch vụ thông báo ngoại tuyến
+                </div>
+                <p className="text-xs text-amber-700/80 leading-relaxed font-medium">
+                  Hệ thống đang cố gắng kết nối lại với dịch vụ thông báo. Vui lòng đợi trong giây lát để đảm bảo dữ liệu được đồng bộ chính xác.
+                </p>
               </div>
             </div>
           )}
@@ -240,8 +254,8 @@ export function Chat() {
         <div className="max-w-4xl mx-auto flex items-end gap-3">
           <div className="flex-1">
             <input
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all bg-gray-50 text-sm"
-              placeholder={CHAT_CONFIG.INPUT_PLACEHOLDER}
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all bg-gray-50 text-sm disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+              placeholder={status === 'connecting' ? "Vui lòng đợi kết nối dịch vụ thông báo..." : CHAT_CONFIG.INPUT_PLACEHOLDER}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}

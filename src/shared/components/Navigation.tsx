@@ -20,7 +20,7 @@ export function Navigation() {
     // { id: 'chat', label: 'Chat', icon: MessageSquare, path: '/chat' },
     { id: 'forum', label: t('nav.forum'), icon: Users, path: '/forum' },
     { id: 'missions', label: 'Nhiệm vụ', icon: FileQuestion, path: '/missions' },
-    { id: 'referral', label: 'Giới thiệu', icon: Users, path: '/referral' },
+    // { id: 'referral', label: 'Giới thiệu', icon: Users, path: '/referral' },
   ];
 
   return (

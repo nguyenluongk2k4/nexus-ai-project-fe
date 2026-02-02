@@ -35,7 +35,7 @@ export function Dashboard() {
     <div className="flex-1 bg-gradient-to-br from-slate-50 via-violet-50/30 to-slate-100 min-h-screen overflow-auto">
       <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
 
-        {/* ============ HEADER ============ */}
+        ============ HEADER ============
         <header className="mb-6 lg:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             {/* Greeting */}
