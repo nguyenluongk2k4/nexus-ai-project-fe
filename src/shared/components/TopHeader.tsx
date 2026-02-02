@@ -38,9 +38,9 @@ export const TopHeader: React.FC = () => {
     if (!user) return null;
 
     return (
-        <header className="h-20 bg-white border-b border-slate-100 flex items-center justify-between px-8 sticky top-0 z-50">
-            {/* Left: Greeting Info */}
-            <div className="flex items-center gap-4">
+        <header className="h-20 bg-white border-b border-slate-100 flex items-center justify-between px-4 md:px-8 sticky top-0 z-50">
+            {/* Left: Greeting Info - Hide on Mobile */}
+            <div className="hidden md:flex items-center gap-4">
                 <div className="flex flex-col">
                     <h2 className="text-lg font-black text-slate-900 leading-tight tracking-tight">
                         {t('header.greeting', { name: user.fullName || user.username })} 👋
@@ -53,9 +53,9 @@ export const TopHeader: React.FC = () => {
 
             {/* Right: Streak & Actions */}
             <div className="flex items-center gap-6">
-                {/* Streak Indicator */}
-                <div className="flex items-center bg-orange-50/50 pl-1 pr-5 rounded-3xl border border-orange-100/50 shadow-sm gap-0 group transition-all hover:bg-orange-100/50 cursor-help h-14">
-                    <div className="w-16 h-16 flex-shrink-0 flex items-center justify-center relative">
+                {/* Streak Indicator - Condensed on Mobile */}
+                <div className="flex items-center bg-orange-50/50 pl-1 pr-3 md:pr-5 rounded-3xl border border-orange-100/50 shadow-sm gap-0 group transition-all hover:bg-orange-100/50 cursor-help h-12 md:h-14">
+                    <div className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0 flex items-center justify-center relative">
                         <DotLottiePlayer
                             src="/assets/lottile/fire-streak-orange.lottie"
                             autoplay
@@ -63,18 +63,37 @@ export const TopHeader: React.FC = () => {
                             style={{ width: '100%', height: '100%' }}
                         />
                     </div>
-                    <div className="flex flex-col items-start justify-center -ml-3 min-w-[44px] h-full">
-                        <span className="text-2xl font-black text-orange-600 leading-tight">
+                    <div className="flex flex-col items-start justify-center -ml-2 md:-ml-3 h-full">
+                        <span className="text-lg md:text-2xl font-black text-orange-600 leading-tight whitespace-nowrap">
                             {user.streak || 0}
                         </span>
-                        <span className="text-[9px] font-black text-orange-400 tracking-[0.2em] uppercase">
+                        <span className="hidden md:block text-[9px] font-black text-orange-400 tracking-[0.2em] uppercase whitespace-nowrap">
                             {t('header.streak')}
                         </span>
                     </div>
                 </div>
 
+                {/* Coins Display (Persistent) - Condensed on Mobile */}
+                <div id="header-coins-target" className="flex items-center bg-yellow-50/50 pl-1 pr-3 md:pr-5 rounded-3xl border border-yellow-100/50 shadow-sm gap-0 group transition-all hover:bg-yellow-100/50 h-12 md:h-14 cursor-pointer" onClick={() => navigate('/missions')}>
+                    <div className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0 flex items-center justify-center relative">
+                        <DotLottiePlayer
+                            src="/assets/coin.lottie"
+                            autoplay
+                            loop
+                            style={{ width: '100%', height: '100%' }}
+                        />
+                    </div>
+                    <div className="flex flex-col items-start justify-center -ml-2 md:-ml-3 h-full">
+                        <span className="text-lg md:text-2xl font-black text-yellow-600 leading-tight whitespace-nowrap">
+                            <CoinsDisplay minimal />
+                        </span>
+                        <span className="hidden md:block text-[9px] font-black text-yellow-400 tracking-[0.2em] uppercase whitespace-nowrap">
+                            {t('missions.coins')}
+                        </span>
+                    </div>
+                </div>
+
                 {/* Vertical Divider */}
-                <div className="h-8 w-[1px] bg-slate-100" />
 
                 {/* Action Buttons & User Dropdown */}
                 <div className="flex items-center gap-4">

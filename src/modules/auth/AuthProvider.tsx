@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthState, LoginRequest, RegisterRequest, User } from "./domain/types";
 import { AuthApiGateway } from "./infrastructure/AuthApiGateway";
+import { notificationGateway } from "@/shared/infrastructure/NotificationGateway";
 
 interface AuthContextType extends AuthState {
   login: (request: LoginRequest) => Promise<void>;
@@ -57,6 +58,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     checkAuth();
   }, []);
+
+  // Connect notification gateway when user changes
+  useEffect(() => {
+    if (state.user) {
+      notificationGateway.connect(state.user.id);
+    } else {
+      notificationGateway.disconnect();
+    }
+  }, [state.user]);
 
   const login = async (request: LoginRequest) => {
     setState(s => ({ ...s, isLoading: true, error: null }));

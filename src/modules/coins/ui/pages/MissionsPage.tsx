@@ -8,6 +8,7 @@ import { DotLottiePlayer } from '@dotlottie/react-player';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { toast } from 'sonner';
+import { CoinBurst } from '@/shared/components/ui/CoinBurst';
 
 const gateway = new CoinsApiGateway();
 const getMissionsUseCase = new GetMissionsUseCase(gateway);
@@ -18,19 +19,21 @@ export const MissionsPage: React.FC = () => {
     const { user } = useAuth();
     const [missions, setMissions] = useState<Mission[]>([]);
     const [userMissions, setUserMissions] = useState<UserMission[]>([]);
+    const [claimingIds, setClaimingIds] = useState<Set<string>>(new Set());
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'all' | 'incomplete' | 'completed'>('all');
+    const [burstPos, setBurstPos] = useState<{ x: number, y: number } | null>(null);
 
-    const fetchData = async () => {
+    const fetchData = async (silent = false) => {
         try {
-            setIsLoading(true);
+            if (!silent) setIsLoading(true);
             const { available, userProgress } = await getMissionsUseCase.execute();
             setMissions(available);
             setUserMissions(userProgress);
         } catch (error) {
             console.error('Failed to fetch missions', error);
         } finally {
-            setIsLoading(false);
+            if (!silent) setIsLoading(false);
         }
     };
 
@@ -38,9 +41,28 @@ export const MissionsPage: React.FC = () => {
         fetchData();
     }, []);
 
-    const handleClaim = async (missionId: string) => {
+    const handleClaim = async (missionId: string, x?: number, y?: number) => {
+        if (claimingIds.has(missionId)) return;
+
         try {
-            await claimRewardUseCase.execute(missionId);
+            setClaimingIds(prev => new Set(prev).add(missionId));
+
+            // Use provided coordinates or fallback to center
+            const startX = x || window.innerWidth / 2;
+            const startY = y || window.innerHeight / 2;
+
+            const updatedUserMission = await claimRewardUseCase.execute(missionId);
+
+            // Use the actual data from the server for the local update
+            setUserMissions(prev => prev.map(um =>
+                um.mission_id === missionId
+                    ? { ...um, ...updatedUserMission }
+                    : um
+            ));
+
+            // Trigger burst effect from the specific position
+            setBurstPos({ x: startX, y: startY });
+
             toast.success(t('missions.reward_claimed'), {
                 icon: '💰',
                 style: {
@@ -50,15 +72,19 @@ export const MissionsPage: React.FC = () => {
                     fontWeight: 'bold'
                 }
             });
-            // Refresh data
-            fetchData();
-            // Refresh user balance if needed (handled by AuthProvider refresh or similar)
-            if (user) {
-                // Ideally trigger a context update for balance
-            }
+
+            // Remove internal fetchData(true) as it's causing a race condition 
+            // where server hasn't committed the transaction yet when we fetch.
+            // The local update above is enough.
         } catch (error: any) {
             console.error('Failed to claim reward', error);
             toast.error(error.message || t('missions.claim_failed'));
+        } finally {
+            setClaimingIds(prev => {
+                const next = new Set(prev);
+                next.delete(missionId);
+                return next;
+            });
         }
     };
 
@@ -97,28 +123,27 @@ export const MissionsPage: React.FC = () => {
                                     <div className="absolute inset-0 to-indigo-50/50" />
                                 </div>
 
-                                <div className="relative p-12 flex flex-col items-center">
-                                    <div className="flex items-center gap-8 mb-8">
+                                <div className="relative p-6 md:p-12 flex flex-col items-center">
+                                    <div className="flex items-center gap-4 md:gap-8 mb-6 md:mb-8 text-center">
                                         <div>
-                                            <h3 className="text-4xl font-black italic uppercase tracking-tighter text-slate-900 leading-none">
+                                            <h3 className="text-2xl md:text-4xl font-black italic uppercase tracking-tighter text-slate-900 leading-none">
                                                 {t('missions.title')}
                                             </h3>
                                         </div>
                                     </div>
 
                                     {/* Big Progress Bar */}
-                                    <div className="w-full max-w-4xl mt-6">
-                                        <div className="flex justify-between items-end mb-6 px-4">
+                                    <div className="w-full max-w-4xl mt-4 md:mt-6">
+                                        <div className="flex justify-between items-end mb-4 md:mb-6 px-2 md:px-4">
                                             <div className="flex flex-col">
-                                                {/* <span className="text-xs font-black text-slate-400 tracking-[0.3em] uppercase mb-1">{t('missions.event_status')}</span> */}
-                                                <h3 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 leading-none">
+                                                <h3 className="text-lg md:text-2xl font-black italic uppercase tracking-tighter text-slate-900 leading-none">
                                                     {t('missions.event_progress')}
                                                 </h3>
                                             </div>
                                             <div className="flex flex-col items-end">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-3xl font-black italic text-violet-600 leading-none">{earnedCoins}</span>
-                                                    <span className="text-sm font-black text-slate-300 uppercase leading-none self-end mb-1">/ {totalCoinsGoal} {t('missions.coins')}</span>
+                                                <div className="flex items-center gap-1 md:gap-2">
+                                                    <span className="text-xl md:text-3xl font-black italic text-violet-600 leading-none">{earnedCoins}</span>
+                                                    <span className="text-[10px] md:text-sm font-black text-slate-300 uppercase leading-none self-end mb-1">/ {totalCoinsGoal} {t('missions.coins')}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -158,8 +183,8 @@ export const MissionsPage: React.FC = () => {
                         </div>
 
                         {/* Mission List */}
-                        <div className="pt-4 space-y-4 p-20 mx-auto w-full">
-                            <div className="flex items-center justify-between mb-2 px-2">
+                        <div className="pt-4 space-y-4 p-4 md:p-8 lg:p-20 mx-auto w-full max-w-7xl">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 px-2 gap-4">
                                 <h4 className="text-[12px] font-black text-slate-500 tracking-[0.2em] uppercase italic">{t('missions.available_missions')}</h4>
                                 <div className="flex gap-4">
                                     <span className={`text-[10px] font-black cursor-pointer transition-all ${activeTab === 'all' ? 'text-violet-600 border-b-2 border-violet-600' : 'text-slate-400 hover:text-slate-900'}`} onClick={() => setActiveTab('all')}>{t('missions.all')}</span>
@@ -174,12 +199,22 @@ export const MissionsPage: React.FC = () => {
                                         mission={mission}
                                         userMission={userMissions.find(um => um.mission_id === mission.id)}
                                         onClaim={handleClaim}
+                                        isClaiming={claimingIds.has(mission.id)}
                                     />
                                 ))}
                         </div>
                     </div>
                 </div>
             </div>
+
+            {burstPos && (
+                <CoinBurst
+                    startX={burstPos.x}
+                    startY={burstPos.y}
+                    count={20}
+                    onComplete={() => setBurstPos(null)}
+                />
+            )}
         </div>
     );
 };
