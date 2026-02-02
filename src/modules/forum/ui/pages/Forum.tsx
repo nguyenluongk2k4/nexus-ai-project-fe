@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   MessageSquare,
@@ -101,6 +101,52 @@ export function Forum() {
     return Date.now() - date.getTime() < 24 * 60 * 60 * 1000;
   };
 
+  const filteredPosts = useMemo(() => {
+    let result = [...posts];
+
+    // 1. Search
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (p) =>
+          p.title.toLowerCase().includes(query) ||
+          p.excerpt.toLowerCase().includes(query)
+      );
+    }
+
+    // 2. Filter & Sort
+    switch (selectedFilter) {
+      case 'hot':
+        // Filter by Hot criteria AND sort by views
+        result = result.filter((p) => isHot(p));
+        result.sort((a, b) => Number(b.stats.views) - Number(a.stats.views));
+        break;
+      case 'new':
+        // Sort by Date (Newest first)
+        result.sort((a, b) => {
+          const dateA = new Date(a.createdAt).getTime();
+          const dateB = new Date(b.createdAt).getTime();
+          return dateB - dateA;
+        });
+        break;
+      case 'unanswered':
+        // Filter by 0 comments
+        result = result.filter((p) => Number(p.stats.comments) === 0);
+        break;
+      default:
+        // 'all': Default sort (usually by date or ID)
+        // If API returns sorted, we keep it. Or enforce Date sort?
+        // Let's enforce Date sort for consistency
+        result.sort((a, b) => {
+          const dateA = new Date(a.createdAt).getTime();
+          const dateB = new Date(b.createdAt).getTime();
+          return dateB - dateA;
+        });
+    }
+
+    return result;
+  }, [posts, searchQuery, selectedFilter]);
+
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50">
@@ -114,15 +160,11 @@ export function Forum() {
 
   return (
     <div className="flex-1 overflow-auto min-h-screen bg-gradient-to-br from-purple-50 via-violet-50 to-pink-50 relative">
-      {/* Animated Background Blobs */}
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-purple-200/50 rounded-full mix-blend-multiply filter blur-[100px] opacity-70 animate-blob"></div>
-        <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-pink-100/50 rounded-full mix-blend-multiply filter blur-[100px] opacity-60 animate-blob" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-1/2 left-1/2 w-[700px] h-[700px] bg-violet-200/40 rounded-full mix-blend-multiply filter blur-[120px] opacity-70 animate-blob" style={{ animationDelay: '4s' }}></div>
-      </div>
+      {/* Animated Background Blobs - Removed for Performance */}
+      {/* <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">...</div> */}
 
       {/* Top Bar with Search - Glassmorphic */}
-      <div className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 border-b border-white/60 shadow-lg shadow-purple-500/5">
+      <div className="sticky top-0 z-40 bg-white/95 border-b border-white/60 shadow-lg shadow-purple-500/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-4">
             {/* Search Bar with shimmer effect */}
@@ -180,112 +222,118 @@ export function Forum() {
 
             {/* Posts List with Stagger Animation */}
             <div className="space-y-5">
-              {posts.map((post, index) => (
-                <article
-                  key={post.id}
-                  onClick={() => onNavigateToThread(post.id)}
-                  className="group bg-white/80 backdrop-blur-sm rounded-2xl border border-white/60 hover:border-violet-400 hover:shadow-2xl hover:shadow-violet-500/10 transition-all duration-300 cursor-pointer overflow-hidden hover:scale-[1.02] hover:-translate-y-1 animate-fade-in"
-                  style={{
-                    animationDelay: `${index * 100}ms`,
-                    transformStyle: 'preserve-3d'
-                  }}
-                >
-                  <div className="p-7 relative">
-                    {/* Hover glow effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
-                    <div className="relative z-10">
-                      {/* Author Info & Badges Row */}
-                      <div className="flex items-start justify-between mb-4">
-                        {/* Author Info - Left */}
-                        <div className="flex items-center gap-3">
-                          <img
-                            alt={post.author.name}
-                            className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-100"
-                            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=random&bold=true`}
-                          />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <h4 className="text-sm font-bold text-slate-900">{post.author.name}</h4>
-                              <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-bold rounded uppercase tracking-wide">
-                                Expert
+              {filteredPosts.length === 0 ? (
+                <div className="text-center py-12 bg-white rounded-2xl border border-slate-100">
+                  <p className="text-slate-500 font-medium">{t('forum.noResults', 'Không tìm thấy bài viết nào')}</p>
+                </div>
+              ) : (
+                filteredPosts.map((post, index) => (
+                  <article
+                    key={post.id}
+                    onClick={() => onNavigateToThread(post.id)}
+                    className="group bg-white rounded-2xl border border-white/60 hover:border-violet-400 hover:shadow-2xl hover:shadow-violet-500/10 transition-all duration-300 cursor-pointer overflow-hidden hover:scale-[1.02] hover:-translate-y-1 animate-fade-in"
+                    style={{
+                      animationDelay: `${index * 100}ms`,
+                      transformStyle: 'preserve-3d'
+                    }}
+                  >
+                    <div className="p-7 relative">
+                      {/* Hover glow effect */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
+                      <div className="relative z-10">
+                        {/* Author Info & Badges Row */}
+                        <div className="flex items-start justify-between mb-4">
+                          {/* Author Info - Left */}
+                          <div className="flex items-center gap-3">
+                            <img
+                              alt={post.author.name}
+                              className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-100"
+                              src={post.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=random&bold=true`}
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-sm font-bold text-slate-900">{post.author.name}</h4>
+                                <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-bold rounded uppercase tracking-wide">
+                                  Expert
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-slate-500">
+                                <Clock className="w-3.5 h-3.5" />
+                                <span>{getTimeAgo(post.createdAt)}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Badges - Right */}
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {isHot(post) && (
+                              <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-orange-50 to-red-50 text-orange-700 text-xs font-bold rounded-full border border-orange-200 shadow-sm animate-pulse-slow">
+                                <Flame className="w-3.5 h-3.5 animate-pulse" />
+                                HOT
                               </span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-slate-500">
-                              <Clock className="w-3.5 h-3.5" />
-                              <span>{getTimeAgo(post.createdAt)}</span>
-                            </div>
+                            )}
+                            {isNew(post) && (
+                              <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200 shadow-sm">
+                                <Sparkles className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '3s' }} />
+                                {t('forum.badges.new')}
+                              </span>
+                            )}
+                            {post.categoryName && (
+                              <span className="px-3 py-1.5 bg-violet-50 text-violet-700 text-xs font-semibold rounded-full border border-violet-200">
+                                {post.categoryName}
+                              </span>
+                            )}
                           </div>
                         </div>
 
-                        {/* Badges - Right */}
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          {isHot(post) && (
-                            <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-orange-50 to-red-50 text-orange-700 text-xs font-bold rounded-full border border-orange-200 shadow-sm animate-pulse-slow">
-                              <Flame className="w-3.5 h-3.5 animate-pulse" />
-                              HOT
-                            </span>
-                          )}
-                          {isNew(post) && (
-                            <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200 shadow-sm">
-                              <Sparkles className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '3s' }} />
-                              {t('forum.badges.new')}
-                            </span>
-                          )}
-                          {post.categoryName && (
-                            <span className="px-3 py-1.5 bg-violet-50 text-violet-700 text-xs font-semibold rounded-full border border-violet-200">
-                              {post.categoryName}
-                            </span>
-                          )}
+                        {/* Post Content */}
+                        <div className="mb-4">
+                          <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-violet-700 transition-colors leading-snug">
+                            {post.title}
+                          </h3>
+                          <p className="text-slate-600 leading-relaxed line-clamp-2">
+                            {post.excerpt}
+                          </p>
                         </div>
-                      </div>
 
-                      {/* Post Content */}
-                      <div className="mb-4">
-                        <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-violet-700 transition-colors leading-snug">
-                          {post.title}
-                        </h3>
-                        <p className="text-slate-600 leading-relaxed line-clamp-2">
-                          {post.excerpt}
-                        </p>
-                      </div>
-
-                      {/* Reactions Preview */}
-                      <div className="flex items-center gap-4 mb-4">
-                        {MOCK_REACTIONS.slice(0, 3).map((reaction, idx) => {
-                          const Icon = reaction.icon;
-                          return (
+                        {/* Interactions & Stats */}
+                        <div className="flex items-center justify-between pt-4 border-t border-slate-100 mt-4">
+                          <div className="flex items-center gap-6">
+                            {/* Like Button */}
                             <button
-                              key={idx}
-                              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors group/reaction"
+                              className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-violet-50 text-slate-600 hover:text-violet-600 rounded-lg transition-colors group/btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Add like logic here if needed
+                              }}
                             >
-                              <Icon className={`w-4 h-4 ${reaction.color} group-hover/reaction:scale-110 transition-transform`} />
-                              <span className="text-xs font-semibold text-slate-600">{Math.floor(Math.random() * 20) + 5}</span>
+                              <ThumbsUp className="w-4 h-4 group-hover/btn:scale-110 transition-transform text-blue-600 fill-blue-600/10" />
+                              <span className="text-sm font-bold">{post.stats.likes || 0}</span>
                             </button>
-                          );
-                        })}
-                      </div>
 
-                      {/* Stats Footer */}
-                      <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                        <div className="flex gap-5 text-sm font-medium text-slate-500">
-                          <div className="flex items-center gap-2">
-                            <MessageSquare className="w-4 h-4" />
-                            <span>{post.stats.comments} {t('forum.comments')}</span>
+                            {/* Comments */}
+                            <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
+                              <MessageSquare className="w-4 h-4" />
+                              <span>{post.stats.comments} {t('forum.comments')}</span>
+                            </div>
+
+                            {/* Views */}
+                            <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
+                              <Eye className="w-4 h-4" />
+                              <span>{post.stats.views} {t('forum.views')}</span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Eye className="w-4 h-4" />
-                            <span>{post.stats.views} {t('forum.views')}</span>
-                          </div>
+
+                          {/* Read More */}
+                          <span className="text-sm font-semibold text-violet-600 group-hover:text-violet-700 flex items-center gap-1">
+                            {t('forum.readMore')}
+                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                          </span>
                         </div>
-                        <span className="text-sm font-semibold text-violet-600 group-hover:text-violet-700 flex items-center gap-1">
-                          {t('forum.readMore')}
-                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </span>
                       </div>
                     </div>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                )))}
             </div>
 
             {/* Load More */}
@@ -299,7 +347,7 @@ export function Forum() {
           {/* Sidebar - Glassmorphic */}
           <aside className="lg:col-span-4 space-y-6">
             {/* Live Activity with glow */}
-            <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-300">
+            <div className="bg-white rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-300">
               <h3 className="font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 {t('forum.sidebar.liveActivity')}
@@ -321,7 +369,7 @@ export function Forum() {
             </div>
 
             {/* Categories - Glass */}
-            <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl transition-all">
+            <div className="bg-white rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl transition-all">
               <h3 className="font-bold text-lg text-slate-900 mb-4">{t('forum.sidebar.categories')}</h3>
               <div className="space-y-2">
                 {categories.map((category) => {
@@ -350,7 +398,7 @@ export function Forum() {
 
             {/* Stats - Animated */}
             {stats && (
-              <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl transition-all">
+              <div className="bg-white rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl transition-all">
                 <h3 className="font-bold text-lg text-slate-900 mb-4">{t('forum.sidebar.stats')}</h3>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
@@ -381,7 +429,7 @@ export function Forum() {
             )}
 
             {/* Top Members - Interactive */}
-            <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl transition-all">
+            <div className="bg-white rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl transition-all">
               <h3 className="font-bold text-lg text-slate-900 mb-4">{t('forum.sidebar.topMembers')}</h3>
               <div className="grid grid-cols-5 gap-3">
                 {MOCK_TOP_MEMBERS.map((member) => (

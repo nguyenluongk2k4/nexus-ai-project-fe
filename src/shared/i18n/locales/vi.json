@@ -596,6 +596,9 @@
         "selectPlaceholder": "-- Chọn tài liệu --",
         "date": "Ngày học",
         "deadline": "Hạn chót",
+        "scheduleInfo": "Thông tin lịch học",
+        "notScheduled": "Chưa xếp lịch",
+        "currentStatus": "Trạng thái",
         "priority": "Độ ưu tiên",
         "priorities": {
           "low": "Thấp",
@@ -621,7 +624,8 @@
           "add": "Lỗi khi thêm vào lịch",
           "connection": "Lỗi kết nối",
           "aiParse": "Không thể phân tích yêu cầu. Vui lòng thử lại.",
-          "aiConfirm": "Lỗi khi xác nhận lịch"
+          "aiConfirm": "Lỗi khi xác nhận lịch",
+          "noUrl": "Chưa có liên kết học tập cho tài liệu này"
         }
       },
       "nodeManagement": {
@@ -645,10 +649,112 @@
           "preview": "Xem trước",
           "swap": "Đổi Node"
         },
-        "errors": {
-          "load": "Không thể tải các node thay thế",
-          "swap": "Không thể đổi node",
-          "session": "Cần có Session ID"
+        "notifications": {
+            "on": "Bật nhắc nhở",
+            "off": "Tắt nhắc nhở"
+        },
+        "agenda": {
+            "goodMorning": "Chào buổi sáng",
+            "goodAfternoon": "Chào buổi chiều",
+            "goodEvening": "Chào buổi tối",
+            "summary": "Bạn có {{count}} phiên học hôm nay",
+            "highPriority": "Quan trọng",
+            "schedule": "Lịch trình hôm nay",
+            "empty": "Không có lịch học nào hôm nay.",
+            "later": "Để sau",
+            "start": "Sẵn sàng"
+        }
+    }
+  },
+  "skillTree": {
+      "button": {
+        "save": "Lưu"
+      },
+      "manageNode": "Quản lý Node",
+      "page": {
+        "backToSkills": "Quay lại Skills",
+        "back": "Quay lại",
+        "nodes": "nodes",
+        "loading": "Đang tải...",
+        "saved": "Đã lưu!",
+        "saving": "Đang lưu...",
+        "saveToMyTree": "Lưu vào My Tree",
+        "creatingTree": "Đang tạo Skill Tree...",
+        "analyzing": "AI đang phân tích và chọn lộ trình phù hợp",
+        "title": "Skill Tree",
+        "instruction1": "Sử dụng chat bên phải để hỏi về lộ trình học tập.",
+        "instruction2": "AI sẽ tự động tạo skill tree phù hợp với bạn.",
+        "chatToStart": "Chat để bắt đầu",
+        "nodeLegend": "Node",
+        "nodesCount": "nodes"
+      },
+      "rightPanel": {
+        "tabs": {
+            "chat": "Trò chuyện",
+            "resource": "Tài liệu"
+        },
+        "timeline": {
+            "title": "Thêm vào Lịch Học",
+            "manual": "Thủ công",
+            "ai": "AI Tự động",
+            "selectResource": "Chọn tài liệu học",
+            "selectPlaceholder": "-- Chọn tài liệu --",
+            "date": "Ngày học",
+            "deadline": "Hạn chót",
+            "priority": "Độ ưu tiên",
+            "priorities": {
+                "low": "Thấp",
+                "medium": "Trung bình",
+                "high": "Cao"
+            },
+            "aiPromptLabel": "Mô tả thời gian rảnh của bạn",
+            "aiPromptPlaceholder": "Ví dụ: Tôi rảnh 8h tối các ngày thứ 2, 4, 6",
+            "aiHint": "AI sẽ phân tích và tự động xếp lịch học cho bạn",
+            "generate": "Tạo lịch học",
+            "analyzing": "Đang phân tích...",
+            "aiunderstood": "AI đã hiểu:",
+            "days": "Các ngày",
+            "time": "Giờ học",
+            "duration": "Thời lượng",
+            "suggestions": "Lịch học đề xuất",
+            "confirm": "Xác nhận lịch học",
+            "cancel": "Hủy",
+            "add": "Thêm vào lịch",
+            "success": "Đã thêm vào lịch thành công",
+            "errors": {
+                "fetch": "Lỗi khi tải tài liệu",
+                "add": "Lỗi khi thêm vào lịch",
+                "connection": "Lỗi kết nối",
+                "aiParse": "Không thể phân tích yêu cầu. Vui lòng thử lại.",
+                "aiConfirm": "Lỗi khi xác nhận lịch"
+            }
+        },
+        "nodeManagement": {
+            "title": "Quản lý Node",
+            "subtitle": "Thay thế node bằng các lựa chọn khác và xem trước cấu trúc",
+            "currentActive": "Node Đang Chọn",
+            "preview": {
+                "title": "Xem trước: Cây con mới",
+                "clear": "Xóa xem trước",
+                "previewing": "Đang xem:",
+                "noSubNodes": "Không tìm thấy node con"
+            },
+            "alternatives": {
+                "title": "Các Node Thay Thế",
+                "refresh": "Làm mới",
+                "empty": "Không tìm thấy lựa chọn thay thế",
+                "swapTo": "Đổi sang"
+            },
+            "actions": {
+                "close": "Đóng",
+                "preview": "Xem trước",
+                "swap": "Đổi Node"
+            },
+            "errors": {
+                "load": "Không thể tải các node thay thế",
+                "swap": "Không thể đổi node",
+                "session": "Cần có Session ID"
+            }
         }
       }
     }

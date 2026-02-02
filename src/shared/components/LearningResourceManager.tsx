@@ -12,7 +12,7 @@ import {
   ExternalLink,
   Pause,
 } from 'lucide-react';
-import { useLearningProgress } from '@/modules/skill-tree/ui/contexts/LearningProgressContext';
+import { useLearningProgress } from '@/modules/skill-tree/ui/hooks/useLearningProgress';
 import { LearningStatus } from '@/modules/skill-tree/domain/types/learning';
 
 interface LearningResourceManagerProps {

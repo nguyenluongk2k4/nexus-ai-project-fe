@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Award, TrendingUp, Target, Brain, Trophy, Zap, BookOpen, CheckCircle, Clock } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { useLearningProgress } from '@/modules/skill-tree/ui/contexts/LearningProgressContext';
+import { useLearningProgress } from '@/modules/skill-tree/ui/hooks/useLearningProgress';
 
 export function LearningInsights() {
   const { stats, progressData, studySessions, timelineItems, getOverdueItems } = useLearningProgress();

@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useState } from 'react';
-import { GitBranch, Calendar, Users, FileQuestion, ChevronDown } from 'lucide-react';
+import { GitBranch, Calendar, Users, FileQuestion, ChevronDown, Home } from 'lucide-react';
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { useTranslation } from 'react-i18next';
 import logo from '@/assets/logo.svg';
@@ -11,7 +11,7 @@ export function Navigation() {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const navItems = [
-    // { id: 'dashboard', label: t('nav.dashboard'), icon: Home, path: '/dashboard' },
+    { id: 'dashboard', label: t('nav.dashboard'), icon: Home, path: '/dashboard' },
     { id: 'skilltree', label: t('nav.skilltree'), icon: GitBranch, path: '/skilltree' },
     // { id: 'quiz', label: t('nav.quiz'), icon: FileQuestion, path: '/quiz' },
     // { id: 'jobs', label: t('nav.jobs'), icon: Briefcase, path: '/jobs' },

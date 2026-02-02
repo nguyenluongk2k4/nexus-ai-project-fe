@@ -26,7 +26,7 @@ import { MissionsPage } from '@/modules/coins/ui/pages/MissionsPage';
 import { ReferralPage } from '@/modules/coins/ui/pages/ReferralPage';
 import { TopHeader } from '@/shared/components/TopHeader';
 import { Toaster } from 'sonner';
-
+import { GlobalDailyAgenda } from '@/modules/skill-tree/ui/components/GlobalDailyAgenda';
 // Protected Route Wrapper
 const ProtectedRoute = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -40,10 +40,11 @@ const ProtectedRoute = () => {
 
 export default function App() {
   return (
-    <LearningProgressProvider>
-      <Toaster position="top-right" richColors />
-      <AuthProvider>
+    <AuthProvider>
+      <LearningProgressProvider>
+        <Toaster position="top-right" richColors />
         <BrowserRouter>
+          <GlobalDailyAgenda />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Landing />} />
@@ -91,7 +92,7 @@ export default function App() {
             </Route>
           </Routes>
         </BrowserRouter>
-      </AuthProvider>
-    </LearningProgressProvider>
+      </LearningProgressProvider>
+    </AuthProvider>
   );
 }

@@ -596,6 +596,9 @@
         "selectPlaceholder": "-- Select Resource --",
         "date": "Study Date",
         "deadline": "Deadline",
+        "scheduleInfo": "Schedule Information",
+        "notScheduled": "Not Scheduled",
+        "currentStatus": "Current Status",
         "priority": "Priority",
         "priorities": {
           "low": "Low",
@@ -615,13 +618,16 @@
         "confirm": "Confirm Schedule",
         "cancel": "Cancel",
         "add": "Add to Calendar",
+        "save": "Save Changes",
+        "close": "Close",
         "success": "Successfully added to schedule",
-        "errors": {
-          "fetch": "Error fetching resources",
-          "add": "Error adding to schedule",
-          "connection": "Connection error",
-          "aiParse": "Could not parse request. Please try again.",
-          "aiConfirm": "Error confirming schedule"
+        "errors": { 
+            "fetch": "Error fetching resources", 
+            "add": "Error adding to timeline", 
+            "connection": "Connection error", 
+            "aiParse": "Could not parse request. Please try again.", 
+            "aiConfirm": "Error confirming schedule",
+            "noUrl": "No learning link available for this resource"
         }
       },
       "nodeManagement": {
@@ -645,10 +651,112 @@
           "preview": "Preview",
           "swap": "Swap"
         },
-        "errors": {
-          "load": "Failed to load alternatives",
-          "swap": "Failed to swap node",
-          "session": "Session ID is required"
+        "notifications": {
+            "on": "Enable Reminders",
+            "off": "Disable Reminders"
+        },
+        "agenda": {
+            "goodMorning": "Good Morning",
+            "goodAfternoon": "Good Afternoon",
+            "goodEvening": "Good Evening",
+            "summary": "You have {{count}} learning sessions today",
+            "highPriority": "High Priority",
+            "schedule": "Today's Schedule",
+            "empty": "No learning sessions scheduled for today.",
+            "later": "Later",
+            "start": "I'm Ready"
+        }
+    }
+  },
+  "skillTree": {
+      "button": {
+        "save": "Save"
+      },
+      "manageNode": "Manage Node",
+      "page": {
+        "backToSkills": "Back to Skills",
+        "back": "Back",
+        "nodes": "nodes",
+        "loading": "Loading...",
+        "saved": "Saved!",
+        "saving": "Saving...",
+        "saveToMyTree": "Save to My Tree",
+        "creatingTree": "Creating Skill Tree...",
+        "analyzing": "AI is analyzing and selecting suitable path",
+        "title": "Skill Tree",
+        "instruction1": "Use chat panel to ask about learning path.",
+        "instruction2": "AI will automatically create a skill tree for you.",
+        "chatToStart": "Chat to start",
+        "nodeLegend": "Node",
+        "nodesCount": "nodes"
+      },
+      "rightPanel": {
+        "tabs": {
+            "chat": "Chat",
+            "resource": "Resources"
+        },
+        "timeline": {
+            "title": "Add to Study Schedule",
+            "manual": "Manual",
+            "ai": "AI Automated",
+            "selectResource": "Select Learning Resource",
+            "selectPlaceholder": "-- Select Resource --",
+            "date": "Study Date",
+            "deadline": "Deadline",
+            "priority": "Priority",
+            "priorities": {
+                "low": "Low",
+                "medium": "Medium",
+                "high": "High"
+            },
+            "aiPromptLabel": "Describe your availability",
+            "aiPromptPlaceholder": "E.g.: I'm free at 8 PM on Mon, Wed, Fri",
+            "aiHint": "AI will analyze and automatically schedule for you",
+            "generate": "Generate Schedule",
+            "analyzing": "Analyzing...",
+            "aiunderstood": "AI Understood:",
+            "days": "Days",
+            "time": "Time",
+            "duration": "Duration",
+            "suggestions": "Suggested Schedule",
+            "confirm": "Confirm Schedule",
+            "cancel": "Cancel",
+            "add": "Add to Calendar",
+            "success": "Successfully added to schedule",
+            "errors": {
+                "fetch": "Error fetching resources",
+                "add": "Error adding to schedule",
+                "connection": "Connection error",
+                "aiParse": "Could not parse request. Please try again.",
+                "aiConfirm": "Error confirming schedule"
+            }
+        },
+        "nodeManagement": {
+            "title": "Node Management",
+            "subtitle": "Swap node with alternatives and preview structure",
+            "currentActive": "Current Active Node",
+            "preview": {
+                "title": "Preview: New Sub-tree",
+                "clear": "Clear Preview",
+                "previewing": "Previewing:",
+                "noSubNodes": "No sub-nodes found"
+            },
+            "alternatives": {
+                "title": "Alternative Nodes",
+                "refresh": "Refresh",
+                "empty": "No alternatives found",
+                "swapTo": "Swap to"
+            },
+            "actions": {
+                "close": "Close",
+                "preview": "Preview",
+                "swap": "Swap"
+            },
+            "errors": {
+                "load": "Failed to load alternatives",
+                "swap": "Failed to swap node",
+                "session": "Session ID is required"
+            }
         }
       }
     }

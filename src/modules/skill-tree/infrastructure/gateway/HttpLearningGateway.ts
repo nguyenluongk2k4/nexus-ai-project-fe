@@ -58,6 +58,9 @@ export class HttpLearningGateway implements LearningGateway {
                 status: item.status as 'not_started' | 'in_progress' | 'completed',
                 priority: item.priority as 'low' | 'medium' | 'high',
                 estimatedTime: item.estimatedTime ? `${item.estimatedTime} phút` : undefined,
+                url: item.url,
+                platform: item.platform,
+                resourceType: item.resourceType,
             }));
         } catch (error) {
             console.error('Error loading timeline:', error);
@@ -189,7 +192,7 @@ export class HttpLearningGateway implements LearningGateway {
 
     async updateTimelineItem(
         itemId: string,
-        updates: { scheduledDate?: string; deadline?: string; priority?: string; status?: string }
+        updates: { scheduledDate?: string; scheduledTime?: string; deadline?: string; priority?: string; status?: string }
     ): Promise<boolean> {
         try {
             const response = await fetch(`${API_TIMELINE_URL}/${itemId}`, {

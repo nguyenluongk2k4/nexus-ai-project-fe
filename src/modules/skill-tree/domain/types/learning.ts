@@ -53,6 +53,7 @@ export interface TimelineItem {
   id: string;
   resourceId: string;
   resourceName: string;
+  resourceType?: string; // Added from API
   nodeId: string;
   nodeName: string;
   scheduledDate: Date;
@@ -60,7 +61,9 @@ export interface TimelineItem {
   deadline?: Date;
   status: LearningStatus;
   priority: 'low' | 'medium' | 'high';
-  estimatedTime?: string;
+  estimatedTime?: string | number; // API returns number
+  url?: string; // Added
+  platform?: string; // Added
 }
 
 export interface LearningStats {
