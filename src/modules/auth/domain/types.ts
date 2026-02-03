@@ -7,8 +7,13 @@ export interface User {
   fullName?: string;
   avatarUrl?: string;
   isActive: boolean;
-  balance?: number;
-  streak?: number;
+  balance: number;
+  subscriptionTier: string;
+  subscriptionExpiresAt?: string;
+  isAdmin: boolean;
+  role: string;
+  forumRank: string;
+  points: number;
   createdAt: string;
   lastLoginAt?: string;
 }

@@ -1,8 +1,19 @@
+export enum ForumRank {
+  MEMBER = 'Member',
+  JUNIOR = 'Junior',
+  MIDDLE = 'Middle',
+  SENIOR = 'Senior',
+  EXPERT = 'Expert',
+  MODERATOR = 'Moderator',
+  HOST = 'Host',
+}
+
 export interface ForumUser {
   id: string;
   name: string;
   avatar: string; // emoji or url
-  role?: string;
+  rank?: ForumRank | string;
+  points?: number;
   joinedAt?: Date;
 }
 
@@ -11,12 +22,13 @@ export interface ForumCategory {
   name: string;
   description: string;
   iconName: string; // Store icon name as string to avoid storing component in entity
+  icon?: string; // Optional custom icon URL
   color: string; // tailwind classes
   postCount?: number;
 }
 
 export interface ForumPost {
-  id: number;
+  id: string;
   title: string;
   excerpt: string;
   content?: string;
@@ -39,7 +51,7 @@ export interface ForumPost {
 
 export interface ForumComment {
   id: string;
-  postId: number;
+  postId: string;
   parentId?: string | null;  // For threaded replies
   author: ForumUser;
   content: string;
@@ -52,4 +64,9 @@ export interface ForumStats {
   totalPosts: number;
   totalMembers: number;
   onlineMembers: number;
+}
+
+export interface ThreadDetails {
+  post: ForumPost | null;
+  comments: ForumComment[];
 }

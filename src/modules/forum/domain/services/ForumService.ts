@@ -1,5 +1,5 @@
 import { ForumGateway, LikeResult } from '../ports/ForumGateway';
-import { ForumPost, ForumCategory, ForumStats, ForumComment } from '../entities/ForumEntities';
+import { ForumPost, ForumCategory, ForumStats, ForumComment, ThreadDetails } from '../entities/ForumEntities';
 
 export class ForumService {
   constructor(private gateway: ForumGateway) { }
@@ -30,19 +30,15 @@ export class ForumService {
     return this.gateway.getPostsByCategory(categoryId);
   }
 
-  async getPostDetails(postId: number) {
-    const [post, comments] = await Promise.all([
-      this.gateway.getPostDetails(postId),
-      this.gateway.getComments(postId),
-    ]);
-    return { post, comments };
+  async getPostDetails(postId: string): Promise<ThreadDetails> {
+    return this.gateway.getThreadDetails(postId);
   }
 
-  async addComment(postId: number, content: string, parentId?: string): Promise<ForumComment> {
+  async addComment(postId: string, content: string, parentId?: string): Promise<ForumComment> {
     return this.gateway.addComment(postId, content, parentId);
   }
 
-  async likePost(postId: number): Promise<LikeResult> {
+  async likePost(postId: string): Promise<LikeResult> {
     return this.gateway.likePost(postId);
   }
 

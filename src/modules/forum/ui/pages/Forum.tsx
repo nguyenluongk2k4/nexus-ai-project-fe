@@ -51,7 +51,7 @@ export function Forum() {
     loadData();
   }, []);
 
-  const onNavigateToThread = (id: number) => {
+  const onNavigateToThread = (id: string) => {
     navigate(`/thread/${id}`);
   };
 
@@ -125,9 +125,9 @@ export function Forum() {
         onCreatePost={() => navigate('/forum/new')}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className=" mx-auto px-4 sm:px-6 lg:px-20 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8 space-y-6">
+          <div className="lg:col-span-9 space-y-6">
             <div>
               <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">{t('forum.hero.title')}</h1>
               <p className="text-slate-600">{t('forum.hero.subtitle')}</p>

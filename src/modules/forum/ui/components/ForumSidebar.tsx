@@ -3,6 +3,7 @@ import { Bot, ArrowRight, Award } from 'lucide-react';
 import { ForumCategory, ForumStats } from '../../domain/entities/ForumEntities';
 import { MOCK_TOP_MEMBERS, MOCK_HOT_TAGS } from './ForumConstants';
 import { useTranslation } from 'react-i18next';
+import { DotLottiePlayer } from '@dotlottie/react-player';
 
 interface ForumSidebarProps {
     stats: ForumStats | null;
@@ -20,24 +21,43 @@ export const ForumSidebar: React.FC<ForumSidebarProps> = ({
     const { t } = useTranslation();
 
     return (
-        <aside className="lg:col-span-4 space-y-6">
+        <aside className="lg:col-span-3 space-y-6">
             <div className="bg-white rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-300">
-                <h3 className="font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    {t('forum.sidebar.liveActivity')}
-                </h3>
-                <div className="space-y-3 text-sm">
-                    <div className="flex items-center justify-between">
-                        <span className="text-slate-600">👥 {t('forum.stats.onlineMembers')}</span>
-                        <span className="font-bold text-green-600">{stats?.onlineMembers || 0}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <span className="text-slate-600">💬 {t('forum.stats.activeDiscussions')}</span>
-                        <span className="font-bold text-slate-900">15</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <span className="text-slate-600">✍️ {t('forum.stats.writing')}</span>
-                        <span className="font-bold text-violet-600">3</span>
+                <div className="space-y-4">
+                    <h3 className="font-bold text-lg text-slate-900 flex items-center gap-2">
+                        <div className="w-5 h-5 flex items-center justify-center">
+                            <DotLottiePlayer
+                                src="/assets/forum/online.lottie"
+                                autoplay
+                                loop
+                                style={{ width: '100%', height: '100%' }}
+                            />
+                        </div>
+                        {t('forum.sidebar.liveActivity')}
+                    </h3>
+
+                    <div className="space-y-4 text-base">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <img alt="Online" src="/assets/forum/online-status.png" className="w-6 h-6 object-contain" />
+                                <span className="text-slate-600 font-medium">{t('forum.stats.onlineMembers')}</span>
+                            </div>
+                            <span className="font-bold text-green-600">{stats?.onlineMembers || 0}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <img alt="Discussions" src="/assets/forum/thao-luan.png" className="w-6 h-6 object-contain" />
+                                <span className="text-slate-600 font-medium">{t('forum.stats.activeDiscussions')}</span>
+                            </div>
+                            <span className="font-bold text-slate-900">15</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <img alt="Writing" src="/assets/forum/dang-viet-bai.png" className="w-6 h-6 object-contain" />
+                                <span className="text-slate-600 font-medium">{t('forum.stats.writing')}</span>
+                            </div>
+                            <span className="font-bold text-violet-600">3</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -46,21 +66,22 @@ export const ForumSidebar: React.FC<ForumSidebarProps> = ({
                 <h3 className="font-bold text-lg text-slate-900 mb-4">{t('forum.sidebar.categories')}</h3>
                 <div className="space-y-2">
                     {categories.map((category) => {
-                        const Icon = iconMap[category.iconName] || Bot;
                         return (
                             <button
                                 key={category.id}
                                 onClick={() => onNavigateToSubForum(category.id)}
                                 className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-violet-50 transition-colors group text-left border border-transparent hover:border-violet-200"
                             >
-                                <div className="w-10 h-10 rounded-lg bg-slate-100 group-hover:bg-violet-100 flex items-center justify-center transition-colors">
-                                    <Icon className="w-5 h-5 text-slate-600 group-hover:text-violet-600 transition-colors" />
+                                <div className="w-10 h-10 rounded-lg bg-slate-100 group-hover:bg-violet-100 flex items-center justify-center transition-colors overflow-hidden">
+                                    {category.icon && (
+                                        <img src={category.icon} alt={category.name} className="w-6 h-6 object-contain" />
+                                    )}
                                 </div>
                                 <div className="flex-1">
-                                    <h4 className="font-semibold text-sm text-slate-700 group-hover:text-violet-700 transition-colors">
+                                    <h4 className="font-bold text-base text-slate-700 group-hover:text-violet-700 transition-colors">
                                         {category.name}
                                     </h4>
-                                    <span className="text-xs text-slate-500">{category.postCount || 0} {t('forum.stats.totalPosts').toLowerCase()}</span>
+                                    <span className="text-sm text-slate-500">{category.postCount || 0} {t('forum.stats.totalPosts').toLowerCase()}</span>
                                 </div>
                                 <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-violet-600 opacity-0 group-hover:opacity-100 transition-all" />
                             </button>

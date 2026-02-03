@@ -11,11 +11,12 @@ import {
 } from 'lucide-react';
 import { ForumPost } from '../../domain/entities/ForumEntities';
 import { useTranslation } from 'react-i18next';
+import { ForumUserBadge } from './ForumUserBadge';
 
 interface ForumPostCardProps {
     post: ForumPost;
     index: number;
-    onNavigateToThread: (id: number) => void;
+    onNavigateToThread: (id: string) => void;
     getTimeAgo: (date: string | Date) => string;
     isHot: (post: ForumPost) => boolean;
     isNew: (post: ForumPost) => boolean;
@@ -53,15 +54,7 @@ export const ForumPostCard: React.FC<ForumPostCardProps> = ({
                             <div className="flex-1">
                                 <div className="flex items-center gap-2">
                                     <h4 className="text-sm font-bold text-slate-900">{post.author.name}</h4>
-                                    {post.author.role === 'expert' || post.author.role === 'host' ? (
-                                        <span className="shiny-tag relative flex items-center justify-center bg-violet-600 text-white text-[14px] font-black rounded-lg uppercase tracking-tight border border-white/20 min-w-[80px]">
-                                            <span className="relative z-10 drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">DIAMOND</span>
-                                        </span>
-                                    ) : (
-                                        <span className="shiny-tag relative flex items-center justify-center bg-slate-500 text-white text-[14px] font-black rounded-lg uppercase tracking-tight border border-white/20 min-w-[80px]">
-                                            <span className="relative z-10 drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">{post.author.role || 'Member'}</span>
-                                        </span>
-                                    )}
+                                    <ForumUserBadge rank={post.author.rank} />
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-slate-500">
                                     <Clock className="w-3.5 h-3.5" />

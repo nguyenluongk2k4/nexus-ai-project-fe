@@ -5,6 +5,7 @@ import { ChevronRight, ThumbsUp, MessageSquare, Share2, Bookmark, Clock, Reply, 
 import { getThreadDetailsUseCase, addCommentUseCase, likePostUseCase } from '../../providers';
 import { ForumPost, ForumComment } from '../../domain/entities/ForumEntities';
 import { useTranslation } from 'react-i18next';
+import { ForumUserBadge } from '../components/ForumUserBadge';
 
 // Recursive CommentItem component for nested replies
 interface CommentItemProps {
@@ -17,7 +18,7 @@ interface CommentItemProps {
   setInlineReplyContent: (content: string) => void;
   isSubmitting: boolean;
   onSubmitReply: (parentId: string) => Promise<void>;
-  isAuthor?: boolean;
+  postAuthorId: string;
 }
 
 function CommentItem({
@@ -30,7 +31,7 @@ function CommentItem({
   setInlineReplyContent,
   isSubmitting,
   onSubmitReply,
-  isAuthor,
+  postAuthorId,
 }: CommentItemProps) {
   const { t, i18n } = useTranslation();
   const replies = allComments.filter(c => c.parentId === comment.id);
@@ -58,16 +59,17 @@ function CommentItem({
             />
           </div>
           <div className="flex-1">
-            <div className={`${isAuthor ? 'bg-violet-500/5 border-violet-500/10' : 'bg-slate-50/80 border-slate-100'} rounded-2xl rounded-tl-none p-${depth > 0 ? '3.5' : '4'} shadow-sm border`}>
+            <div className={`${comment.author.id === postAuthorId ? 'bg-violet-500/5 border-violet-500/20' : 'bg-white border-slate-200'} rounded-2xl ${depth > 0 ? 'p-4' : 'p-6'} shadow-sm border hover:border-violet-200 transition-colors`}>
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-sm font-bold text-slate-900">{comment.author.name}</span>
-                  {isAuthor && (
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-violet-600 text-white uppercase">
-                      {t('forum.badges.author')}
-                    </span>
+                  <ForumUserBadge rank={comment.author.rank} />
+                  {comment.author.id === postAuthorId && (
+                    <ForumUserBadge isAuthor />
                   )}
-                  <span className="text-xs text-slate-400">{new Date(comment.createdAt).toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'vi-VN')}</span>
+                  <span className="text-xs text-slate-400 font-medium ml-1">
+                    {new Date(comment.createdAt).toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'vi-VN')}
+                  </span>
                 </div>
                 <button className="text-slate-400 hover:text-slate-600">
                   <MoreHorizontal className="w-4 h-4" />
@@ -123,26 +125,27 @@ function CommentItem({
                 </div>
               </div>
             )}
+            {/* Render nested replies */}
+            <div className="mt-4 space-y-4">
+              {replies.map(reply => (
+                <CommentItem
+                  key={reply.id}
+                  comment={reply}
+                  allComments={allComments}
+                  depth={depth + 1}
+                  replyingToId={replyingToId}
+                  setReplyingToId={setReplyingToId}
+                  inlineReplyContent={inlineReplyContent}
+                  setInlineReplyContent={setInlineReplyContent}
+                  isSubmitting={isSubmitting}
+                  onSubmitReply={onSubmitReply}
+                  postAuthorId={postAuthorId}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Render nested replies */}
-      {replies.map(reply => (
-        <CommentItem
-          key={reply.id}
-          comment={reply}
-          allComments={allComments}
-          depth={depth + 1}
-          replyingToId={replyingToId}
-          setReplyingToId={setReplyingToId}
-          inlineReplyContent={inlineReplyContent}
-          setInlineReplyContent={setInlineReplyContent}
-          isSubmitting={isSubmitting}
-          onSubmitReply={onSubmitReply}
-          isAuthor={false}
-        />
-      ))}
     </>
   );
 }
@@ -167,7 +170,7 @@ export function ThreadDetail() {
       try {
         if (!id) return;
         setLoading(true);
-        const data = await getThreadDetailsUseCase.execute(Number(id));
+        const data = await getThreadDetailsUseCase.execute(id);
         setPost(data.post);
         setComments(data.comments);
         if (data.post) {
@@ -194,7 +197,7 @@ export function ThreadDetail() {
   const handleLike = async () => {
     if (!id) return;
     try {
-      const result = await likePostUseCase.execute(Number(id));
+      const result = await likePostUseCase.execute(id);
       setIsLiked(result.liked);
       setLikeCount(result.likeCount);
     } catch (error) {
@@ -209,7 +212,7 @@ export function ThreadDetail() {
 
     try {
       setIsSubmitting(true);
-      const newComment = await addCommentUseCase.execute(Number(id), replyContent.trim());
+      const newComment = await addCommentUseCase.execute(id, replyContent.trim());
       setComments([...comments, newComment]);
       setReplyContent('');
     } catch (error) {
@@ -266,7 +269,7 @@ export function ThreadDetail() {
         }}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className=" mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-slate-500 mb-8 overflow-x-auto whitespace-nowrap pb-2">
           <button onClick={() => navigate('/forum')} className="hover:text-violet-600 transition-colors flex items-center">
@@ -316,15 +319,15 @@ export function ThreadDetail() {
                         <h4 className="text-lg font-bold text-slate-900 hover:text-violet-600 cursor-pointer transition-colors">
                           {post.author.name}
                         </h4>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-gradient-to-r from-amber-200 to-yellow-400 text-yellow-900 uppercase tracking-wider shadow-sm">
-                          {t('forum.badges.vip')}
-                        </span>
+                        <ForumUserBadge rank={post.author.rank} />
+                        <ForumUserBadge isAuthor />
+                        {post.author.points !== undefined && (
+                          <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md">
+                            {post.author.points} pts
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-3 text-xs text-slate-500 font-medium">
-                        <span className="flex items-center gap-1">
-                          <Code className="w-3.5 h-3.5" /> {t('forum.badges.techLead')}
-                        </span>
-                        <span className="w-1 h-1 rounded-full bg-slate-300"></span>
                         <span className="flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5" /> {getTimeAgo(post.createdAt)}
                         </span>
@@ -347,7 +350,12 @@ export function ThreadDetail() {
 
                 {/* Content */}
                 <div className="mb-8">
-                  <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-800 mb-6 leading-tight tracking-tight">
+                  <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-800 mb-6 leading-tight tracking-tight flex items-center gap-4">
+                    {post.isHot && (
+                      <span className="shiny-tag flex items-center justify-center bg-red-500 text-white text-[16px] font-black px-4 py-1 rounded-full border border-white/20 shadow-lg shadow-red-500/20">
+                        <span className="tracking-tight uppercase relative z-10 drop-shadow-[0_0_5px_rgba(255,255,255,0.4)]">HOT</span>
+                      </span>
+                    )}
                     {post.title}
                   </h1>
                   <div className="prose prose-slate prose-lg max-w-none text-slate-600 leading-relaxed font-medium">
@@ -430,13 +438,13 @@ export function ThreadDetail() {
                     inlineReplyContent={inlineReplyContent}
                     setInlineReplyContent={setInlineReplyContent}
                     isSubmitting={isSubmitting}
-                    isAuthor={post.author.id === comment.author.id}
+                    postAuthorId={post.author.id}
                     onSubmitReply={async (parentId: string) => {
                       if (!id || !inlineReplyContent.trim() || isSubmitting) return;
                       try {
                         setIsSubmitting(true);
                         const newComment = await addCommentUseCase.execute(
-                          Number(id),
+                          id,
                           inlineReplyContent.trim(),
                           parentId
                         );

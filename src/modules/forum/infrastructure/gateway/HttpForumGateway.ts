@@ -1,5 +1,5 @@
-import { ForumGateway } from '../../domain/ports/ForumGateway';
-import { ForumPost, ForumCategory, ForumComment, ForumStats } from '../../domain/entities/ForumEntities';
+import { ForumGateway, LikeResult } from '../../domain/ports/ForumGateway';
+import { ForumPost, ForumCategory, ForumComment, ForumStats, ThreadDetails } from '../../domain/entities/ForumEntities';
 
 import { apiConfig } from "@/shared/config/api.config";
 
@@ -11,6 +11,7 @@ interface UserResponse {
     username: string;
     full_name: string | null;
     avatar: string | null;
+    rank?: string;
 }
 
 interface CategoryResponse {
@@ -83,6 +84,7 @@ function mapCategory(cat: CategoryResponse): ForumCategory {
         name: cat.name,
         description: cat.description || '',
         iconName: cat.iconName || 'Bot',
+        icon: cat.icon || undefined,
         color: cat.color || 'from-gray-500 to-gray-600',
         postCount: cat.post_count,
     };
@@ -90,7 +92,7 @@ function mapCategory(cat: CategoryResponse): ForumCategory {
 
 function mapPost(post: PostResponse): ForumPost {
     return {
-        id: parseInt(post.id.split('-')[0], 16) || Math.floor(Math.random() * 10000), // Convert UUID to number for compatibility
+        id: post.id,
         title: post.title,
         excerpt: post.excerpt,
         content: post.content || undefined,
@@ -98,6 +100,7 @@ function mapPost(post: PostResponse): ForumPost {
             id: post.author.id || '',
             name: post.author.full_name || post.author.username,
             avatar: post.author.avatar || '👤',
+            rank: post.author.rank,
         },
         categoryId: post.categoryId,
         categoryName: post.categoryName || undefined,
@@ -118,12 +121,13 @@ function mapPost(post: PostResponse): ForumPost {
 function mapComment(comment: CommentResponse): ForumComment {
     return {
         id: comment.id,
-        postId: parseInt(comment.postId.split('-')[0], 16) || 0,
+        postId: comment.postId,
         parentId: comment.parentId || null,
         author: {
             id: comment.author.id || '',
             name: comment.author.full_name || comment.author.username,
             avatar: comment.author.avatar || '👤',
+            rank: comment.author.rank,
         },
         content: comment.content,
         likes: comment.likes,
@@ -132,7 +136,6 @@ function mapComment(comment: CommentResponse): ForumComment {
 }
 
 export class HttpForumGateway implements ForumGateway {
-    private postIdToUuid: Map<number, string> = new Map();
 
     async getStats(): Promise<ForumStats> {
         const response = await fetch(`${API_FORUM_URL}/stats`);
@@ -176,12 +179,6 @@ export class HttpForumGateway implements ForumGateway {
         }
         const data: PostResponse[] = await response.json();
 
-        // Store UUID mapping for later use
-        data.forEach((post) => {
-            const numericId = parseInt(post.id.split('-')[0], 16) || 0;
-            this.postIdToUuid.set(numericId, post.id);
-        });
-
         return data.map(mapPost);
     }
 
@@ -192,71 +189,44 @@ export class HttpForumGateway implements ForumGateway {
         }
         const data: CategoryPostsResponse = await response.json();
 
-        // Store UUID mapping
-        data.posts.forEach((post) => {
-            const numericId = parseInt(post.id.split('-')[0], 16) || 0;
-            this.postIdToUuid.set(numericId, post.id);
-        });
-
         return data.posts.map(mapPost);
     }
 
-    async getPostDetails(postId: number): Promise<ForumPost | null> {
-        try {
-            // Try to find UUID from mapping, otherwise use the number as hex prefix
-            const uuid = this.postIdToUuid.get(postId) || postId.toString(16);
-
-            // Try fetching latest posts first to get proper UUID mapping
-            if (!this.postIdToUuid.has(postId)) {
-                await this.getLatestPosts();
-            }
-
-            const actualUuid = this.postIdToUuid.get(postId);
-            if (!actualUuid) {
-                console.warn(`No UUID mapping for post ID ${postId}`);
-                return null;
-            }
-
-            // Include auth header so backend can check if user liked the post
-            const headers: HeadersInit = {};
-            const token = localStorage.getItem('token');
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
-            }
-
-            const response = await fetch(`${API_FORUM_URL}/posts/${actualUuid}`, { headers });
-            if (!response.ok) {
-                return null;
-            }
-            const data: ThreadDetailsResponse = await response.json();
-            return mapPost(data.post);
-        } catch {
-            return null;
-        }
+    async getPostDetails(postId: string): Promise<ForumPost | null> {
+        const data = await this._fetchThread(postId);
+        return data ? mapPost(data.post) : null;
     }
 
-    async getComments(postId: number): Promise<ForumComment[]> {
-        try {
-            const actualUuid = this.postIdToUuid.get(postId);
-            if (!actualUuid) {
-                return [];
-            }
+    async getComments(postId: string): Promise<ForumComment[]> {
+        const data = await this._fetchThread(postId);
+        return data ? data.comments.map(mapComment) : [];
+    }
 
-            // Include auth header for consistency
+    async getThreadDetails(postId: string): Promise<ThreadDetails> {
+        const data = await this._fetchThread(postId);
+        if (!data) return { post: null, comments: [] };
+
+        const post = mapPost(data.post);
+        const comments = data.comments.map(mapComment);
+
+        return { post, comments };
+    }
+
+    private async _fetchThread(postId: string): Promise<ThreadDetailsResponse | null> {
+        try {
             const headers: HeadersInit = {};
             const token = localStorage.getItem('token');
             if (token) {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            const response = await fetch(`${API_FORUM_URL}/posts/${actualUuid}`, { headers });
-            if (!response.ok) {
-                return [];
-            }
-            const data: ThreadDetailsResponse = await response.json();
-            return data.comments.map(mapComment);
-        } catch {
-            return [];
+            const response = await fetch(`${API_FORUM_URL}/posts/${postId}`, { headers });
+            if (!response.ok) return null;
+
+            return await response.json();
+        } catch (error) {
+            console.error('Failed to fetch thread:', error);
+            return null;
         }
     }
 
@@ -286,25 +256,16 @@ export class HttpForumGateway implements ForumGateway {
 
         const data: PostResponse = await response.json();
 
-        // Store UUID mapping
-        const numericId = parseInt(data.id.split('-')[0], 16) || 0;
-        this.postIdToUuid.set(numericId, data.id);
-
         return mapPost(data);
     }
 
-    async addComment(postId: number, content: string, parentId?: string): Promise<ForumComment> {
+    async addComment(postId: string, content: string, parentId?: string): Promise<ForumComment> {
         const token = localStorage.getItem('token');
         if (!token) {
             throw new Error('Authentication required');
         }
 
-        const actualUuid = this.postIdToUuid.get(postId);
-        if (!actualUuid) {
-            throw new Error('Post not found');
-        }
-
-        const response = await fetch(`${API_FORUM_URL}/posts/${actualUuid}/comments`, {
+        const response = await fetch(`${API_FORUM_URL}/posts/${postId}/comments`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -325,18 +286,13 @@ export class HttpForumGateway implements ForumGateway {
         return mapComment(data);
     }
 
-    async likePost(postId: number): Promise<{ liked: boolean; likeCount: number }> {
+    async likePost(postId: string): Promise<LikeResult> {
         const token = localStorage.getItem('token');
         if (!token) {
             throw new Error('Authentication required');
         }
 
-        const actualUuid = this.postIdToUuid.get(postId);
-        if (!actualUuid) {
-            throw new Error('Post not found');
-        }
-
-        const response = await fetch(`${API_FORUM_URL}/posts/${actualUuid}/like`, {
+        const response = await fetch(`${API_FORUM_URL}/posts/${postId}/like`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

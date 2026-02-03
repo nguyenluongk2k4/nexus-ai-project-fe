@@ -1,4 +1,4 @@
-import { ForumPost, ForumCategory, ForumComment, ForumStats } from '../entities/ForumEntities';
+import { ForumPost, ForumCategory, ForumComment, ForumStats, ThreadDetails } from '../entities/ForumEntities';
 
 export interface LikeResult {
   liked: boolean;
@@ -11,10 +11,11 @@ export interface ForumGateway {
   getCategoryById(id: string): Promise<ForumCategory | null>;
   getLatestPosts(): Promise<ForumPost[]>;
   getPostsByCategory(categoryId: string): Promise<ForumPost[]>;
-  getPostDetails(postId: number): Promise<ForumPost | null>;
-  getComments(postId: number): Promise<ForumComment[]>;
+  getPostDetails(postId: string): Promise<ForumPost | null>;
+  getComments(postId: string): Promise<ForumComment[]>;
+  getThreadDetails(postId: string): Promise<ThreadDetails>;
   createPost(post: Omit<ForumPost, 'id' | 'stats' | 'createdAt'>): Promise<ForumPost>;
-  addComment(postId: number, content: string, parentId?: string): Promise<ForumComment>;
-  likePost(postId: number): Promise<LikeResult>;
+  addComment(postId: string, content: string, parentId?: string): Promise<ForumComment>;
+  likePost(postId: string): Promise<LikeResult>;
 }
 
