@@ -13,12 +13,12 @@ export function useChat(options: UseChatOptions = {}) {
   const { disableNavigation = false } = options;
   const navigate = useNavigate();
   const { sessionId: urlSessionId } = useParams<{ sessionId: string }>();
-  
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [status, setStatus] = useState<ConnectionStatus>('connecting');
   const [error, setError] = useState<string | null>(null);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(urlSessionId || null);
-  
+
   // Sessions state
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
@@ -26,7 +26,7 @@ export function useChat(options: UseChatOptions = {}) {
   const [loadingMore, setLoadingMore] = useState(false);
   const offsetRef = useRef(0);
   const LIMIT = 10;
-  
+
   // Prevent multiple loads
   const isLoadingRef = useRef(false);
 
@@ -37,7 +37,7 @@ export function useChat(options: UseChatOptions = {}) {
   const loadSessions = useCallback(async (reset: boolean = false) => {
     if (isLoadingRef.current) return;
     isLoadingRef.current = true;
-    
+
     try {
       const currentOffset = reset ? 0 : offsetRef.current;
       if (reset) {
@@ -45,9 +45,9 @@ export function useChat(options: UseChatOptions = {}) {
       } else {
         setLoadingMore(true);
       }
-      
+
       const data = await sessionGateway.getSessions(LIMIT, currentOffset);
-      
+
       if (reset) {
         setSessions(data);
         offsetRef.current = LIMIT;
@@ -55,7 +55,7 @@ export function useChat(options: UseChatOptions = {}) {
         setSessions(prev => [...prev, ...data]);
         offsetRef.current += LIMIT;
       }
-      
+
       setHasMore(data.length === LIMIT);
     } catch (err) {
       console.error('Failed to load sessions:', err);
@@ -121,7 +121,7 @@ export function useChat(options: UseChatOptions = {}) {
   // WebSocket connection - separate effect
   useEffect(() => {
     const service = getChatService();
-    
+
     const handleMessage = (msg: Message) => {
       // Handle new session creation - navigate but don't add to messages
       if (msg.role === 'system' && msg.text.startsWith('Bắt đầu session: ')) {
@@ -135,13 +135,13 @@ export function useChat(options: UseChatOptions = {}) {
         setTimeout(() => loadSessions(true), 500);
         return; // Don't add system message to chat
       }
-      
+
       // Only add bot messages to the list
       if (msg.role === 'bot') {
         setMessages((prev) => [...prev, msg]);
       }
     };
-    
+
     service.connect(
       handleMessage,
       (newStatus) => setStatus(newStatus),
@@ -157,11 +157,11 @@ export function useChat(options: UseChatOptions = {}) {
       const session = sessions.find(s => s.id === currentSessionId);
       if (session?.context_data?.tree_nodes) {
         import('../../../skill-tree/domain/services/treeNodeService').then(({ treeNodeService }) => {
-           // Small delay to ensure UI is ready
-           setTimeout(() => {
-             treeNodeService.updateNodes(session.context_data!.tree_nodes as any);
-             console.log('🌳 [useChat] Restored tree from session context');
-           }, 100);
+          // Small delay to ensure UI is ready
+          setTimeout(() => {
+            treeNodeService.updateNodes(session.context_data!.tree_nodes as any);
+            console.log('🌳 [useChat] Restored tree from session context');
+          }, 100);
         });
       }
     }
@@ -176,7 +176,7 @@ export function useChat(options: UseChatOptions = {}) {
     if (file.size > MAX_SIZE) {
       const msg = 'File quá lớn (Max 5MB)';
       setError(msg);
-      throw new Error(msg); 
+      throw new Error(msg);
     }
 
     setIsUploading(true);
@@ -206,58 +206,63 @@ export function useChat(options: UseChatOptions = {}) {
       // Auto-convert long text to file
       const CHAR_LIMIT = 800;
       if (text.length > CHAR_LIMIT) {
-          try {
-             // Create file from text
-             const blob = new Blob([text], { type: 'text/plain' });
-             const file = new File([blob], "long-message.txt", { type: "text/plain" });
-             
-             // Upload
-             // Note: uploadFile triggers state update, but we need the response now
-             // We reuse the logic but avoiding double state update issues isn't critical here
-             // since we clear attachments right after.
-             const autoFile = await uploadFile(file);
-             
-             finalAttachments.push(autoFile);
-             finalText = `(Nội dung quá dài (${text.length} ký tự), hệ thống đã tự động chuyển thành file đính kèm)`;
-          } catch (uploadErr) {
-             console.error("Auto-upload failed", uploadErr);
-             // Fallback: send as text if upload fails, or throw error?
-             // Throwing might be safer to avoid clogging socket
-             setError('Gửi thất bại: Nội dung quá dài và không thể tự động tạo file.');
-             return;
-          }
+        try {
+          // Create file from text
+          const blob = new Blob([text], { type: 'text/plain' });
+          const file = new File([blob], "long-message.txt", { type: "text/plain" });
+
+          // Upload
+          // Note: uploadFile triggers state update, but we need the response now
+          // We reuse the logic but avoiding double state update issues isn't critical here
+          // since we clear attachments right after.
+          const autoFile = await uploadFile(file);
+
+          finalAttachments.push(autoFile);
+          finalText = `(Nội dung quá dài (${text.length} ký tự), hệ thống đã tự động chuyển thành file đính kèm)`;
+        } catch (uploadErr) {
+          console.error("Auto-upload failed", uploadErr);
+          // Fallback: send as text if upload fails, or throw error?
+          // Throwing might be safer to avoid clogging socket
+          setError('Gửi thất bại: Nội dung quá dài và không thể tự động tạo file.');
+          return;
+        }
       }
 
       // Validation
       if (!finalText.trim() && finalAttachments.length === 0) {
-          return;
+        return;
       }
       if (finalAttachments.length > 0 && !finalText.trim()) {
-          setError('Vui lòng thêm mô tả cho file đính kèm');
-          return;
+        setError('Vui lòng thêm mô tả cho file đính kèm');
+        return;
       }
-      
+
       // Optimistic update
       const userMsg: Message = {
         id: crypto.randomUUID(),
         role: 'user',
-        text: finalText, 
+        text: finalText,
         attachments: finalAttachments, // Include attachments in UI
         timestamp: new Date().toISOString()
       };
-      
+
       setMessages((prev) => [...prev, userMsg]);
-      
+
       // Clear attachments after sending
       setAttachments([]);
-      
+
       await sendMessageUseCase.execute(finalText, currentSessionId, finalAttachments);
     } catch (err: any) {
       setError(err.message);
     }
   }, [currentSessionId, attachments, uploadFile]);
 
-  const clearError = () => setError(null);
+  const clearError = () => {
+    setError(null);
+    if (status === 'error') {
+      setStatus('idle');
+    }
+  };
 
   return {
     messages,

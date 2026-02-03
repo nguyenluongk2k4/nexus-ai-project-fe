@@ -15,7 +15,7 @@ interface RightPanelProps {
   // Node props
   selectedNode: SkillNode | null;
   getNodeStatus: (node: SkillNode) => 'completed' | 'in-progress' | 'locked';
-  
+
   // Chat props
   messages: Message[];
   status: ConnectionStatus;
@@ -30,18 +30,18 @@ interface RightPanelProps {
   currentSessionId: string | null;
   onSelectSession: (id: string) => void;
   onNewChat: () => void;
-  
+
   // Panel state
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
-  
+
   // Tab state (Controlled)
   activeTab?: 'chat' | 'resource';
   onTabChange?: (tab: 'chat' | 'resource') => void;
-  
+
   // Customization
   hideChat?: boolean;
-  
+
   // Upload Props passed from useChat
   uploadFile?: (file: File) => Promise<UploadResponse>;
   attachments?: UploadResponse[];
@@ -77,10 +77,10 @@ export function RightPanel({
 }: RightPanelProps) {
   const { t } = useTranslation();
   const [internalTab, setInternalTab] = useState<TabType>('chat');
-  
+
   // Use controlled state if provided, otherwise internal state
   const activeTab = controlledTab !== undefined ? controlledTab : internalTab;
-  
+
   const handleTabChange = (tab: TabType) => {
     if (onTabChange) {
       onTabChange(tab);
@@ -118,17 +118,16 @@ export function RightPanel({
   }
 
   return (
-    <div className="absolute inset-0 z-40 md:static md:inset-auto w-full md:w-[480px] bg-white border-l border-slate-200 flex flex-col shadow-lg flex-shrink-0 h-full">
+    <div className="absolute inset-0 z-30 md:static md:inset-auto w-full md:w-[480px] bg-white border-l border-slate-200 flex flex-col shadow-lg flex-shrink-0 h-full">
       {/* Tab Bar */}
       <div className="flex items-center border-b border-slate-200">
         {!hideChat && (
           <button
             onClick={() => handleTabChange('chat')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
-              activeTab === 'chat'
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'chat'
                 ? 'border-indigo-500 text-indigo-600 bg-indigo-50/50'
                 : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-            }`}
+              }`}
           >
             <MessageSquare className="w-4 h-4" />
             {t('skillTree.rightPanel.tabs.chat')}
@@ -136,11 +135,10 @@ export function RightPanel({
         )}
         <button
           onClick={() => handleTabChange('resource')}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
-            activeTab === 'resource'
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'resource'
               ? 'border-indigo-500 text-indigo-600 bg-indigo-50/50'
               : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-          }`}
+            }`}
         >
           <BookOpen className="w-4 h-4" />
           {t('skillTree.rightPanel.tabs.resource')}

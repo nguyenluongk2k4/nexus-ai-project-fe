@@ -21,7 +21,12 @@ import { LearningProgressProvider } from '@/modules/skill-tree/ui/contexts/Learn
 import { AuthProvider, useAuth } from '@/modules/auth/AuthProvider';
 import { LoginPage } from '@/modules/auth/ui/LoginPage';
 import { RegisterPage } from '@/modules/auth/ui/RegisterPage';
-
+import { GoogleCallbackPage } from '@/modules/auth/ui/GoogleCallbackPage';
+import { MissionsPage } from '@/modules/coins/ui/pages/MissionsPage';
+import { ReferralPage } from '@/modules/coins/ui/pages/ReferralPage';
+import { TopHeader } from '@/shared/components/TopHeader';
+import { Toaster } from 'sonner';
+import { GlobalDailyAgenda } from '@/modules/skill-tree/ui/components/GlobalDailyAgenda';
 // Protected Route Wrapper
 const ProtectedRoute = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -33,20 +38,18 @@ const ProtectedRoute = () => {
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
-import { Toaster } from 'sonner';
-
-// ... existing code ...
-
 export default function App() {
   return (
-    <LearningProgressProvider>
-      <Toaster position="top-right" richColors />
-      <AuthProvider>
+    <AuthProvider>
+      <LearningProgressProvider>
+        <Toaster position="top-right" richColors />
         <BrowserRouter>
+          <GlobalDailyAgenda />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth/callback" element={<GoogleCallbackPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
             {/* Protected App Routes */}
@@ -56,27 +59,32 @@ export default function App() {
                 element={
                   <div className="flex h-screen w-screen overflow-hidden relative">
                     <Navigation />
-                    <main className="flex-1 overflow-auto bg-white relative z-10">
-                      <Routes>
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/skilltree" element={<SkillTree />} />
-                        <Route path="/my-skills" element={<MySkillTree />} />
-                        <Route path="/quiz" element={<Quiz />} />
-                        <Route path="/jobs" element={<JobRecommendation />} />
-                        <Route path="/insights" element={<LearningInsights />} />
-                        <Route path="/timeline" element={<Timeline />} />
-                        <Route path="/chat" element={<Chat />} />
-                        <Route path="/chat/c/:sessionId" element={<Chat />} />
-                        <Route path="/forum" element={<Forum />} />
-                        <Route path="/forum/new" element={<CreatePost />} />
-                        <Route path="/forum/:category" element={<SubForum />} />
-                        <Route path="/thread/:id" element={<ThreadDetail />} />
-                        <Route path="/profile" element={<Profile />} />
-                        <Route path="/purchase" element={<Purchase />} />
-                        <Route path="/purchase/success" element={<PurchaseSuccess />} />
-                        <Route path="/plans" element={<Plans />} />
-                        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                      </Routes>
+                    <main className="flex-1 flex flex-col overflow-hidden bg-white">
+                      <TopHeader />
+                      <div className="flex-1 overflow-auto">
+                        <Routes>
+                          <Route path="/dashboard" element={<Dashboard />} />
+                          <Route path="/skilltree" element={<SkillTree />} />
+                          <Route path="/my-skills" element={<MySkillTree />} />
+                          <Route path="/quiz" element={<Quiz />} />
+                          <Route path="/jobs" element={<JobRecommendation />} />
+                          <Route path="/insights" element={<LearningInsights />} />
+                          <Route path="/timeline" element={<Timeline />} />
+                          <Route path="/chat" element={<Chat />} />
+                          <Route path="/chat/c/:sessionId" element={<Chat />} />
+                          <Route path="/forum" element={<Forum />} />
+                          <Route path="/forum/new" element={<CreatePost />} />
+                          <Route path="/forum/:category" element={<SubForum />} />
+                          <Route path="/thread/:id" element={<ThreadDetail />} />
+                          <Route path="/missions" element={<MissionsPage />} />
+                          <Route path="/referral" element={<ReferralPage />} />
+                          <Route path="/profile" element={<Profile />} />
+                          <Route path="/purchase" element={<Purchase />} />
+                          <Route path="/purchase/success" element={<PurchaseSuccess />} />
+                          <Route path="/plans" element={<Plans />} />
+                          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                        </Routes>
+                      </div>
                     </main>
                   </div>
                 }
@@ -84,7 +92,7 @@ export default function App() {
             </Route>
           </Routes>
         </BrowserRouter>
-      </AuthProvider>
-    </LearningProgressProvider>
+      </LearningProgressProvider>
+    </AuthProvider>
   );
 }

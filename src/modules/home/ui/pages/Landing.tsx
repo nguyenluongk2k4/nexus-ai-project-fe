@@ -18,21 +18,11 @@ export function Landing() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-violet-50 to-pink-50 text-slate-900 font-sans antialiased overflow-x-hidden">
-      {/* Animated Background Blobs */}
-      {/* Animated Background Blobs - DISABLED FOR PERFORMANCE */}
-      {/* 
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-purple-200/50 rounded-full mix-blend-multiply filter blur-[120px] opacity-70 animate-blob"></div>
-        <div className="absolute top-[20%] right-0 w-[600px] h-[600px] bg-pink-100/50 rounded-full mix-blend-multiply filter blur-[100px] opacity-60 animate-blob" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute -bottom-32 left-1/3 w-[700px] h-[700px] bg-violet-200/40 rounded-full mix-blend-multiply filter blur-[140px] opacity-70 animate-blob" style={{ animationDelay: '4s' }}></div>
-      </div>
-      */}
+      {/* Animated Background Blobs - Removed for Performance */}
+      {/* <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">...</div> */}
 
-      {/* Header */}
       {/* Header */}
       <PublicHeader />
-
-      {/* Hero Section */}
 
       {/* Hero Section */}
       <section className="relative pt-20 pb-20 lg:pt-32 lg:pb-32 overflow-hidden">
@@ -76,7 +66,7 @@ export function Landing() {
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </span>
                 </button>
-                <button className="px-8 py-4 rounded-full border border-slate-300 font-medium hover:bg-white/50 backdrop-blur-sm transition-all text-slate-900">
+                <button className="px-8 py-4 rounded-full border border-slate-300 font-medium hover:bg-slate-50 transition-all text-slate-900 bg-white/80">
                   {t('landing.hero.learnMore')}
                 </button>
               </div>
@@ -92,7 +82,7 @@ export function Landing() {
 
             {/* Enhanced Tree Visualization */}
             <div className="relative z-10 h-[500px] lg:h-[650px] flex items-center justify-center">
-              <div className="absolute inset-0 bg-violet-500/20 blur-[120px] rounded-full scale-75 animate-pulse"></div>
+              <div className="absolute inset-0 bg-violet-500/10 rounded-full scale-75 animate-pulse"></div>
               <div className="relative w-full h-full max-w-[600px] mx-auto">
                 <svg className="relative z-10 w-full h-full drop-shadow-[0_0_30px_rgba(124,58,237,0.3)]" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
                   <defs>
@@ -125,7 +115,7 @@ export function Landing() {
                 </svg>
 
                 {/* Floating Achievement Cards */}
-                <div className="absolute top-[20%] right-0 backdrop-blur-md bg-white/70 p-4 rounded-xl shadow-lg animate-float border border-white/50" style={{ animationDelay: '1s', zIndex: 20 }}>
+                <div className="absolute top-[20%] right-0 bg-white/90 p-4 rounded-xl shadow-lg animate-float border border-white/50" style={{ animationDelay: '1s' }}>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600">
                       <Award className="w-5 h-5" />
@@ -146,7 +136,7 @@ export function Landing() {
                   </div>
                 </div>
 
-                <div className="absolute bottom-[20%] left-0 backdrop-blur-md bg-white/70 p-4 rounded-xl shadow-lg animate-float border border-white/50" style={{ animationDelay: '2.5s', zIndex: 20 }}>
+                <div className="absolute bottom-[20%] left-0 bg-white/90 p-4 rounded-xl shadow-lg animate-float border border-white/50" style={{ animationDelay: '2.5s' }}>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center text-violet-600">
                       <TrendingUp className="w-5 h-5" />
@@ -172,7 +162,7 @@ export function Landing() {
               { num: '50k+', label: t('landing.stats.skills') },
               { num: '95%', label: t('landing.stats.success') }
             ].map((stat, i) => (
-              <div key={i} className="backdrop-blur-md bg-white/70 p-8 rounded-2xl text-center shadow-xl transform hover:-translate-y-2 transition-all duration-500 border-t border-white/80">
+              <div key={i} className="bg-white/90 p-8 rounded-2xl text-center shadow-xl transform hover:-translate-y-2 transition-all duration-500 border border-white/50">
                 <h3 className="font-bold text-5xl text-slate-900 mb-2">{stat.num}</h3>
                 <p className="text-slate-500 font-medium tracking-wide uppercase text-sm">{stat.label}</p>
               </div>
@@ -220,7 +210,7 @@ export function Landing() {
               { icon: Key, step: 'STEP 04', title: t('landing.howItWorks.step4.title'), desc: t('landing.howItWorks.step4.desc') }
             ].map((item, i) => (
               <div key={i} className="text-center group relative">
-                <div className="w-24 h-24 mx-auto backdrop-blur-md bg-white/70 rounded-full flex items-center justify-center mb-8 shadow-lg group-hover:shadow-violet-500/50 group-hover:scale-110 transition-all duration-500">
+                <div className="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center mb-8 shadow-lg group-hover:shadow-violet-500/50 group-hover:scale-110 transition-all duration-500 border border-slate-100">
                   <item.icon className="w-10 h-10 text-slate-700 group-hover:text-violet-600 transition-colors" />
                 </div>
                 <span className="text-xs font-bold text-violet-600 mb-3 block tracking-wider">{item.step}</span>
@@ -233,7 +223,7 @@ export function Landing() {
       </section>
 
       {/* Features Bento Grid */}
-      <section className="py-24 bg-white/30 backdrop-blur-sm">
+      <section className="py-24 bg-white/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="font-bold text-4xl md:text-5xl text-slate-900 mb-4">{t('landing.features.title')}</h2>
@@ -242,13 +232,13 @@ export function Landing() {
 
           <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
             {/* Large Feature Card - AI Roadmap */}
-            <div className="col-span-1 md:col-span-4 md:row-span-2 bg-white rounded-3xl p-10 border border-slate-100 hover:shadow-2xl transition-all">
+            <div className="col-span-1 md:col-span-4 md:row-span-2 bg-white rounded-3xl p-10 border border-slate-100 hover:shadow-2xl transition-all shadow-sm">
               <Brain className="w-14 h-14 text-violet-600 mb-6" />
               <h3 className="font-bold text-3xl text-slate-900 mb-4">{t('landing.features.roadmap.title')}</h3>
               <p className="text-slate-600 max-w-md text-lg mb-8">{t('landing.features.roadmap.desc')}</p>
 
               {/* Enhanced Roadmap Visualization */}
-              <div className="relative h-64 w-full bg-slate-50/50 rounded-xl border border-slate-100 p-8 overflow-hidden">
+              <div className="relative h-64 w-full bg-slate-50 rounded-xl border border-slate-100 p-8 overflow-hidden">
                 <svg className="w-full h-full" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
                   <defs>
                     <linearGradient id="pathGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -302,7 +292,7 @@ export function Landing() {
             </div>
 
             {/* Small Feature Cards */}
-            <div className="col-span-1 md:col-span-2 bg-white rounded-3xl p-8 border border-slate-100 hover:shadow-2xl transition-all">
+            <div className="col-span-1 md:col-span-2 bg-white rounded-3xl p-8 border border-slate-100 hover:shadow-2xl transition-all shadow-sm">
               <TrendingUp className="w-12 h-12 text-purple-600 mb-6" />
               <h3 className="font-bold text-xl text-slate-900 mb-2">{t('landing.features.visual.title')}</h3>
               <p className="text-sm text-slate-600 mb-6">{t('landing.features.visual.desc')}</p>
@@ -313,17 +303,17 @@ export function Landing() {
               </div>
             </div>
 
-            <div className="col-span-1 md:col-span-2 backdrop-blur-md bg-white/70 rounded-3xl p-8 border border-white/60 hover:shadow-2xl transition-all">
+            <div className="col-span-1 md:col-span-2 bg-white rounded-3xl p-8 border border-slate-100 hover:shadow-2xl transition-all shadow-sm">
               <Target className="w-12 h-12 text-amber-600 mb-6" />
               <h3 className="font-bold text-xl text-slate-900 mb-2">{t('landing.features.career.title')}</h3>
               <p className="text-sm text-slate-600 mb-4">{t('landing.features.career.desc')}</p>
               <div className="space-y-2">
-                <div className="flex items-center gap-2 p-2 rounded-lg bg-white/50 border border-white/50">
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 border border-slate-100">
                   <div className="w-6 h-6 rounded-full bg-blue-100 text-xs flex items-center justify-center">G</div>
                   <div className="h-2 w-16 bg-slate-200 rounded-full" />
                   <span className="ml-auto text-xs font-bold text-green-600">98%</span>
                 </div>
-                <div className="flex items-center gap-2 p-2 rounded-lg bg-white/50 border border-white/50 opacity-70">
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 border border-slate-100 opacity-70">
                   <div className="w-6 h-6 rounded-full bg-red-100 text-xs flex items-center justify-center">N</div>
                   <div className="h-2 w-12 bg-slate-200 rounded-full" />
                   <span className="ml-auto text-xs font-bold text-slate-400">85%</span>
@@ -348,7 +338,7 @@ export function Landing() {
               { name: 'Michael Rodriguez', role: 'Full Stack Engineer', quote: t('landing.testimonials.q2') },
               { name: 'Emily Watson', role: 'Product Designer', quote: t('landing.testimonials.q3') }
             ].map((testimonial, i) => (
-              <div key={i} className="backdrop-blur-md bg-white/70 p-10 rounded-2xl border border-white/60 hover:shadow-2xl transition-all">
+              <div key={i} className="bg-white p-10 rounded-2xl border border-slate-100 hover:shadow-2xl transition-all shadow-sm">
                 <Quote className="w-10 h-10 text-violet-600 mb-6" />
                 <p className="text-slate-600 italic leading-relaxed text-lg mb-6 font-serif">"{testimonial.quote}"</p>
                 <div className="flex items-center gap-4">
@@ -376,7 +366,7 @@ export function Landing() {
             { q: t('landing.faq.q3'), a: t('landing.faq.a3') },
             { q: t('landing.faq.q4'), a: t('landing.faq.a4') }
           ].map((faq, i) => (
-            <div key={i} className="backdrop-blur-md bg-white/70 rounded-xl px-6 py-4 border border-white/50 hover:bg-white/80 transition-all">
+            <div key={i} className="bg-white rounded-xl px-6 py-4 border border-slate-100 hover:bg-slate-50 transition-all shadow-sm">
               <button
                 onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 className="w-full flex justify-between items-center text-left"
@@ -479,6 +469,6 @@ export function Landing() {
           animation: float 6s ease-in-out infinite;
         }
       `}</style>
-    </div>
+    </div >
   );
 }

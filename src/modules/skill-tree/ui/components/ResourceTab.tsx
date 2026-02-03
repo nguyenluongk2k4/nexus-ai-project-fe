@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Share2, Zap, Clock, Star, BookOpen, Play, Bell, Calendar, Edit3, Rocket, Check, ChevronDown, Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Share2, Zap, Clock, Star, BookOpen, Play, Bell, Calendar, Edit3, Rocket, Check, ChevronDown, Lock, Brain, TrendingUp, History, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { SkillNode } from '../hooks/useSkillTree';
-import { getSkillTreeService } from '../../providers';
+import { getSkillTreeService, learningGateway } from '../../providers';
+import { useLearningProgress } from '../hooks/useLearningProgress';
 import { treeNodeService } from '../../domain/services/treeNodeService';
-
+import { toast } from 'sonner';
+import { useQuizHistory } from '../../../quiz/ui/hooks/useQuizHistory';
+import { QuizProgressChart } from './QuizProgressChart';
 type NodeStatus = 'completed' | 'in-progress' | 'locked';
 
 interface ResourceTabProps {
@@ -14,39 +18,47 @@ interface ResourceTabProps {
 
 export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { getProgress, updateProgress } = useLearningProgress();
 
   // Local state for resources (moved up to avoid conditional hook error)
   const [resources, setResources] = useState<any[]>([]);
   const [loadingResources, setLoadingResources] = useState(false);
-  
+  const [showChart, setShowChart] = useState(false);
+
+  // Quiz history hook
+  const { history: quizHistory, isLoading: quizHistoryLoading } = useQuizHistory(
+    selectedNode?.originalNodeId || selectedNode?.id || null
+  );
+
   const status = selectedNode ? getNodeStatus(selectedNode) : 'locked';
   const nodeData = selectedNode?.nodeData;
 
   // Sync resources from props or fetch
   useEffect(() => {
     if (!selectedNode?.id) return;
-    
+
     // If props have resources, use them (priority source of truth)
     if (nodeData?.learningResources && nodeData.learningResources.length > 0) {
       setResources(nodeData.learningResources);
       return;
     }
-    
+
     // Otherwise fetch
     setLoadingResources(true);
     getSkillTreeService().getNodeResources(selectedNode.id)
       .then(res => {
-         if (res) {
-            setResources(res);
-            // Still update service for other consumers if needed
-            if (res.length > 0) {
-               treeNodeService.setResources({ [selectedNode.id]: res });
-            }
-         }
+        if (res) {
+          setResources(res);
+          // Still update service for other consumers if needed
+          if (res.length > 0) {
+            treeNodeService.setResources({ [selectedNode.id]: res });
+          }
+        }
       })
       .catch(err => {
         console.error("Failed to load resources:", err);
-        setResources([]); 
+        setResources([]);
       })
       .finally(() => setLoadingResources(false));
   }, [selectedNode?.id, nodeData?.learningResources]);
@@ -67,27 +79,46 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
 
   const handleStatusUpdate = async (resourceId: string, newStatus: string) => {
     try {
-       // Send underscore to API
-       const apiStatus = denormalizeStatus(newStatus);
-       await getSkillTreeService().updateResourceStatus(resourceId, apiStatus as any);
-       
-       // Update local state
-       setResources(prev => prev.map((r: any) => 
+      // Send underscore to API
+      const apiStatus = denormalizeStatus(newStatus);
+      await getSkillTreeService().updateResourceStatus(resourceId, apiStatus as any);
+
+      // IF Learn Now (in-progress) -> Add to Backlog (Timeline with null date)
+      if (newStatus === 'in-progress') {
+        try {
+          await learningGateway.addTimelineItem({
+            resourceId: resourceId,
+            scheduledDate: '', // Empty = Backlog item
+            deadline: undefined,
+            priority: 'medium'
+          });
+          toast.success(t('mySkillTree.timeline.addedToBacklog', { defaultValue: 'Đã thêm vào Hàng chờ' }));
+        } catch (error) {
+          console.error("Failed to add to backlog", error);
+          // Don't block UI if backlog add fails, status is already updated
+        }
+      }
+
+      // Update local state
+      setResources(prev => prev.map((r: any) =>
+        (r.id === resourceId) ? { ...r, status: apiStatus } : r
+      ));
+
+      // Update Global Context
+      updateProgress(resourceId, { status: apiStatus as any });
+
+      // Update global service (best effort)
+      if (nodeData?.learningResources) {
+        const updatedResources = nodeData.learningResources.map((r: any) =>
           (r.id === resourceId) ? { ...r, status: apiStatus } : r
-       ));
-       
-       // Update global service (best effort)
-       if (nodeData?.learningResources) {
-         const updatedResources = nodeData.learningResources.map((r: any) => 
-            (r.id === resourceId) ? { ...r, status: apiStatus } : r
-         );
-         treeNodeService.setResources({
-           [selectedNode.id]: updatedResources
-         });
-       }
-       
+        );
+        treeNodeService.setResources({
+          [selectedNode.id]: updatedResources
+        });
+      }
+
     } catch (e) {
-       console.error("Failed to update status", e);
+      console.error("Failed to update status", e);
     }
   };
 
@@ -99,18 +130,17 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
 
   const formattedDuration = (minutes?: number) => {
     if (!minutes) return t('mySkillTree.panel.types.selfStudy');
-    return `${Math.round(minutes/60)} ${t('mySkillTree.panel.types.hours')}`;
+    return `${Math.round(minutes / 60)} ${t('mySkillTree.panel.types.hours')}`;
   };
 
   return (
     <div className="p-6 h-full overflow-y-auto">
       {/* Header Badge & Share */}
       <div className="flex items-start justify-between mb-3">
-        <span className={`px-2.5 py-1 text-[10px] font-bold rounded-md uppercase tracking-wider ${
-          status === 'in-progress' ? 'bg-indigo-100 text-indigo-700' :
+        <span className={`px-2.5 py-1 text-[10px] font-bold rounded-md uppercase tracking-wider ${status === 'in-progress' ? 'bg-indigo-100 text-indigo-700' :
           status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
-          'bg-slate-100 text-slate-500'
-        }`}>
+            'bg-slate-100 text-slate-500'
+          }`}>
           {getStatusLabel(status)}
         </span>
         <button className="text-slate-400 hover:text-slate-600">
@@ -164,13 +194,12 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
           <div>
             <div className="flex gap-1 mb-1">
               {[1, 2, 3].map((i) => (
-                <span 
-                  key={i} 
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    i <= Math.ceil((nodeData?.importanceScore || 3) / 3.5 * 3)
-                      ? 'bg-amber-400' 
-                      : 'bg-slate-200'
-                  }`}
+                <span
+                  key={i}
+                  className={`w-1.5 h-1.5 rounded-full ${i <= Math.ceil((nodeData?.importanceScore || 3) / 3.5 * 3)
+                    ? 'bg-amber-400'
+                    : 'bg-slate-200'
+                    }`}
                 />
               ))}
             </div>
@@ -187,15 +216,107 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
         </div>
         <div>
           <h5 className="text-sm font-bold text-slate-800 mb-1">
-             {typeof nodeData?.projectIdeas?.[0] === 'object' ? nodeData.projectIdeas[0].title : t('mySkillTree.panel.defaultProjectTitle')}
+            {typeof nodeData?.projectIdeas?.[0] === 'object' ? nodeData.projectIdeas[0].title : t('mySkillTree.panel.defaultProjectTitle')}
           </h5>
           <p className="text-xs text-slate-600 leading-relaxed">
-            {typeof nodeData?.projectIdeas?.[0] === 'string' 
-              ? nodeData.projectIdeas[0] 
+            {typeof nodeData?.projectIdeas?.[0] === 'string'
+              ? nodeData.projectIdeas[0]
               : nodeData?.projectIdeas?.[0]?.description || (nodeData?.projectIdeas ? "Áp dụng các kiến thức vào kịch bản thực tế." : t('mySkillTree.panel.defaultProjectDesc'))}
           </p>
         </div>
       </div>
+
+      {/* Take Quiz Button - Direct access for testing */}
+      <div className="mb-6 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100 rounded-xl p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
+              <Brain className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-slate-800">{t('mySkillTree.panel.takeQuiz', { defaultValue: 'Kiểm tra kiến thức' })}</h4>
+              <p className="text-xs text-slate-500">{t('mySkillTree.panel.quizDesc', { defaultValue: 'Làm quiz cá nhân hóa' })}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate(`/quiz?nodeId=${selectedNode.originalNodeId || selectedNode.id}&nodeName=${encodeURIComponent(selectedNode.fullName || selectedNode.label)}`)}
+            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+          >
+            <Play className="w-3 h-3 fill-current" />
+            {t('mySkillTree.panel.startQuiz', { defaultValue: 'Bắt đầu' })}
+          </button>
+        </div>
+      </div>
+
+      {/* Quiz History & Progress Section */}
+      {(quizHistory.length > 0 || quizHistoryLoading) && (
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <History className="w-4 h-4 text-purple-500" />
+              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                {t('mySkillTree.panel.quizHistory', { defaultValue: 'Lịch sử làm quiz' })}
+              </h4>
+            </div>
+            {quizHistory.length > 0 && (
+              <button
+                onClick={() => setShowChart(!showChart)}
+                className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-700 font-medium"
+              >
+                <TrendingUp className="w-3 h-3" />
+                {showChart ? 'Ẩn biểu đồ' : 'Xem tiến độ'}
+              </button>
+            )}
+          </div>
+
+          {/* Progress Chart */}
+          {showChart && quizHistory.length > 0 && (
+            <div className="bg-white border border-slate-200 rounded-xl p-4 mb-3">
+              <QuizProgressChart attempts={quizHistory} />
+            </div>
+          )}
+
+          {/* Recent Attempts */}
+          {quizHistoryLoading ? (
+            <div className="text-center py-4">
+              <div className="animate-spin w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full mx-auto"></div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {quizHistory.slice(0, 3).map((attempt) => (
+                <button
+                  key={attempt.attemptId}
+                  onClick={() => navigate(`/quiz?attemptId=${attempt.attemptId}&review=true`)}
+                  className="w-full flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg hover:border-purple-200 hover:bg-purple-50/30 transition-colors text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${(attempt.score || 0) >= 70
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-red-100 text-red-700'
+                      }`}>
+                      {attempt.score?.toFixed(0) || 0}%
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-slate-800">
+                        {(attempt.score || 0) >= 70 ? 'Đạt' : 'Chưa đạt'} • {attempt.totalQuestions} câu
+                      </div>
+                      <div className="text-xs text-slate-500">
+                        {attempt.completedAt
+                          ? new Date(attempt.completedAt).toLocaleDateString('vi-VN', {
+                            day: '2-digit', month: '2-digit', year: 'numeric'
+                          })
+                          : 'Đang làm'
+                        }
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Learning Resources */}
       <div className="mb-8">
@@ -211,46 +332,49 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
 
         <div className="space-y-3">
           {loadingResources ? (
-             <div className="text-center py-8">
-                <div className="animate-spin w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full mx-auto mb-2"></div>
-                <p className="text-xs text-slate-500">{t('mySkillTree.panel.loadingResources')}</p>
-             </div>
+            <div className="text-center py-8">
+              <div className="animate-spin w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+              <p className="text-xs text-slate-500">{t('mySkillTree.panel.loadingResources')}</p>
+            </div>
           ) : resources.length > 0 ? (
             resources.map((resource: any, idx: number) => {
               const resourceName = typeof resource === 'string' ? resource : (resource.name || resource.title || 'Learning Resource');
-              const rawStatus = resource.status || 'not_started';
-              const status = normalizeStatus(rawStatus);
               
+              // Get status from Global Context if available, else fallback to resource prop
+              const progress = getProgress(resource.id);
+              const liveStatus = progress?.status ? normalizeStatus(progress.status) : null;
+              const rawStatus = liveStatus || resource.status || 'not_started';
+              
+              const status = normalizeStatus(rawStatus);
+
               return (
                 <div key={idx} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:border-indigo-200 transition-colors">
                   <div className="flex items-start gap-3 mb-4">
                     {/* Icon Box */}
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                      status === 'completed' ? 'bg-emerald-100 text-emerald-600' :
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${status === 'completed' ? 'bg-emerald-100 text-emerald-600' :
                       status === 'in-progress' ? 'bg-indigo-100 text-indigo-600' :
-                      'bg-slate-100 text-slate-400'
-                    }`}>
+                        'bg-slate-100 text-slate-400'
+                      }`}>
                       {status === 'completed' ? <Check className="w-5 h-5" /> :
-                       status === 'in-progress' ? <Play className="w-5 h-5 fill-current" /> :
-                       <Lock className="w-5 h-5" />}
+                        status === 'in-progress' ? <Play className="w-5 h-5 fill-current" /> :
+                          <Lock className="w-5 h-5" />}
                     </div>
-                    
+
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start">
-                          <h4 className="text-sm font-bold text-slate-800 mb-0.5 truncate pr-2" title={resourceName}>{resourceName}</h4>
-                          
-                           {/* Status Tag */}
-                           <span className={`flex-shrink-0 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${
-                                status === 'completed' ? 'bg-emerald-100 text-emerald-600' :
-                                status === 'in-progress' ? 'bg-indigo-100 text-indigo-600' :
-                                'bg-slate-100 text-slate-400'
-                           }`}>
-                               {status === 'completed' ? t('mySkillTree.panel.status.completed') : 
-                                status === 'in-progress' ? t('mySkillTree.panel.status.inProgress') : t('mySkillTree.panel.status.notStarted')}
-                           </span>
+                        <h4 className="text-sm font-bold text-slate-800 mb-0.5 truncate pr-2" title={resourceName}>{resourceName}</h4>
+
+                        {/* Status Tag */}
+                        <span className={`flex-shrink-0 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${status === 'completed' ? 'bg-emerald-100 text-emerald-600' :
+                          status === 'in-progress' ? 'bg-indigo-100 text-indigo-600' :
+                            'bg-slate-100 text-slate-400'
+                          }`}>
+                          {status === 'completed' ? t('mySkillTree.panel.status.completed') :
+                            status === 'in-progress' ? t('mySkillTree.panel.status.inProgress') : t('mySkillTree.panel.status.notStarted')}
+                        </span>
                       </div>
-                      
+
                       <p className="text-xs text-slate-500 flex items-center gap-1.5">
                         {resource.type || t('mySkillTree.panel.types.course')} • {formattedDuration(resource.duration_minutes)}
                       </p>
@@ -260,30 +384,29 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
                   {/* Actions Row */}
                   <div className="flex items-center justify-between pt-3 border-t border-slate-50 mt-auto">
                     {status === 'not-started' ? (
-                       <button 
-                          onClick={() => handleStatusUpdate(resource.id, 'in-progress')}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all"
-                       >
-                          <Play className="w-3 h-3 fill-current" />
-                          {t('mySkillTree.panel.learnNow')}
-                       </button>
+                      <button
+                        onClick={() => handleStatusUpdate(resource.id, 'in-progress')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all"
+                      >
+                        <Play className="w-3 h-3 fill-current" />
+                        {t('mySkillTree.panel.learnNow')}
+                      </button>
                     ) : (
-                       <button 
-                          onClick={() => handleStatusUpdate(resource.id, status === 'completed' ? 'not_started' : 'completed')}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                             status === 'completed' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      <button
+                        onClick={() => handleStatusUpdate(resource.id, status === 'completed' ? 'not_started' : 'completed')}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${status === 'completed' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                           }`}
-                       >
-                          {status === 'completed' ? <Check className="w-3 h-3" /> : <BookOpen className="w-3 h-3" />}
-                          {status === 'completed' ? t('mySkillTree.panel.finished') : t('mySkillTree.panel.markFinished')}
-                       </button>
+                      >
+                        {status === 'completed' ? <Check className="w-3 h-3" /> : <BookOpen className="w-3 h-3" />}
+                        {status === 'completed' ? t('mySkillTree.panel.finished') : t('mySkillTree.panel.markFinished')}
+                      </button>
                     )}
-                    
+
                     <div className="flex items-center gap-1">
                       {resource.url && (
-                        <a 
-                          href={resource.url} 
-                          target="_blank" 
+                        <a
+                          href={resource.url}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
                           title={t('mySkillTree.panel.openResource')}

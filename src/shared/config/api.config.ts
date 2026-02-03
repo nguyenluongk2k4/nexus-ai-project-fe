@@ -7,30 +7,18 @@
 const envApiUrl = import.meta.env.VITE_API_URL;
 const envWsUrl = import.meta.env.VITE_WS_URL;
 
-/**
- * Formats a URL with the correct protocol (http/https or ws/wss) 
- * and ensures it's absolute for WebSocket constructors.
- */
-/**
- * Formats a URL with the correct protocol (http/https or ws/wss) 
- * and ensures it's absolute for WebSocket constructors.
- * Also handles protocol downgrading for local dev if needed.
- */
-const formatUrl = (url: string, isWs: boolean): string => {
-  if (typeof window === 'undefined') return url;
-
-  const isHttps = window.location.protocol === 'https:';
-  let formatted = url || '';
-
-  // 1. If relative (starts with /), make absolute using current host
-  if (formatted.startsWith('/')) {
-    formatted = `${window.location.host}${formatted}`;
+// Helper to determine Base URL
+const getBaseUrl = () => {
+  // CRITICAL FIX: If running on production domain (not localhost), ALWAYS use relative path
+  // This prevents 'localhost:8000' from leaking into production builds via env vars
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return '/api';
   }
 
   // 2. Prepend protocol if missing
   if (formatted && !formatted.includes('://')) {
-    const protocol = isWs 
-      ? (isHttps ? 'wss:' : 'ws:') 
+    const protocol = isWs
+      ? (isHttps ? 'wss:' : 'ws:')
       : (isHttps ? 'https:' : 'http:');
     formatted = `${protocol}//${formatted.replace(/^\/+/, '')}`;
   }
@@ -52,32 +40,46 @@ const formatUrl = (url: string, isWs: boolean): string => {
 // Helper to determine Base URL
 const getBaseUrl = () => {
   let url = envApiUrl || '/api';
-  
+
   // CRITICAL: If they point to localhost:8000 but forget /api, we MUST add it
   // because the backend serves all logic under /api
   if (url.includes('localhost:8000') && !url.includes('/api')) {
     url = url.replace(/\/+$/, '') + '/api';
   }
-  
+
   return formatUrl(url, false);
 };
 
 // Helper to determine WS URL
 const getWsBaseUrl = () => {
-  const url = envWsUrl || '/api';
-  return formatUrl(url, true);
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+
+  if (envWsUrl) {
+    // If it's already a full URL, use as is
+    if (envWsUrl.startsWith('ws://') || envWsUrl.startsWith('wss://')) {
+      return envWsUrl;
+    }
+    // If it's just a host/path, add protocol
+    return `${protocol}//${envWsUrl}`;
+  }
+
+  // Default to current host with upgrading protocol
+  return `${protocol}//${window.location.host}/api`;
 };
 
 export const apiConfig = {
   baseUrl: getBaseUrl(),
   wsUrl: getWsBaseUrl(),
-  
+
+  // All API Endpoints
   endpoints: {
     auth: {
       login: '/auth/login',
       register: '/auth/register',
       me: '/auth/me',
     },
+
+    // Chat Module
     chat: {
       ws: '/chat/ws',
       message: '/chat/message',
@@ -85,6 +87,8 @@ export const apiConfig = {
       sessionMessages: (sessionId: string) => `/chat/sessions/${sessionId}/messages`,
       sessionDelete: (sessionId: string) => `/chat/sessions/${sessionId}`,
     },
+
+    // Admin Module - Templates
     admin: {
       templates: {
         list: '/admin/templates',
@@ -93,6 +97,8 @@ export const apiConfig = {
         delete: (id: string) => `/admin/templates/${id}`,
         nodes: (templateId: string) => `/admin/templates/${templateId}/nodes`,
       },
+
+      // Nodes
       nodes: {
         create: '/admin/nodes',
         get: (id: string) => `/admin/nodes/${id}`,
@@ -101,10 +107,14 @@ export const apiConfig = {
         children: (id: string) => `/admin/nodes/${id}/children`,
         resources: (nodeId: string) => `/admin/nodes/${nodeId}/resources`,
       },
+
+      // Resources
       resources: {
         create: '/admin/resources',
         delete: (id: string) => `/admin/resources/${id}`,
       },
+
+      // Sync
       sync: {
         rebuild: '/admin/sync/rebuild',
       },
@@ -121,22 +131,29 @@ export const apiConfig = {
       saveToMyTree: '/skill-tree/my-tree/save',
       removeFromMyTree: (nodeId: string) => `/skill-tree/my-tree/nodes/${nodeId}`,
     },
+
+    // Learning Module (placeholders for future)
     learning: {
       progress: '/learning/progress',
       timeline: '/learning/timeline',
     },
+
+    // Forum Module (placeholders for future)
     forum: {
       categories: '/forum/categories',
       threads: '/forum/threads',
       posts: '/forum/posts',
       upload: '/upload',
     },
+
+    // Jobs Module (placeholders for future)
     jobs: {
       recommendations: '/jobs/recommendations',
       applications: '/jobs/applications',
     },
   },
-  
+
+  // Helper methods
   getWsUrl(path: string): string {
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
     // If base already has the path, return as is (for full path envs)
@@ -145,7 +162,7 @@ export const apiConfig = {
     }
     return `${this.wsUrl.replace(/\/+$/, '')}${cleanPath}`;
   },
-  
+
   getHttpUrl(path: string): string {
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
     // If base already has the path, return as is
@@ -155,5 +172,6 @@ export const apiConfig = {
     return `${this.baseUrl.replace(/\/+$/, '')}${cleanPath}`;
   }
 };
+
 
 

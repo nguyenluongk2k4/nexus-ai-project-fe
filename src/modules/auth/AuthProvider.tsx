@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthState, LoginRequest, RegisterRequest, User } from "./domain/types";
 import { AuthApiGateway } from "./infrastructure/AuthApiGateway";
+import { notificationGateway } from "@/shared/infrastructure/NotificationGateway";
 
 interface AuthContextType extends AuthState {
   login: (request: LoginRequest) => Promise<void>;
@@ -13,7 +14,7 @@ interface AuthContextType extends AuthState {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Singleton gateway
-const authGateway = new AuthApiGateway();
+export const authGateway = new AuthApiGateway();
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({
@@ -26,7 +27,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check auth on mount
   useEffect(() => {
     const checkAuth = async () => {
+      // Small delay to avoid race condition with other requests on page load
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       const token = localStorage.getItem("token");
+
       if (!token) {
         setState(s => ({ ...s, isLoading: false }));
         return;
@@ -53,6 +58,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     checkAuth();
   }, []);
+
+  // Connect notification gateway when user changes
+  useEffect(() => {
+    if (state.user) {
+      notificationGateway.connect(state.user.id);
+    } else {
+      notificationGateway.disconnect();
+    }
+  }, [state.user]);
 
   const login = async (request: LoginRequest) => {
     setState(s => ({ ...s, isLoading: true, error: null }));

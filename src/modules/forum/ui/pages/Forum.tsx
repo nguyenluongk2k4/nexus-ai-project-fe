@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   MessageSquare,
@@ -102,6 +102,52 @@ export function Forum() {
     return Date.now() - date.getTime() < 24 * 60 * 60 * 1000;
   };
 
+  const filteredPosts = useMemo(() => {
+    let result = [...posts];
+
+    // 1. Search
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (p) =>
+          p.title.toLowerCase().includes(query) ||
+          p.excerpt.toLowerCase().includes(query)
+      );
+    }
+
+    // 2. Filter & Sort
+    switch (selectedFilter) {
+      case 'hot':
+        // Filter by Hot criteria AND sort by views
+        result = result.filter((p) => isHot(p));
+        result.sort((a, b) => Number(b.stats.views) - Number(a.stats.views));
+        break;
+      case 'new':
+        // Sort by Date (Newest first)
+        result.sort((a, b) => {
+          const dateA = new Date(a.createdAt).getTime();
+          const dateB = new Date(b.createdAt).getTime();
+          return dateB - dateA;
+        });
+        break;
+      case 'unanswered':
+        // Filter by 0 comments
+        result = result.filter((p) => Number(p.stats.comments) === 0);
+        break;
+      default:
+        // 'all': Default sort (usually by date or ID)
+        // If API returns sorted, we keep it. Or enforce Date sort?
+        // Let's enforce Date sort for consistency
+        result.sort((a, b) => {
+          const dateA = new Date(a.createdAt).getTime();
+          const dateB = new Date(b.createdAt).getTime();
+          return dateB - dateA;
+        });
+    }
+
+    return result;
+  }, [posts, searchQuery, selectedFilter]);
+
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-screen" style={{ backgroundColor: '#faf5ff' }}>
@@ -114,13 +160,13 @@ export function Forum() {
   }
 
   return (
-    <div 
-        className="flex-1 overflow-auto min-h-screen relative" 
-        style={{
-            backgroundColor: '#faf5ff',
-            backgroundImage: 'radial-gradient(#e9d5ff 1px, transparent 1px)',
-            backgroundSize: '24px 24px'
-        }}
+    <div
+      className="flex-1 overflow-auto min-h-screen relative"
+      style={{
+        backgroundColor: '#faf5ff',
+        backgroundImage: 'radial-gradient(#e9d5ff 1px, transparent 1px)',
+        backgroundSize: '24px 24px'
+      }}
     >
       {/* Animated Background Blobs */}
       {/* Animated Background Blobs - DISABLED FOR PERFORMANCE */}
@@ -191,121 +237,133 @@ export function Forum() {
 
             {/* Posts List with Stagger Animation */}
             <div className="space-y-5">
-              {posts.map((post, index) => (
-                <article
-                  key={post.id}
-                  onClick={() => onNavigateToThread(post.id)}
-                  className="group bg-white rounded-2xl border border-slate-100 hover:border-violet-400 hover:shadow-2xl hover:shadow-violet-500/10 transition-all duration-300 cursor-pointer overflow-hidden hover:scale-[1.02] hover:-translate-y-1 animate-fade-in"
-                  style={{
-                    animationDelay: `${index * 100}ms`,
-                    transformStyle: 'preserve-3d'
-                  }}
-                >
-                  <div className="p-7 relative">
-                    {/* Hover glow effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
-                    <div className="relative z-10">
-                      {/* Author Info & Badges Row */}
-                      <div className="flex items-start justify-between mb-4">
-                        {/* Author Info - Left */}
-                        <div className="flex items-center gap-3">
-                          <img
-                            alt={post.author.name}
-                            className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-100"
-                            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=random&bold=true`}
-                          />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <h4 className="text-sm font-bold text-slate-900">{post.author.name}</h4>
-                              <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-bold rounded uppercase tracking-wide">
-                                Expert
+              {filteredPosts.length === 0 ? (
+                <div className="text-center py-12 bg-white rounded-2xl border border-slate-100">
+                  <p className="text-slate-500 font-medium">{t('forum.noResults', 'Không tìm thấy bài viết nào')}</p>
+                </div>
+              ) : (
+                filteredPosts.map((post, index) => (
+                  <article
+                    key={post.id}
+                    onClick={() => onNavigateToThread(post.id)}
+                    className="group bg-white rounded-2xl border border-white/60 hover:border-violet-400 hover:shadow-2xl hover:shadow-violet-500/10 transition-all duration-300 cursor-pointer overflow-hidden hover:scale-[1.02] hover:-translate-y-1 animate-fade-in"
+                    style={{
+                      animationDelay: `${index * 100}ms`,
+                      transformStyle: 'preserve-3d'
+                    }}
+                  >
+                    <div className="p-7 relative">
+                      {/* Hover glow effect */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
+                      <div className="relative z-10">
+                        {/* Author Info & Badges Row */}
+                        <div className="flex items-start justify-between mb-4">
+                          {/* Author Info - Left */}
+                          <div className="flex items-center gap-3">
+                            <img
+                              alt={post.author.name}
+                              className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-100"
+                              src={post.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=random&bold=true`}
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-sm font-bold text-slate-900">{post.author.name}</h4>
+                                <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-bold rounded uppercase tracking-wide">
+                                  Expert
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-slate-500">
+                                <Clock className="w-3.5 h-3.5" />
+                                <span>{getTimeAgo(post.createdAt)}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Badges - Right */}
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {isHot(post) && (
+                              <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-orange-50 to-red-50 text-orange-700 text-xs font-bold rounded-full border border-orange-200 shadow-sm animate-pulse-slow">
+                                <Flame className="w-3.5 h-3.5 animate-pulse" />
+                                HOT
                               </span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-slate-500">
-                              <Clock className="w-3.5 h-3.5" />
-                              <span>{getTimeAgo(post.createdAt)}</span>
-                            </div>
+                            )}
+                            {isNew(post) && (
+                              <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200 shadow-sm">
+                                <Sparkles className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '3s' }} />
+                                {t('forum.badges.new')}
+                              </span>
+                            )}
+                            {post.categoryName && (
+                              <span className="px-3 py-1.5 bg-violet-50 text-violet-700 text-xs font-semibold rounded-full border border-violet-200">
+                                {post.categoryName}
+                              </span>
+                            )}
                           </div>
                         </div>
 
-                        {/* Badges - Right */}
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          {isHot(post) && (
-                            <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-orange-50 to-red-50 text-orange-700 text-xs font-bold rounded-full border border-orange-200 shadow-sm animate-pulse-slow">
-                              <Flame className="w-3.5 h-3.5 animate-pulse" />
-                              HOT
-                            </span>
-                          )}
-                          {isNew(post) && (
-                            <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200 shadow-sm">
-                              <Sparkles className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '3s' }} />
-                              {t('forum.badges.new')}
-                            </span>
-                          )}
-                          {post.categoryName && (
-                            <span className="px-3 py-1.5 bg-violet-50 text-violet-700 text-xs font-semibold rounded-full border border-violet-200">
-                              {post.categoryName}
-                            </span>
-                          )}
+                        {/* Post Content */}
+                        <div className="mb-4">
+                          <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-violet-700 transition-colors leading-snug">
+                            {post.title}
+                          </h3>
+                          <p className="text-slate-600 leading-relaxed line-clamp-2">
+                            {post.excerpt}
+                          </p>
                         </div>
-                      </div>
 
-                      {/* Post Content */}
-                      <div className="mb-4">
-                        <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-violet-700 transition-colors leading-snug">
-                          {post.title}
-                        </h3>
-                        <p className="text-slate-600 leading-relaxed line-clamp-2">
-                          {post.excerpt}
-                        </p>
-                      </div>
+                        {/* Interactions & Stats */}
+                        <div className="flex items-center justify-between pt-4 border-t border-slate-100 mt-4">
+                          <div className="flex items-center gap-6">
+                            {/* Like Button */}
+                            <button
+                              className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-violet-50 text-slate-600 hover:text-violet-600 rounded-lg transition-colors group/btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Add like logic here if needed
+                              }}
+                            >
+                              <ThumbsUp className="w-4 h-4 group-hover/btn:scale-110 transition-transform text-blue-600 fill-blue-600/10" />
+                              <span className="text-sm font-bold">{post.stats.likes || 0}</span>
+                            </button>
 
-                      {/* Actions & Stats Row */}
-                      <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                        <div className="flex items-center gap-4">
-                          {/* Like Button */}
-                          <button className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-violet-50 text-slate-600 hover:text-violet-600 rounded-lg transition-colors group/btn">
-                            <ThumbsUp className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
-                            <span className="text-xs font-bold">{post.stats.likes || 0}</span>
-                          </button>
-
-                          {/* Stats */}
-                          <div className="flex items-center gap-4 text-sm font-medium text-slate-500">
-                            <div className="flex items-center gap-1.5 hover:text-violet-600 transition-colors">
+                            {/* Comments */}
+                            <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
                               <MessageSquare className="w-4 h-4" />
-                              <span>{post.stats.comments} {t('forum.comments').toLowerCase()}</span>
+                              <span>{post.stats.comments} {t('forum.comments')}</span>
                             </div>
-                            <div className="flex items-center gap-1.5">
+
+                            {/* Views */}
+                            <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
                               <Eye className="w-4 h-4" />
-                              <span>{post.stats.views} {t('forum.views').toLowerCase()}</span>
+                              <span>{post.stats.views} {t('forum.views')}</span>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Read More */}
-                        <span className="text-xs font-bold text-violet-600 group-hover:text-violet-700 flex items-center gap-1 uppercase tracking-wide">
-                          {t('forum.readMore')}
-                          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+                          {/* Read More */}
+                          <span className="text-sm font-semibold text-violet-600 group-hover:text-violet-700 flex items-center gap-1">
+                            {t('forum.readMore')}
+                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                          </span>
+                        </div>
+                      </div >
+                    </div >
+                  </article >
+                )))
+              }
+            </div >
 
             {/* Load More */}
-            <div className="flex justify-center pt-4">
+            < div className="flex justify-center pt-4" >
               <button className="px-8 py-3 bg-white border-2 border-slate-200 text-slate-700 hover:border-violet-600 hover:text-violet-600 font-semibold rounded-xl transition-all">
                 {t('forum.loadMore')}
               </button>
-            </div>
-          </div>
+            </div >
+          </div >
 
           {/* Sidebar - Glassmorphic */}
-          <aside className="lg:col-span-4 space-y-6">
+          < aside className="lg:col-span-4 space-y-6" >
             {/* Live Activity with glow */}
-            <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-300">
+            < div className="bg-white rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-300" >
               <h3 className="font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 {t('forum.sidebar.liveActivity')}
@@ -324,10 +382,10 @@ export function Forum() {
                   <span className="font-bold text-violet-600">3</span>
                 </div>
               </div>
-            </div>
+            </div >
 
             {/* Categories - Glass */}
-            <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl transition-all">
+            < div className="bg-white rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl transition-all" >
               <h3 className="font-bold text-lg text-slate-900 mb-4">{t('forum.sidebar.categories')}</h3>
               <div className="space-y-2">
                 {categories.map((category) => {
@@ -352,42 +410,44 @@ export function Forum() {
                   );
                 })}
               </div>
-            </div>
+            </div >
 
             {/* Stats - Animated */}
-            {stats && (
-              <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl transition-all">
-                <h3 className="font-bold text-lg text-slate-900 mb-4">{t('forum.sidebar.stats')}</h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-600">{t('forum.stats.totalPosts')}</span>
-                    <span className="text-2xl font-bold text-slate-900">{stats.totalPosts.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-600">{t('forum.stats.members')}</span>
-                    <span className="text-2xl font-bold text-slate-900">{stats.totalMembers.toLocaleString()}</span>
-                  </div>
+            {
+              stats && (
+                <div className="bg-white rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl transition-all">
+                  <h3 className="font-bold text-lg text-slate-900 mb-4">{t('forum.sidebar.stats')}</h3>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-600">{t('forum.stats.totalPosts')}</span>
+                      <span className="text-2xl font-bold text-slate-900">{stats.totalPosts.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-600">{t('forum.stats.members')}</span>
+                      <span className="text-2xl font-bold text-slate-900">{stats.totalMembers.toLocaleString()}</span>
+                    </div>
 
-                  {/* Activity Chart */}
-                  <div className="pt-4 mt-4 border-t border-slate-100">
-                    <p className="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-wider">{t('forum.stats.activity7Days')}</p>
-                    <div className="h-20 flex items-end gap-1.5">
-                      {[30, 45, 35, 60, 50, 75, 90].map((height, i) => (
-                        <div
-                          key={i}
-                          className="flex-1 bg-slate-200 hover:bg-violet-600 rounded-t transition-all cursor-pointer"
-                          style={{ height: `${height}%` }}
-                          title={`${100 + i * 10} posts`}
-                        />
-                      ))}
+                    {/* Activity Chart */}
+                    <div className="pt-4 mt-4 border-t border-slate-100">
+                      <p className="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-wider">{t('forum.stats.activity7Days')}</p>
+                      <div className="h-20 flex items-end gap-1.5">
+                        {[30, 45, 35, 60, 50, 75, 90].map((height, i) => (
+                          <div
+                            key={i}
+                            className="flex-1 bg-slate-200 hover:bg-violet-600 rounded-t transition-all cursor-pointer"
+                            style={{ height: `${height}%` }}
+                            title={`${100 + i * 10} posts`}
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )
+            }
 
             {/* Top Members - Interactive */}
-            <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl transition-all">
+            <div className="bg-white rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl transition-all">
               <h3 className="font-bold text-lg text-slate-900 mb-4">{t('forum.sidebar.topMembers')}</h3>
               <div className="grid grid-cols-5 gap-3">
                 {MOCK_TOP_MEMBERS.map((member) => (
@@ -428,9 +488,9 @@ export function Forum() {
                 ))}
               </div>
             </div>
-          </aside>
-        </div>
-      </main>
+          </aside >
+        </div >
+      </main >
 
       <style>{`
         @keyframes blob {
@@ -468,6 +528,6 @@ export function Forum() {
           animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
       `}</style>
-    </div>
+    </div >
   );
 }

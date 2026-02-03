@@ -40,13 +40,14 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
     const { t, i18n } = useTranslation();
     const [activeTab, setActiveTab] = useState<'manual' | 'ai'>('manual');
     const [resources, setResources] = useState<Resource[]>([]);
+    const [backlogItems, setBacklogItems] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(false);
 
     // Manual mode state
     const [selectedResourceId, setSelectedResourceId] = useState('');
     const [scheduledDate, setScheduledDate] = useState('');
     const [deadline, setDeadline] = useState('');
-    const [priority, setPriority] = useState('medium');
+    const [priority, setPriority] = useState('medium'); 
 
     // AI mode state
     const [aiPrompt, setAiPrompt] = useState('');
@@ -66,7 +67,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
     // Load resources when dialog opens
     useEffect(() => {
         if (isOpen) {
-            fetchResources();
+            fetchData();
             // Set default date to tomorrow
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
@@ -78,17 +79,38 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
         }
     }, [isOpen]);
 
-    const fetchResources = async () => {
+    const fetchData = async () => {
         try {
-            const response = await fetch(`${API_TIMELINE_URL}/resources`, {
-                headers: getHeaders(),
-            });
-            if (response.ok) {
-                const data = await response.json();
+            const [resourcesRes, timelineRes] = await Promise.all([
+                fetch(`${API_TIMELINE_URL}/resources`, { headers: getHeaders() }),
+                fetch(`${API_TIMELINE_URL}`, { headers: getHeaders() })
+            ]);
+
+            if (resourcesRes.ok) {
+                const data = await resourcesRes.json();
                 setResources(data);
             }
+
+            if (timelineRes.ok) {
+                const timelineData = await timelineRes.json();
+                // API returns { items: [...], stats: {...} }
+                const items = Array.isArray(timelineData) ? timelineData : (timelineData.items || []);
+                
+                // Filter items with no scheduledDate (Backlog)
+                const backlogIds = new Set<string>();
+                if (Array.isArray(items)) {
+                    items.forEach((item: any) => {
+                         // Check for null date, empty string, or explicit "null" string
+                         if (!item.scheduledDate || item.scheduledDate === '' || item.scheduledDate === 'null') {
+                             backlogIds.add(item.resourceId);
+                         }
+                    });
+                }
+                setBacklogItems(backlogIds);
+            }
+
         } catch (error) {
-            console.error('Error fetching resources:', error);
+            console.error('Error fetching data:', error);
         }
     };
 
@@ -207,6 +229,11 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
         });
     };
 
+    const handleCancel = () => {
+        resetForm();
+        onClose();
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -216,7 +243,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                 <div className="flex items-center justify-between p-6 border-b border-border">
                     <h2 className="text-xl font-bold text-foreground">{t('mySkillTree.timeline.title')}</h2>
                     <button
-                        onClick={onClose}
+                        onClick={handleCancel}
                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                     >
                         <X className="w-5 h-5" />
@@ -228,8 +255,8 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                     <button
                         onClick={() => setActiveTab('manual')}
                         className={`flex-1 py-3 px-4 font-medium transition-colors flex items-center justify-center gap-2 ${activeTab === 'manual'
-                                ? 'text-violet-600 border-b-2 border-violet-600 bg-violet-50'
-                                : 'text-muted-foreground hover:bg-gray-50'
+                            ? 'text-violet-600 border-b-2 border-violet-600 bg-violet-50'
+                            : 'text-muted-foreground hover:bg-gray-50'
                             }`}
                     >
                         <Calendar className="w-4 h-4" />
@@ -238,8 +265,8 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                     <button
                         onClick={() => setActiveTab('ai')}
                         className={`flex-1 py-3 px-4 font-medium transition-colors flex items-center justify-center gap-2 ${activeTab === 'ai'
-                                ? 'text-violet-600 border-b-2 border-violet-600 bg-violet-50'
-                                : 'text-muted-foreground hover:bg-gray-50'
+                            ? 'text-violet-600 border-b-2 border-violet-600 bg-violet-50'
+                            : 'text-muted-foreground hover:bg-gray-50'
                             }`}
                     >
                         <Sparkles className="w-4 h-4" />
@@ -251,7 +278,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                 <div className="p-6 overflow-y-auto max-h-[60vh]">
                     {activeTab === 'manual' ? (
                         <div className="space-y-4">
-                            {/* Resource Select */}
+                            {/* Resource Select - Grouped by Priority */}
                             <div>
                                 <label className="block text-sm font-medium text-foreground mb-2">
                                     {t('mySkillTree.timeline.selectResource')}
@@ -262,11 +289,30 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                                     className="w-full p-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500"
                                 >
                                     <option value="">{t('mySkillTree.timeline.selectPlaceholder')}</option>
-                                    {resources.map((res) => (
-                                        <option key={res.id} value={res.id}>
-                                            {res.title} ({res.nodeName})
-                                        </option>
-                                    ))}
+                                    
+                                    {/* Group 1: Backlog Items (Highest Priority) */}
+                                    {resources.filter(r => backlogItems.has(r.id)).length > 0 && (
+                                        <optgroup label="🛑 Backlog (Đã chọn học)">
+                                            {resources.filter(r => backlogItems.has(r.id)).map((res) => (
+                                                <option key={res.id} value={res.id}>
+                                                    {res.title} ({res.nodeName})
+                                                </option>
+                                            ))}
+                                        </optgroup>
+                                    )}
+
+                                    {/* Group 2: In Progress (Non-backlog) */}
+                                    {resources.filter(r => !backlogItems.has(r.id) && (r as any).status === 'in-progress').length > 0 && (
+                                        <optgroup label="⏳ Đang học (Chưa có lịch)">
+                                            {resources.filter(r => !backlogItems.has(r.id) && (r as any).status === 'in-progress').map((res) => (
+                                                <option key={res.id} value={res.id}>
+                                                    {res.title} ({res.nodeName})
+                                                </option>
+                                            ))}
+                                        </optgroup>
+                                    )}
+                                    
+                                    {/* Removed 'not_started' items as requested */}
                                 </select>
                             </div>
 
@@ -307,12 +353,12 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                                             key={p}
                                             onClick={() => setPriority(p)}
                                             className={`flex-1 py-2 px-4 rounded-xl border-2 font-medium transition-all ${priority === p
-                                                    ? p === 'high'
-                                                        ? 'border-red-500 bg-red-50 text-red-700'
-                                                        : p === 'medium'
-                                                            ? 'border-amber-500 bg-amber-50 text-amber-700'
-                                                            : 'border-gray-400 bg-gray-50 text-gray-700'
-                                                    : 'border-border hover:bg-gray-50'
+                                                ? p === 'high'
+                                                    ? 'border-red-500 bg-red-50 text-red-700'
+                                                    : p === 'medium'
+                                                        ? 'border-amber-500 bg-amber-50 text-amber-700'
+                                                        : 'border-gray-400 bg-gray-50 text-gray-700'
+                                                : 'border-border hover:bg-gray-50'
                                                 }`}
                                         >
                                             {p === 'high' ? t('mySkillTree.timeline.priorities.high') : p === 'medium' ? t('mySkillTree.timeline.priorities.medium') : t('mySkillTree.timeline.priorities.low')}
@@ -419,7 +465,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                 {/* Footer */}
                 <div className="flex items-center justify-end gap-3 p-6 border-t border-border bg-gray-50">
                     <button
-                        onClick={onClose}
+                        onClick={handleCancel}
                         className="px-6 py-2.5 text-muted-foreground hover:text-foreground transition-colors"
                     >
                         {t('mySkillTree.timeline.cancel')}

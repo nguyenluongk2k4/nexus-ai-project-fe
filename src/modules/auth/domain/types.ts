@@ -7,6 +7,8 @@ export interface User {
   fullName?: string;
   avatarUrl?: string;
   isActive: boolean;
+  balance?: number;
+  streak?: number;
   createdAt: string;
   lastLoginAt?: string;
 }
