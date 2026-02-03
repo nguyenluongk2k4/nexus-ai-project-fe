@@ -250,7 +250,7 @@ export function Timeline() {
     const currentIndex = statusOrder.indexOf(item.status);
     const nextStatus = statusOrder[(currentIndex + 1) % 3];
     updateTimelineItem(item.id, { status: nextStatus });
-    
+
     // Sync with Learning Progress (Skill Tree)
     if (item.resourceId) {
       updateProgress(item.resourceId, { status: nextStatus });
@@ -397,18 +397,18 @@ export function Timeline() {
 
   const handleStartLearning = async (item: TimelineItem) => {
     if (item.status === 'in_progress') return;
-    
+
     // Update to in_progress
     updateTimelineItem(item.id, { status: 'in_progress' });
     if (item.resourceId) {
       updateProgress(item.resourceId, { status: 'in_progress' });
     }
-    
+
     // Call API (fire and forget for UI responsiveness)
     try {
-        await (learningGateway as any).updateTimelineItem(item.id, { status: 'in_progress' });
+      await (learningGateway as any).updateTimelineItem(item.id, { status: 'in_progress' });
     } catch (e) {
-        console.error("Failed to update status", e);
+      console.error("Failed to update status", e);
     }
   };
 
@@ -427,15 +427,15 @@ export function Timeline() {
     const priority = priorityColors[item.priority];
 
     return (
-        <DraggableCard 
-            key={item.id} 
-            item={item} 
-            priority={priority} 
-            barColor={barColor} 
-            onStatusChange={handleStatusChange} 
-            onDelete={handleDelete}
-            onClick={() => setSelectedStudyItem(item)}
-        />
+      <DraggableCard
+        key={item.id}
+        item={item}
+        priority={priority}
+        barColor={barColor}
+        onStatusChange={handleStatusChange}
+        onDelete={handleDelete}
+        onClick={() => setSelectedStudyItem(item)}
+      />
     );
   };
 
@@ -635,14 +635,14 @@ export function Timeline() {
 
       // 2. Call API
       const success = await (learningGateway as any).updateTimelineItem(editingItem.id, payload);
-      
+
       if (!success) {
         throw new Error('Backend update failed');
       }
 
       // 3. Update Local Context
       updateTimelineItem(editingItem.id, editFormData as any);
-      
+
       // Sync with Learning Progress (Skill Tree)
       if (editingItem.resourceId && editFormData.status) {
         updateProgress(editingItem.resourceId, { status: editFormData.status });
@@ -766,13 +766,8 @@ export function Timeline() {
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <div 
-        className="h-full flex flex-col overflow-hidden relative" 
-        style={{
-            backgroundColor: '#faf5ff',
-            backgroundImage: 'radial-gradient(#e9d5ff 1px, transparent 1px)',
-            backgroundSize: '24px 24px'
-        }}
+      <div
+        className="h-full flex flex-col overflow-hidden relative bg-white"
       >
         {/* Header */}
         <header className="bg-card z-10 shadow-sm border-b border-border flex-shrink-0">
@@ -947,23 +942,23 @@ export function Timeline() {
         {/* Main content - Conditional rendering based on view mode */}
         <div className="flex-1 overflow-x-hidden overflow-y-auto bg-transparent">
           <div className="p-4 md:p-6 lg:p-8 h-full">
-          {viewMode === 'week' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-auto lg:h-full pb-20 lg:pb-0">
-              {renderTimePeriodColumn('morning')}
-              {renderTimePeriodColumn('afternoon')}
-              {renderTimePeriodColumn('evening')}
-            </div>
-          ) : (
-            <MonthlyCalendarView
-              currentDate={currentWeekStart}
-              timelineItems={timelineItems}
-              selectedDate={selectedDate}
-              onSelectDate={(date) => {
-                setSelectedDate(date);
-                setViewMode('week'); // Switch to week view when a date is selected
-              }}
-            />
-          )}
+            {viewMode === 'week' ? (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-auto lg:h-full pb-20 lg:pb-0">
+                {renderTimePeriodColumn('morning')}
+                {renderTimePeriodColumn('afternoon')}
+                {renderTimePeriodColumn('evening')}
+              </div>
+            ) : (
+              <MonthlyCalendarView
+                currentDate={currentWeekStart}
+                timelineItems={timelineItems}
+                selectedDate={selectedDate}
+                onSelectDate={(date) => {
+                  setSelectedDate(date);
+                  setViewMode('week'); // Switch to week view when a date is selected
+                }}
+              />
+            )}
           </div>
         </div>
 
@@ -987,10 +982,10 @@ export function Timeline() {
 
         {/* Study Dialog */}
         <StudyDialog
-            isOpen={!!selectedStudyItem}
-            onClose={() => setSelectedStudyItem(null)}
-            item={selectedStudyItem}
-            onStartLearning={handleStartLearning}
+          isOpen={!!selectedStudyItem}
+          onClose={() => setSelectedStudyItem(null)}
+          item={selectedStudyItem}
+          onStartLearning={handleStartLearning}
         />
       </div>
     </DndContext>

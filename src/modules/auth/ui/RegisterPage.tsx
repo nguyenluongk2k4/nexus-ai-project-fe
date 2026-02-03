@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PublicHeader } from '@/shared/components/PublicHeader';
-import logo from '@/assets/logo.svg';
 import { DotLottiePlayer } from '@dotlottie/react-player';
 
 export const RegisterPage = () => {
@@ -87,7 +86,7 @@ export const RegisterPage = () => {
           {/* Glowing Icon */}
           <div className="relative mb-4 group">
             <div className="absolute inset-0 "></div>
-            <img src={logo} alt="NexusAI" className=" h-20" />
+            <img src="/logo.png" alt="NexusAI" className=" h-20" />
 
             {/* Peach Blossom Animation - Right of NexusAI */}
             <div className="absolute top-[-16px] right-[-40px] sm:right-[-120px] md:right-[-140px] pointer-events-none transition-all duration-300">

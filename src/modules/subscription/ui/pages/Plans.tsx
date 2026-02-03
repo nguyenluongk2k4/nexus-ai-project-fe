@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useSubscription } from '../hooks/useSubscription';
 import { DotLottiePlayer } from '@dotlottie/react-player';
+import { PageLoading } from '@/shared/components/PageLoading';
 
 export function Plans() {
     const { t, i18n } = useTranslation();
@@ -63,22 +64,11 @@ export function Plans() {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="flex-1 flex items-center justify-center min-h-screen" style={{ backgroundColor: '#faf5ff' }}>
-                <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
-            </div>
-        );
-    }
+    if (loading) return <PageLoading />;
 
     return (
-        <div 
-            className="flex-1 overflow-auto relative min-h-screen"
-            style={{
-                backgroundColor: '#faf5ff',
-                backgroundImage: 'radial-gradient(#e9d5ff 1px, transparent 1px)',
-                backgroundSize: '24px 24px'
-            }}
+        <div
+            className="flex-1 overflow-auto relative min-h-screen bg-white"
         >
 
             <div className="max-w-7xl mx-auto px-6 pt-8 pb-4 relative z-10">

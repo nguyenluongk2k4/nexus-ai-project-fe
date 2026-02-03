@@ -405,7 +405,7 @@ export function Landing() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-4">
-                <TreeDeciduous className="w-6 h-6 text-violet-600" />
+                <img src="/logo.png" alt="NexusAI" className="w-10 h-10 object-contain" />
                 <span className="font-bold text-xl">NexusAI</span>
               </div>
               <p className="text-sm text-slate-500 leading-relaxed">{t('landing.footer.desc')}</p>

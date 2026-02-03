@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
 import { LanguageSwitcher } from '@/shared/components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
-import logo from '@/assets/logo.svg';
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { DotLottiePlayer } from '@dotlottie/react-player';
 
@@ -24,7 +23,7 @@ export function PublicHeader({ showAuthButtons = true, className = '' }: PublicH
             className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate('/')}
           >
-            <img src={logo} alt="NexusAI" className="h-15" />
+            <img src="/logo.png" alt="NexusAI" className="h-15" />
           </div>
 
           {/* New Year Banner - Desktop */}

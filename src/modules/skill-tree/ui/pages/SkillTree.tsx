@@ -474,7 +474,7 @@ export function SkillTree() {
 
   // Main layout - always show with tree canvas (empty or with data)
   return (
-    <div className="flex-1 flex flex-col min-w-0 h-full bg-slate-50">
+    <div className="flex-1 flex flex-col min-w-0 h-full bg-white">
       <style dangerouslySetInnerHTML={{
         __html: `
         @keyframes nodePopIn {

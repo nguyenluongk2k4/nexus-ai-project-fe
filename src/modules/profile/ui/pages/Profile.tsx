@@ -28,6 +28,7 @@ import { useTranslation } from 'react-i18next';
 import { useProfile } from '../hooks/useProfile';
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { DotLottiePlayer } from '@dotlottie/react-player';
+import { PageLoading } from '@/shared/components/PageLoading';
 
 const ACTIVITY_ICONS: Record<string, any> = {
     login: LogIn,
@@ -97,17 +98,11 @@ export function Profile() {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="flex-1 flex items-center justify-center min-h-screen" style={{ backgroundColor: '#faf5ff' }}>
-                <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
-            </div>
-        );
-    }
+    if (loading) return <PageLoading />;
 
     if (error) {
         return (
-            <div className="flex-1 flex items-center justify-center min-h-screen" style={{ backgroundColor: '#faf5ff' }}>
+            <div className="flex-1 flex items-center justify-center min-h-screen bg-white">
                 <div className="text-center">
                     <p className="text-red-500 mb-4">{error}</p>
                     <button
@@ -139,12 +134,7 @@ export function Profile() {
 
     return (
         <div
-            className="flex-1 overflow-auto min-h-screen p-4 md:p-8"
-            style={{
-                backgroundColor: '#faf5ff',
-                backgroundImage: 'radial-gradient(#e9d5ff 1px, transparent 1px)',
-                backgroundSize: '24px 24px'
-            }}
+            className="flex-1 overflow-auto min-h-screen p-4 md:p-8 bg-white"
         >
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header */}

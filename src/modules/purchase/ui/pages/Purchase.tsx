@@ -100,12 +100,7 @@ export function Purchase() {
 
     return (
         <div
-            className="flex-1 overflow-auto min-h-screen p-4 md:p-8"
-            style={{
-                backgroundColor: '#faf5ff',
-                backgroundImage: 'radial-gradient(#e9d5ff 1px, transparent 1px)',
-                backgroundSize: '24px 24px'
-            }}
+            className="flex-1 overflow-auto min-h-screen p-4 md:p-8 bg-white"
         >
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header */}

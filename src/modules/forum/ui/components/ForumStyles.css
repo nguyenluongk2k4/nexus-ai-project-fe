@@ -1,0 +1,161 @@
+@keyframes blob {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-slow {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes fire-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes rainbow-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes light-sweep {
+  0% {
+    transform: translateX(-200%) skewX(-20deg);
+  }
+
+  50% {
+    transform: translateX(200%) skewX(-20deg);
+  }
+
+  100% {
+    transform: translateX(200%) skewX(-20deg);
+  }
+}
+
+@keyframes glossy-shine {
+  0% {
+    opacity: 0;
+    transform: translateX(-150%) skewX(-25deg);
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(150%) skewX(-25deg);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.animate-fire-flow {
+  animation: fire-flow 2s ease infinite;
+}
+
+.animate-rainbow-shimmer {
+  animation: rainbow-shimmer 3s linear infinite;
+}
+
+.animate-light-sweep {
+  animation: light-sweep 3s ease-in-out infinite;
+}
+
+.shiny-tag {
+  position: relative;
+  overflow: hidden;
+}
+
+.shiny-tag::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.05) 15%,
+      rgba(255, 255, 255, 0.6) 50%,
+      rgba(255, 255, 255, 0.05) 85%,
+      rgba(255, 255, 255, 0) 100%);
+  transform: translateX(-150%) skewX(-25deg);
+  animation: light-sweep 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-blob {
+  animation: blob 10s infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

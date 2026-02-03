@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { GitBranch, Calendar, Users, FileQuestion, ChevronDown, Home } from 'lucide-react';
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { useTranslation } from 'react-i18next';
-import logo from '@/assets/logo.svg';
 import { DotLottiePlayer } from '@dotlottie/react-player';
 
 export function Navigation() {
@@ -34,7 +33,7 @@ export function Navigation() {
       <div className={`mb-8 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
         {!isCollapsed && (
           <div>
-            <img src={logo} alt="Nexus AI" className="h-16 mb-1" />
+            <img src="/logo.png" alt="Nexus AI" className="h-16 mb-1" />
           </div>
         )}
         <button
@@ -73,12 +72,12 @@ export function Navigation() {
 
         {/* Falling Flowers Animation - Hidden on very short screens */}
         {!isCollapsed && (
-          <div className="flex justify-start -ml-4 mt-0 mb-1 overflow-visible [@media(max-height:620px)]:hidden">
+          <div className="flex justify-center -mx-4 mt-0 mb-1 overflow-visible [@media(max-height:620px)]:hidden">
             <DotLottiePlayer
               src="/assets/Hoa_dao_den_long.lottie"
               autoplay
               loop
-              style={{ width: '200px', height: '200px', border: 'none' }}
+              style={{ width: '100%', height: 'auto', border: 'none' }}
             />
           </div>
         )}
@@ -97,18 +96,16 @@ export function Navigation() {
 
         {/* Festive Animations - Hidden first on short screens */}
         {!isCollapsed && (
-          <div className="mt-auto flex flex-col items-center gap-1 pb-2 pt-2 overflow-visible mb-8 [@media(max-height:820px)]:hidden -mt-16">
+          <div className="mt-auto flex flex-col items-center gap-1 -mx-4 pb-0 pt-2 overflow-visible mb-0 [@media(max-height:820px)]:hidden -mt-12">
             {/* Peach Blossom - Smaller */}
             <div className="relative w-full flex justify-center">
               <DotLottiePlayer
                 src="/assets/home/Animation - 1705409067911.lottie"
                 autoplay
                 loop
-                style={{ width: '200px', height: '200px', border: 'none' }}
+                style={{ width: '100%', height: 'auto', border: 'none' }}
               />
             </div>
-
-
           </div>
         )}
       </div>

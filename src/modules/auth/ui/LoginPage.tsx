@@ -4,7 +4,6 @@ import { useAuth, authGateway } from '../AuthProvider';
 import { Mail, Lock, ArrowRight, TreeDeciduous, Github, Chrome, Sparkles, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PublicHeader } from '@/shared/components/PublicHeader';
-import logo from '@/assets/logo.svg';
 import { DotLottiePlayer } from '@dotlottie/react-player';
 
 export const LoginPage = () => {
@@ -63,7 +62,7 @@ export const LoginPage = () => {
         </svg>
       </div>
 
-      <div className="absolute top-0 left-0 w-full z-50">
+      <div className="w-full z-50">
         <PublicHeader showAuthButtons={false} />
       </div>
 
@@ -73,7 +72,7 @@ export const LoginPage = () => {
           {/* Glowing Icon */}
           <div className="relative mb-4 group">
             <div className="absolute inset-0 "></div>
-            <img src={logo} alt="NexusAI" className=" h-20" />
+            <img src="/logo.png" alt="NexusAI" className=" h-20" />
 
             {/* Lantern Animation - Top Right */}
             <div
