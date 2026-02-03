@@ -7,12 +7,19 @@
 const envApiUrl = import.meta.env.VITE_API_URL;
 const envWsUrl = import.meta.env.VITE_WS_URL;
 
-// Helper to determine Base URL
-const getBaseUrl = () => {
-  // CRITICAL FIX: If running on production domain (not localhost), ALWAYS use relative path
-  // This prevents 'localhost:8000' from leaking into production builds via env vars
-  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return '/api';
+/**
+ * Formats a URL with the correct protocol (http/https or ws/wss) 
+ * and ensures it's absolute for WebSocket constructors.
+ */
+const formatUrl = (url: string, isWs: boolean): string => {
+  if (typeof window === 'undefined') return url;
+
+  const isHttps = window.location.protocol === 'https:';
+  let formatted = url || '';
+
+  // 1. If relative (starts with /), make absolute using current host
+  if (formatted.startsWith('/')) {
+    formatted = `${window.location.host}${formatted}`;
   }
 
   // 2. Prepend protocol if missing
@@ -39,10 +46,14 @@ const getBaseUrl = () => {
 
 // Helper to determine Base URL
 const getBaseUrl = () => {
+  // CRITICAL FIX: If running on production domain (not localhost), ALWAYS use relative path
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return '/api';
+  }
+
   let url = envApiUrl || '/api';
 
   // CRITICAL: If they point to localhost:8000 but forget /api, we MUST add it
-  // because the backend serves all logic under /api
   if (url.includes('localhost:8000') && !url.includes('/api')) {
     url = url.replace(/\/+$/, '') + '/api';
   }
