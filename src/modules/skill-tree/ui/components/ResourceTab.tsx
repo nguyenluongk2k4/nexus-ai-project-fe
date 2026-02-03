@@ -9,6 +9,7 @@ import { treeNodeService } from '../../domain/services/treeNodeService';
 import { toast } from 'sonner';
 import { useQuizHistory } from '../../../quiz/ui/hooks/useQuizHistory';
 import { QuizProgressChart } from './QuizProgressChart';
+import { DotLottiePlayer } from '@dotlottie/react-player';
 type NodeStatus = 'completed' | 'in-progress' | 'locked';
 
 interface ResourceTabProps {
@@ -227,11 +228,16 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
       </div>
 
       {/* Take Quiz Button - Direct access for testing */}
-      <div className="mb-6 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100 rounded-xl p-4">
+      <div className="mb-6 bg-gradient-to-r border border-purple-100 rounded-xl p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
-              <Brain className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 flex items-center justify-center">
+              <DotLottiePlayer
+                src="/assets/dashboard/AI.lottie"
+                autoplay
+                loop
+                className="w-10 h-10"
+              />
             </div>
             <div>
               <h4 className="text-sm font-bold text-slate-800">{t('mySkillTree.panel.takeQuiz', { defaultValue: 'Kiểm tra kiến thức' })}</h4>
@@ -240,10 +246,12 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
           </div>
           <button
             onClick={() => navigate(`/quiz?nodeId=${selectedNode.originalNodeId || selectedNode.id}&nodeName=${encodeURIComponent(selectedNode.fullName || selectedNode.label)}`)}
-            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+            className="shiny-tag relative px-4 py-2 bg-orange-400 text-white rounded-lg text-xs font-black uppercase tracking-tight border border-white/20 shadow-md transition-all hover:shadow-lg flex items-center gap-2"
           >
-            <Play className="w-3 h-3 fill-current" />
-            {t('mySkillTree.panel.startQuiz', { defaultValue: 'Bắt đầu' })}
+            <span className="relative z-10 drop-shadow-[0_0_8px_rgba(255,255,255,0.4)] flex items-center gap-2">
+              <Play className="w-3 h-3 fill-current" />
+              {t('mySkillTree.panel.startQuiz', { defaultValue: 'Bắt đầu' })}
+            </span>
           </button>
         </div>
       </div>
@@ -291,8 +299,8 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${(attempt.score || 0) >= 70
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-red-100 text-red-700'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-red-100 text-red-700'
                       }`}>
                       {attempt.score?.toFixed(0) || 0}%
                     </div>
@@ -339,12 +347,12 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
           ) : resources.length > 0 ? (
             resources.map((resource: any, idx: number) => {
               const resourceName = typeof resource === 'string' ? resource : (resource.name || resource.title || 'Learning Resource');
-              
+
               // Get status from Global Context if available, else fallback to resource prop
               const progress = getProgress(resource.id);
               const liveStatus = progress?.status ? normalizeStatus(progress.status) : null;
               const rawStatus = liveStatus || resource.status || 'not_started';
-              
+
               const status = normalizeStatus(rawStatus);
 
               return (

@@ -5,6 +5,7 @@
 
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { DotLottiePlayer } from '@dotlottie/react-player';
 import {
     Play,
     Clock,
@@ -39,12 +40,17 @@ export function ContinueLearningCard({ resource, onContinue }: ContinueLearningC
 
     if (!resource) {
         return (
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
-                        <BookOpen className="w-5 h-5 text-violet-600" />
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div className="flex items-center -ml-3 mb-2">
+                    <div className="w-24 h-24 ml-2 flex items-center justify-center overflow-hidden">
+                        <DotLottiePlayer
+                            src="/assets/dashboard/Book.lottie"
+                            autoplay
+                            loop
+                            style={{ width: '100px', height: '100px' }}
+                        />
                     </div>
-                    <h3 className="font-bold text-slate-800">
+                    <h3 className="font-bold text-slate-800 -ml-2">
                         {t('dashboard.continueLearning', { defaultValue: 'Tiếp tục học' })}
                     </h3>
                 </div>
@@ -162,13 +168,18 @@ export function TodayScheduleCard({ items, onViewAll }: TodayScheduleCardProps) 
     };
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                        <Calendar className="w-5 h-5 text-blue-600" />
+                <div className="flex items-center -ml-2">
+                    <div className="w-24 h-24 flex items-center justify-center overflow-hidden">
+                        <DotLottiePlayer
+                            src="/assets/dashboard/Calendar.lottie"
+                            autoplay
+                            loop
+                            style={{ width: '100px', height: '100px' }}
+                        />
                     </div>
-                    <div>
+                    <div className="-ml-2">
                         <h3 className="font-bold text-slate-800">
                             {t('dashboard.todaySchedule', { defaultValue: 'Lịch hôm nay' })}
                         </h3>
@@ -177,7 +188,7 @@ export function TodayScheduleCard({ items, onViewAll }: TodayScheduleCardProps) 
                         </p>
                     </div>
                 </div>
-                <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-lg text-xs font-bold">
+                <span className="px-2 mr-5 py-1 bg-blue-100 text-blue-600 rounded-lg text-xs font-bold">
                     {items.length} việc
                 </span>
             </div>
@@ -259,12 +270,17 @@ export function ProgressDonutCard({ percentage, totalNodes, completedNodes, tree
     const offset = circumference - (percentage / 100) * circumference;
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-                    <Target className="w-5 h-5 text-emerald-600" />
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="flex items-center -ml-3">
+                <div className="w-24 h-24 flex items-center justify-center overflow-hidden">
+                    <DotLottiePlayer
+                        src="/assets/dashboard/progress.lottie"
+                        autoplay
+                        loop
+                        style={{ width: '100px', height: '100px' }}
+                    />
                 </div>
-                <div>
+                <div className="-ml-3 mt-1">
                     <h3 className="font-bold text-slate-800">
                         {t('dashboard.overallProgress', { defaultValue: 'Tiến độ tổng thể' })}
                     </h3>
@@ -274,57 +290,59 @@ export function ProgressDonutCard({ percentage, totalNodes, completedNodes, tree
                 </div>
             </div>
 
-            <div className="flex flex-col items-center py-4">
-                <div className="relative">
-                    <svg width={size} height={size} className="-rotate-90">
-                        {/* Background circle */}
-                        <circle
-                            cx={size / 2}
-                            cy={size / 2}
-                            r={radius}
-                            fill="none"
-                            stroke="#e2e8f0"
-                            strokeWidth={strokeWidth}
-                        />
-                        {/* Progress circle */}
-                        <circle
-                            cx={size / 2}
-                            cy={size / 2}
-                            r={radius}
-                            fill="none"
-                            stroke="url(#progressGradient)"
-                            strokeWidth={strokeWidth}
-                            strokeLinecap="round"
-                            strokeDasharray={circumference}
-                            strokeDashoffset={offset}
-                            className="transition-all duration-700"
-                        />
-                        <defs>
-                            <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#8b5cf6" />
-                                <stop offset="100%" stopColor="#14b8a6" />
-                            </linearGradient>
-                        </defs>
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-3xl font-bold text-slate-800">{percentage}%</span>
+            <div className="px-6 pb-6 mt-2">
+                <div className="flex flex-col items-center py-4">
+                    <div className="relative">
+                        <svg width={size} height={size} className="-rotate-90">
+                            {/* Background circle */}
+                            <circle
+                                cx={size / 2}
+                                cy={size / 2}
+                                r={radius}
+                                fill="none"
+                                stroke="#e2e8f0"
+                                strokeWidth={strokeWidth}
+                            />
+                            {/* Progress circle */}
+                            <circle
+                                cx={size / 2}
+                                cy={size / 2}
+                                r={radius}
+                                fill="none"
+                                stroke="url(#progressGradient)"
+                                strokeWidth={strokeWidth}
+                                strokeLinecap="round"
+                                strokeDasharray={circumference}
+                                strokeDashoffset={offset}
+                                className="transition-all duration-700"
+                            />
+                            <defs>
+                                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stopColor="#8b5cf6" />
+                                    <stop offset="100%" stopColor="#14b8a6" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <span className="text-3xl font-bold text-slate-800">{percentage}%</span>
+                        </div>
+                    </div>
+
+                    <div className="mt-4 text-center">
+                        <p className="text-sm text-slate-600">
+                            <span className="font-bold text-emerald-600">{completedNodes}</span>
+                            <span className="text-slate-400"> / {totalNodes} kỹ năng</span>
+                        </p>
                     </div>
                 </div>
 
-                <div className="mt-4 text-center">
-                    <p className="text-sm text-slate-600">
-                        <span className="font-bold text-emerald-600">{completedNodes}</span>
-                        <span className="text-slate-400"> / {totalNodes} kỹ năng</span>
-                    </p>
-                </div>
+                <button
+                    onClick={() => navigate('/my-skill-tree')}
+                    className="w-full py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors"
+                >
+                    {t('dashboard.viewSkillTree', { defaultValue: 'Xem Skill Tree' })}
+                </button>
             </div>
-
-            <button
-                onClick={() => navigate('/my-skill-tree')}
-                className="w-full py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors"
-            >
-                {t('dashboard.viewSkillTree', { defaultValue: 'Xem Skill Tree' })}
-            </button>
         </div>
     );
 }
@@ -345,8 +363,13 @@ export function AIInsightsCard({ weakTopics, recommendedFocus, nodeId }: AIInsig
     return (
         <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-200 p-6">
             <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-                    <Brain className="w-5 h-5 text-amber-600" />
+                <div className="w-12 h-12 flex items-center justify-center overflow-hidden">
+                    <DotLottiePlayer
+                        src="/assets/dashboard/AI.lottie"
+                        autoplay
+                        loop
+                        style={{ width: '100px', height: '100px' }}
+                    />
                 </div>
                 <div>
                     <h3 className="font-bold text-slate-800">
@@ -464,12 +487,17 @@ export function WeeklyActivityChart({ data }: WeeklyActivityChartProps) {
     const maxHours = Math.max(...data.map(d => d.hours), 1);
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-violet-600" />
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="flex items-center -ml-3">
+                <div className="w-14 h-14 flex ml-6 mr-6 items-center justify-center overflow-hidden">
+                    <DotLottiePlayer
+                        src="/assets/dashboard/GrowthChart.lottie"
+                        autoplay
+                        loop
+                        style={{ width: '100px', height: '100px' }}
+                    />
                 </div>
-                <div>
+                <div className="-ml-3 mt-1">
                     <h3 className="font-bold text-slate-800">
                         {t('dashboard.weeklyActivity', { defaultValue: 'Hoạt động tuần này' })}
                     </h3>
@@ -479,18 +507,21 @@ export function WeeklyActivityChart({ data }: WeeklyActivityChartProps) {
                 </div>
             </div>
 
-            <div className="flex items-end justify-between gap-2 h-32">
-                {data.map((item, idx) => (
-                    <div key={idx} className="flex-1 flex flex-col items-center gap-2">
-                        <div className="w-full flex justify-center">
-                            <div
-                                className="w-8 md:w-10 rounded-t-lg bg-gradient-to-t from-violet-500 to-purple-400 transition-all hover:from-violet-600 hover:to-purple-500"
-                                style={{ height: `${(item.hours / maxHours) * 100}%`, minHeight: item.hours > 0 ? '8px' : '4px' }}
-                            />
+            <div className="px-6 pb-6 mt-2">
+
+                <div className="flex items-end justify-between gap-2 h-32">
+                    {data.map((item, idx) => (
+                        <div key={idx} className="flex-1 flex flex-col items-center gap-2">
+                            <div className="w-full flex justify-center">
+                                <div
+                                    className="w-8 md:w-10 rounded-t-lg bg-gradient-to-t from-violet-500 to-purple-400 transition-all hover:from-violet-600 hover:to-purple-500"
+                                    style={{ height: `${(item.hours / maxHours) * 100}%`, minHeight: item.hours > 0 ? '8px' : '4px' }}
+                                />
+                            </div>
+                            <span className="text-[10px] text-slate-500 font-medium">{item.day}</span>
                         </div>
-                        <span className="text-[10px] text-slate-500 font-medium">{item.day}</span>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
         </div>
     );
