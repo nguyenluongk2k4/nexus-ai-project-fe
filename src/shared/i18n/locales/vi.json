@@ -773,7 +773,8 @@
       "dontHaveAccount": "Chưa có tài khoản?",
       "signUpLink": "Đăng ký miễn phí",
       "backToLanding": "Về trang chủ",
-      "success": "Đăng nhập thành công"
+      "success": "Đăng nhập thành công",
+      "googleLogin": "Đăng nhập với Google"
     },
     "register": {
       "title": "Tạo tài khoản mới",
@@ -793,7 +794,8 @@
       "alreadyHaveAccount": "Đã có tài khoản?",
       "signInLink": "Đăng nhập tại đây",
       "backToLanding": "Về trang chủ",
-      "passwordsDoNotMatch": "Mật khẩu không khớp!"
+      "passwordsDoNotMatch": "Mật khẩu không khớp!",
+      "googleSignUp": "Đăng ký với Google"
     },
     "logout": {
       "success": "Đăng xuất thành công"
