@@ -6,6 +6,114 @@ import { getThreadDetailsUseCase, addCommentUseCase, likePostUseCase } from '../
 import { ForumPost, ForumComment } from '../../domain/entities/ForumEntities';
 import { useTranslation } from 'react-i18next';
 import { ForumUserBadge } from '../components/ForumUserBadge';
+import { useTopContributors } from '../hooks/useTopContributors';
+
+// Monthly Contributors Component (moved from ForumSidebar)
+const MonthlyContributors = () => {
+  const { contributors, loading, error } = useTopContributors(10);
+
+  if (loading) {
+    return (
+      <div className="space-y-4 animate-pulse">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-slate-200"></div>
+            <div className="flex-1">
+              <div className="h-4 bg-slate-200 rounded w-24 mb-1"></div>
+              <div className="h-3 bg-slate-200 rounded w-32"></div>
+            </div>
+            <div className="h-4 bg-slate-200 rounded w-12"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-6 text-red-500 text-sm">
+        Không thể tải dữ liệu
+      </div>
+    );
+  }
+
+  if (!contributors || contributors.length === 0) {
+    return (
+      <div className="text-center py-6 text-slate-500 text-sm">
+        Chưa có thống kê tháng này
+      </div>
+    );
+  }
+
+  const getRankBadge = (index: number) => {
+    if (index === 0) return '🥇';
+    if (index === 1) return '🥈';
+    if (index === 2) return '🥉';
+    return `#${index + 1}`;
+  };
+
+  const getMainContribution = (contributor: typeof contributors[0]) => {
+    if (contributor.postsCount > contributor.commentsCount && contributor.postsCount > contributor.likesReceived) {
+      return `${contributor.postsCount} bài viết`;
+    } else if (contributor.likesReceived >= contributor.postsCount && contributor.likesReceived >= contributor.commentsCount) {
+      return `${contributor.likesReceived} likes`;
+    } else {
+      return `${contributor.commentsCount} bình luận`;
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      {contributors.map((contributor, index) => {
+        // Define border colors for top 3
+        let borderColor = 'border-slate-200';
+        let borderWidth = 'border-2';
+        if (index === 0) {
+          borderColor = 'border-yellow-400';
+          borderWidth = 'border-[3px]';
+        } else if (index === 1) {
+          borderColor = 'border-slate-300';
+          borderWidth = 'border-[3px]';
+        } else if (index === 2) {
+          borderColor = 'border-orange-400';
+          borderWidth = 'border-[3px]';
+        }
+
+        return (
+          <div
+            key={contributor.userId}
+            className="flex items-center gap-3 group cursor-pointer p-2 rounded-xl hover:bg-slate-50/80 transition-all duration-200"
+          >
+            <img
+              className={`w-10 h-10 rounded-full object-cover ${borderWidth} ${borderColor} shadow-sm`}
+              src={contributor.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(contributor.username)}&background=random`}
+              alt={contributor.username}
+            />
+
+            <div className="flex-1 min-w-0">
+              <h5 className="text-sm font-bold text-slate-800 truncate group-hover:text-violet-600 transition-colors">
+                {contributor.username}
+              </h5>
+              <span className="text-xs text-slate-500">
+                {getMainContribution(contributor)}
+              </span>
+            </div>
+
+            <div className={`text-sm font-bold ${index === 0 ? 'text-yellow-500' :
+                index === 1 ? 'text-slate-500' :
+                  index === 2 ? 'text-orange-500' : 'text-slate-400'
+              }`}>
+              {contributor.totalPoints >= 1000
+                ? `${(contributor.totalPoints / 1000).toFixed(1)}k`
+                : contributor.totalPoints} pts
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 
 // Recursive CommentItem component for nested replies
 interface CommentItemProps {
@@ -596,48 +704,9 @@ export function ThreadDetail() {
                 <span className="p-2 bg-yellow-100 rounded-lg text-yellow-600 shadow-sm">
                   <Award className="w-5 h-5" />
                 </span>
-                <h3 className="font-bold text-lg text-slate-800">Top đóng góp tháng</h3>
+                <h3 className="font-bold text-lg text-slate-800">🏆 Top Đóng Góp Tháng {new Date().getMonth() + 1} 🏆</h3>
               </div>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between group cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <img
-                        className="w-10 h-10 rounded-full border-2 border-yellow-400 shadow-sm"
-                        src="https://ui-avatars.com/api/?name=Nguyen+Luong&background=random"
-                        alt="User"
-                      />
-                      <div className="absolute -top-1.5 -right-1.5 bg-yellow-400 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm border border-white">
-                        #1
-                      </div>
-                    </div>
-                    <div>
-                      <h5 className="text-sm font-bold text-slate-800 group-hover:text-violet-600 transition-colors">Nguyễn Lương</h5>
-                      <span className="text-xs text-slate-500">240 bài viết</span>
-                    </div>
-                  </div>
-                  <div className="text-yellow-500 font-bold text-sm">3.2k pts</div>
-                </div>
-                <div className="flex items-center justify-between group cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <img
-                        className="w-10 h-10 rounded-full border-2 border-slate-300 shadow-sm"
-                        src="https://ui-avatars.com/api/?name=Tran+Van+C&background=random"
-                        alt="User"
-                      />
-                      <div className="absolute -top-1.5 -right-1.5 bg-slate-400 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm border border-white">
-                        #2
-                      </div>
-                    </div>
-                    <div>
-                      <h5 className="text-sm font-bold text-slate-800 group-hover:text-violet-600 transition-colors">Trần Văn C</h5>
-                      <span className="text-xs text-slate-500">180 bài viết</span>
-                    </div>
-                  </div>
-                  <div className="text-slate-500 font-bold text-sm">2.1k pts</div>
-                </div>
-              </div>
+              <MonthlyContributors />
             </div>
 
             {/* Sponsored */}

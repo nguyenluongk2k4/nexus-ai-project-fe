@@ -1,6 +1,6 @@
 import React from 'react';
 import { Bot, ArrowRight, Award } from 'lucide-react';
-import { ForumCategory, ForumStats } from '../../domain/entities/ForumEntities';
+import { ForumCategory, ForumStats, ForumUser } from '../../domain/entities/ForumEntities';
 import { MOCK_TOP_MEMBERS, MOCK_HOT_TAGS } from './ForumConstants';
 import { useTranslation } from 'react-i18next';
 import { DotLottiePlayer } from '@dotlottie/react-player';
@@ -10,6 +10,7 @@ interface ForumSidebarProps {
     categories: ForumCategory[];
     onNavigateToSubForum: (categoryId: string) => void;
     iconMap: Record<string, any>;
+    topMembers?: ForumUser[];
 }
 
 export const ForumSidebar: React.FC<ForumSidebarProps> = ({
@@ -17,6 +18,7 @@ export const ForumSidebar: React.FC<ForumSidebarProps> = ({
     categories,
     onNavigateToSubForum,
     iconMap,
+    topMembers,
 }) => {
     const { t } = useTranslation();
 
@@ -121,29 +123,63 @@ export const ForumSidebar: React.FC<ForumSidebarProps> = ({
             )}
 
             <div className="bg-white rounded-2xl border border-white/60 p-6 shadow-lg hover:shadow-xl transition-all">
-                <h3 className="font-bold text-lg text-slate-900 mb-4">{t('forum.sidebar.topMembers')}</h3>
-                <div className="grid grid-cols-5 gap-3">
-                    {MOCK_TOP_MEMBERS.map((member) => (
-                        <div key={member.id} className="relative group cursor-pointer">
-                            <img
-                                className="w-12 h-12 rounded-full border-2 border-slate-200 object-cover group-hover:border-violet-600 transition-all group-hover:scale-110"
-                                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random`}
-                                alt={member.name}
-                                title={member.name}
-                            />
-                            {member.isTopContributor && (
-                                <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 border border-slate-200">
-                                    <Award className="w-3 h-3 text-amber-500" />
-                                </div>
-                            )}
-                            {member.isOnline && (
-                                <div className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                            )}
-                        </div>
-                    ))}
-                    <div className="w-12 h-12 rounded-full bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-xs font-bold text-slate-500 hover:border-violet-600 hover:text-violet-600 cursor-pointer transition-all">
-                        +12
+                <div className="flex items-center gap-2 mb-4">
+                    <div className="p-2 bg-amber-100 rounded-lg">
+                        <Award className="w-5 h-5 text-amber-600" />
                     </div>
+                    <h3 className="font-bold text-lg text-slate-900">⭐ Top Members</h3>
+                </div>
+
+                <div className="space-y-4">
+                    {topMembers && topMembers.length > 0 ? topMembers.map((member, index) => {
+                        // Define border colors for top 3
+                        let borderColor = 'border-slate-200';
+                        let borderWidth = 'border-2';
+                        if (index === 0) {
+                            borderColor = 'border-yellow-400';
+                            borderWidth = 'border-[3px]';
+                        } else if (index === 1) {
+                            borderColor = 'border-slate-300';
+                            borderWidth = 'border-[3px]';
+                        } else if (index === 2) {
+                            borderColor = 'border-orange-400';
+                            borderWidth = 'border-[3px]';
+                        }
+
+                        return (
+                            <div key={member.id} className="flex items-center gap-3 group cursor-pointer p-2 rounded-xl hover:bg-slate-50 transition-colors">
+                                <img
+                                    className={`w-10 h-10 rounded-full object-cover ${borderWidth} ${borderColor} shadow-sm`}
+                                    src={member.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random`}
+                                    alt={member.name}
+                                />
+
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="font-bold text-sm text-slate-900 truncate group-hover:text-violet-600 transition-colors">
+                                        {member.name}
+                                    </h4>
+                                    <p className="text-xs text-slate-500">
+                                        {member.postCount || 0} bài viết
+                                    </p>
+                                </div>
+
+                                <div className="text-right">
+                                    <span className={`text-sm font-bold ${index === 0 ? 'text-yellow-600' :
+                                        index === 1 ? 'text-slate-600' :
+                                            index === 2 ? 'text-orange-600' : 'text-slate-400'
+                                        }`}>
+                                        {(member.points || 0) >= 1000
+                                            ? `${((member.points || 0) / 1000).toFixed(1)}k`
+                                            : member.points || 0} pts
+                                    </span>
+                                </div>
+                            </div>
+                        );
+                    }) : (
+                        <div className="text-center py-6 text-slate-500 text-sm">
+                            Chưa có thống kê
+                        </div>
+                    )}
                 </div>
             </div>
 

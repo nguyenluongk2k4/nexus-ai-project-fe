@@ -5,7 +5,7 @@ import {
   Code,
   Database,
 } from 'lucide-react';
-import { getForumDashboardUseCase } from '../../providers';
+import { getForumDashboardUseCase, likePostUseCase } from '../../providers';
 import { ForumPost, ForumCategory, ForumStats } from '../../domain/entities/ForumEntities';
 import { useTranslation } from 'react-i18next';
 import { PageLoading } from '@/shared/components/PageLoading';
@@ -115,6 +115,32 @@ export function Forum() {
 
   if (loading) return <PageLoading message={t('forum.loading')} />;
 
+  const handleLike = async (postId: string) => {
+    // Optimistic update
+    setPosts(posts.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          isLiked: !post.isLiked,
+          stats: {
+            ...post.stats,
+            likes: post.isLiked ? Number(post.stats.likes) - 1 : Number(post.stats.likes) + 1
+          }
+        };
+      }
+      return post;
+    }));
+
+    try {
+      await likePostUseCase.execute(postId);
+    } catch (error) {
+      console.error('Failed to like post:', error);
+      // Revert on error
+      const data = await getForumDashboardUseCase.execute();
+      setPosts(data.latestPosts);
+    }
+  };
+
   return (
     <div className="flex-1 overflow-auto min-h-screen relative bg-white">
       <ForumHeader
@@ -148,6 +174,7 @@ export function Forum() {
                     getTimeAgo={getTimeAgo}
                     isHot={isHot}
                     isNew={isNew}
+                    onLike={handleLike}
                   />
                 ))
               )}
@@ -165,6 +192,7 @@ export function Forum() {
             categories={categories}
             onNavigateToSubForum={onNavigateToSubForum}
             iconMap={ICON_MAP}
+            topMembers={stats?.topMembers}
           />
         </div>
       </main>

@@ -20,6 +20,7 @@ interface ForumPostCardProps {
     getTimeAgo: (date: string | Date) => string;
     isHot: (post: ForumPost) => boolean;
     isNew: (post: ForumPost) => boolean;
+    onLike: (postId: string) => void;
 }
 
 export const ForumPostCard: React.FC<ForumPostCardProps> = ({
@@ -29,6 +30,7 @@ export const ForumPostCard: React.FC<ForumPostCardProps> = ({
     getTimeAgo,
     isHot,
     isNew,
+    onLike,
 }) => {
     const { t } = useTranslation();
 
@@ -97,10 +99,11 @@ export const ForumPostCard: React.FC<ForumPostCardProps> = ({
                                 className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-violet-50 text-slate-600 hover:text-violet-600 rounded-lg transition-colors group/btn"
                                 onClick={(e) => {
                                     e.stopPropagation();
+                                    onLike(post.id);
                                 }}
                             >
-                                <ThumbsUp className="w-4 h-4 group-hover/btn:scale-110 transition-transform text-blue-600 fill-blue-600/10" />
-                                <span className="text-sm font-bold">{post.stats.likes || 0}</span>
+                                <ThumbsUp className={`w-4 h-4 group-hover/btn:scale-110 transition-transform ${post.isLiked ? 'text-blue-600 fill-blue-600' : 'text-slate-400'}`} />
+                                <span className={`text-sm font-bold ${post.isLiked ? 'text-blue-600' : 'text-slate-500'}`}>{post.stats.likes || 0}</span>
                             </button>
 
                             <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">

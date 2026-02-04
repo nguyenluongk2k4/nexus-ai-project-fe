@@ -1,5 +1,5 @@
 import { ForumGateway, LikeResult } from '../ports/ForumGateway';
-import { ForumPost, ForumCategory, ForumStats, ForumComment, ThreadDetails } from '../entities/ForumEntities';
+import { ForumPost, ForumCategory, ForumStats, ForumComment, ThreadDetails, ForumUser } from '../entities/ForumEntities';
 
 export class ForumService {
   constructor(private gateway: ForumGateway) { }
@@ -8,18 +8,9 @@ export class ForumService {
     stats: ForumStats;
     categories: ForumCategory[];
     latestPosts: ForumPost[];
+    topMembers: ForumUser[];
   }> {
-    const [stats, categories, latestPosts] = await Promise.all([
-      this.gateway.getStats(),
-      this.gateway.getCategories(),
-      this.gateway.getLatestPosts(),
-    ]);
-
-    return {
-      stats,
-      categories,
-      latestPosts,
-    };
+    return this.gateway.getDashboard();
   }
 
   async getCategoryById(categoryId: string): Promise<ForumCategory | null> {

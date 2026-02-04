@@ -14,6 +14,7 @@ export interface ForumUser {
   avatar: string; // emoji or url
   rank?: ForumRank | string;
   points?: number;
+  postCount?: number;
   joinedAt?: Date;
 }
 
@@ -64,9 +65,20 @@ export interface ForumStats {
   totalPosts: number;
   totalMembers: number;
   onlineMembers: number;
+  topMembers?: ForumUser[];
 }
 
 export interface ThreadDetails {
   post: ForumPost | null;
   comments: ForumComment[];
+}
+
+export interface ContributorStats {
+  userId: string;
+  username: string;
+  avatar: string | null;
+  totalPoints: number;
+  postsCount: number;
+  commentsCount: number;
+  likesReceived: number;
 }

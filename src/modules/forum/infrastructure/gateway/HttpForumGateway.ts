@@ -1,5 +1,5 @@
 import { ForumGateway, LikeResult } from '../../domain/ports/ForumGateway';
-import { ForumPost, ForumCategory, ForumComment, ForumStats, ThreadDetails } from '../../domain/entities/ForumEntities';
+import { ForumPost, ForumCategory, ForumComment, ForumStats, ThreadDetails, ForumUser, ContributorStats } from '../../domain/entities/ForumEntities';
 
 import { apiConfig } from "@/shared/config/api.config";
 
@@ -12,6 +12,8 @@ interface UserResponse {
     full_name: string | null;
     avatar: string | null;
     rank?: string;
+    points?: number;
+    post_count?: number;
 }
 
 interface CategoryResponse {
@@ -75,6 +77,16 @@ interface CategoryPostsResponse {
 interface ThreadDetailsResponse {
     post: PostResponse;
     comments: CommentResponse[];
+}
+
+interface ContributorStatsResponse {
+    userId: string;
+    username: string;
+    avatar: string | null;
+    totalPoints: number;
+    postsCount: number;
+    commentsCount: number;
+    likesReceived: number;
 }
 
 // Mappers
@@ -172,24 +184,40 @@ export class HttpForumGateway implements ForumGateway {
         }
     }
 
-    async getLatestPosts(): Promise<ForumPost[]> {
-        const response = await fetch(`${API_FORUM_URL}/posts?limit=10`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch latest posts');
+    async getDashboard(): Promise<{ stats: ForumStats; categories: ForumCategory[]; latestPosts: ForumPost[]; topMembers: ForumUser[] }> {
+        const headers: HeadersInit = {};
+        const token = localStorage.getItem('token');
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
         }
-        const data: PostResponse[] = await response.json();
 
-        return data.map(mapPost);
-    }
-
-    async getPostsByCategory(categoryId: string): Promise<ForumPost[]> {
-        const response = await fetch(`${API_FORUM_URL}/categories/${categoryId}/posts`);
+        const response = await fetch(`${API_FORUM_URL}/dashboard`, { headers });
         if (!response.ok) {
-            throw new Error('Failed to fetch posts by category');
+            throw new Error('Failed to fetch dashboard data');
         }
-        const data: CategoryPostsResponse = await response.json();
 
-        return data.posts.map(mapPost);
+        const data: DashboardResponse & { topMembers: UserResponse[] } = await response.json();
+
+        const topMembers = data.topMembers ? data.topMembers.map(u => ({
+            id: u.id || '',
+            name: u.full_name || u.username,
+            avatar: u.avatar || '👤',
+            rank: u.rank,
+            points: u.points || 0,
+            postCount: u.post_count || 0
+        })) : [];
+
+        return {
+            categories: data.categories.map(mapCategory),
+            latestPosts: data.latestPosts.map(mapPost),
+            stats: {
+                totalPosts: data.stats.totalPosts,
+                totalMembers: data.stats.totalMembers,
+                onlineMembers: data.stats.onlineMembers,
+                topMembers
+            },
+            topMembers
+        };
     }
 
     async getPostDetails(postId: string): Promise<ForumPost | null> {
@@ -228,6 +256,38 @@ export class HttpForumGateway implements ForumGateway {
             console.error('Failed to fetch thread:', error);
             return null;
         }
+    }
+
+    async getLatestPosts(): Promise<ForumPost[]> {
+        const headers: HeadersInit = {};
+        const token = localStorage.getItem('token');
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${API_FORUM_URL}/posts?limit=10`, { headers });
+        if (!response.ok) {
+            throw new Error('Failed to fetch latest posts');
+        }
+        const data: PostResponse[] = await response.json();
+
+        return data.map(mapPost);
+    }
+
+    async getPostsByCategory(categoryId: string): Promise<ForumPost[]> {
+        const headers: HeadersInit = {};
+        const token = localStorage.getItem('token');
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${API_FORUM_URL}/categories/${categoryId}/posts`, { headers });
+        if (!response.ok) {
+            throw new Error('Failed to fetch posts by category');
+        }
+        const data: CategoryPostsResponse = await response.json();
+
+        return data.posts.map(mapPost);
     }
 
     async createPost(post: Omit<ForumPost, 'id' | 'stats' | 'createdAt'>): Promise<ForumPost> {
@@ -310,6 +370,31 @@ export class HttpForumGateway implements ForumGateway {
             liked: data.liked,
             likeCount: data.likeCount,
         };
+    }
+
+    async getTopContributors(limit: number = 10, month?: number, year?: number): Promise<ContributorStats[]> {
+        const params = new URLSearchParams();
+        if (limit) params.append('limit', limit.toString());
+        if (month) params.append('month', month.toString());
+        if (year) params.append('year', year.toString());
+
+        const response = await fetch(`${API_FORUM_URL}/contributors/top?${params.toString()}`);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Failed to fetch top contributors:', response.status, errorText);
+            throw new Error(`Failed to fetch top contributors: ${response.status}`);
+        }
+
+        const data: ContributorStatsResponse[] = await response.json();
+        return data.map(contributor => ({
+            userId: contributor.userId,
+            username: contributor.username,
+            avatar: contributor.avatar,
+            totalPoints: contributor.totalPoints,
+            postsCount: contributor.postsCount,
+            commentsCount: contributor.commentsCount,
+            likesReceived: contributor.likesReceived
+        }));
     }
 }
 
