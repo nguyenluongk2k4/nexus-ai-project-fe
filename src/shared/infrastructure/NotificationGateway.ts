@@ -1,5 +1,6 @@
 import { coinsStore } from '@/modules/coins/domain/services/CoinsStore';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { apiConfig } from '@/shared/config/api.config';
 
 export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
 
@@ -17,14 +18,11 @@ export class NotificationGateway {
         this.userId = userId;
         this.statusSubject.next('connecting');
 
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const apiHost = import.meta.env.VITE_API_URL?.replace(/^https?:\/\//, '') || 'localhost:8000';
-        // Use port 8001/8002 depending on local vs container, for now let's assume 8002 as per design
-        const host = apiHost.split(':')[0] + ':8002';
+        const wsUrl = apiConfig.getWsUrl('/ws/notifications');
         const token = localStorage.getItem('token');
 
         try {
-            this.socket = new WebSocket(`${protocol}//${host}/ws/notifications?token=${token}`);
+            this.socket = new WebSocket(`${wsUrl}?token=${token}`);
 
             this.socket.onopen = () => {
                 console.log('✅ [Notification] connected');
