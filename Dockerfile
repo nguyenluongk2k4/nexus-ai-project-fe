@@ -29,9 +29,9 @@ WORKDIR /app
 RUN npm install -g serve
 
 # Copy built assets from builder
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/build ./build
 
 EXPOSE 80
 
 # Serve the static files on port 80 with SPA support (-s)
-CMD ["serve", "-s", "dist", "-l", "80"]
+CMD ["serve", "-s", "build", "-l", "80"]
