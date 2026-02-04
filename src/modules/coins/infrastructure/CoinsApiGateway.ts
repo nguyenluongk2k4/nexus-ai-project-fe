@@ -1,11 +1,12 @@
 import { CoinsGateway } from '../domain/ports/CoinsGateway';
+import { apiConfig } from '../../../shared/config/api.config';
 
 export class CoinsApiGateway implements CoinsGateway {
-    private apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
     private async fetch(endpoint: string, options: RequestInit = {}) {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${this.apiUrl}/api${endpoint}`, {
+        const url = apiConfig.getHttpUrl(endpoint);
+
+        const response = await fetch(url, {
             ...options,
             headers: {
                 'Content-Type': 'application/json',
