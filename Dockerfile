@@ -22,16 +22,9 @@ ENV GOOGLE_API_KEY=$GOOGLE_API_KEY
 RUN npm run build
 
 # --- Stage 2: Serve ---
-FROM node:20-slim
-WORKDIR /app
-
-# Install serve globally
-RUN npm install -g serve
-
-# Copy built assets from builder
-COPY --from=builder /app/build ./build
+FROM nginx:alpine
+COPY --from=builder /app/build /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
-
-# Serve the static files on port 80 with SPA support (-s)
-CMD ["serve", "-s", "build", "-l", "80"]
+CMD ["nginx", "-g", "daemon off;"]
