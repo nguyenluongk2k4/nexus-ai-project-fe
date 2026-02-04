@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../AuthProvider';
+import { useAuth, authGateway } from '../AuthProvider';
 import {
   TreeDeciduous, User, IdCard, Mail, Lock,
   ArrowRight, Github, Chrome, Sparkles, Star
@@ -43,6 +43,15 @@ export const RegisterPage = () => {
       navigate('/');
     } catch (err) {
       // Error handled by AuthProvider
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const url = await authGateway.getGoogleLoginUrl();
+      window.location.href = url;
+    } catch (err) {
+      console.error("Google login failed", err);
     }
   };
 
@@ -302,20 +311,18 @@ export const RegisterPage = () => {
           </div>
 
           {/* Social Buttons */}
-          <div className="mt-8 sm:mt-10 grid grid-cols-2 gap-4">
+          <div className="mt-8 sm:mt-10 grid gap-4">
             <button
               type="button"
+              onClick={handleGoogleLogin}
               className="flex items-center justify-center w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm bg-white/60 backdrop-blur-sm text-sm font-semibold text-slate-700 hover:bg-white hover:border-slate-300 hover:shadow-md transition-all duration-200 group"
             >
-              <Chrome className="h-5 w-5 mr-2 text-slate-600 group-hover:text-violet-600 group-hover:scale-110 transition-all" />
-              Google
-            </button>
-            <button
-              type="button"
-              className="flex items-center justify-center w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm bg-white/60 backdrop-blur-sm text-sm font-semibold text-slate-700 hover:bg-white hover:border-slate-300 hover:shadow-md transition-all duration-200 group"
-            >
-              <Github className="h-5 w-5 mr-2 text-slate-600 group-hover:text-violet-600 group-hover:scale-110 transition-all" />
-              GitHub
+              <img
+                src="/logo-google.png"
+                alt="Google"
+                className="w-5 h-5 mr-3 group-hover:scale-110 transition-all"
+              />
+              {t('auth.register.googleSignUp')}
             </button>
           </div>
         </div>
@@ -390,6 +397,6 @@ export const RegisterPage = () => {
           scrollbar-width: none;
         }
       `}</style>
-    </div>
+    </div >
   );
 };

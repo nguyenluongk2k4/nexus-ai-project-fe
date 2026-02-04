@@ -23,7 +23,7 @@ export function PublicHeader({ showAuthButtons = true, className = '' }: PublicH
             className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate('/')}
           >
-            <img src="/logo.png" alt="NexusAI" className="h-15" />
+            <img src="/logo-icon.png" alt="NexusAI" className="h-15" />
           </div>
 
           {/* New Year Banner - Desktop */}

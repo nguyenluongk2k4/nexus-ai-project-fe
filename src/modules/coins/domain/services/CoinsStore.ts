@@ -14,6 +14,10 @@ class CoinsStore {
     setBalance(balance: number) {
         this.balanceSubject.next(balance);
     }
+
+    clear() {
+        this.balanceSubject.next(null);
+    }
 }
 
 export const coinsStore = new CoinsStore();

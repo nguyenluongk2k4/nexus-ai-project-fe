@@ -32,16 +32,20 @@ export function Navigation() {
     >
       <div className={`mb-8 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
         {!isCollapsed && (
-          <div>
-            <img src="/logo.png" alt="Nexus AI" className="h-16 mb-1" />
+          <div className="flex items-center ml-2">
+            <img src="/logo-icon.png" alt="Nexus AI" className="h-12 mb-1" />
           </div>
         )}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors"
+          className={`p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors ${isCollapsed ? 'hover:bg-transparent' : ''}`}
           title={isCollapsed ? "Expand" : "Collapse"}
         >
-          {isCollapsed ? <ChevronDown className="w-5 h-5 -rotate-90" /> : <ChevronDown className="w-5 h-5 rotate-90" />}
+          {isCollapsed ? (
+            <img src="/logo-icon.png" alt="Nexus AI" className="h-10" />
+          ) : (
+            <ChevronDown className="w-5 h-5 rotate-90" />
+          )}
         </button>
       </div>
 

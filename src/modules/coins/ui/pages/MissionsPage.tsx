@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { toast } from 'sonner';
 import { CoinBurst } from '@/shared/components/ui/CoinBurst';
+import { coinsStore } from '@/modules/coins/domain/services/CoinsStore';
 
 const gateway = new CoinsApiGateway();
 const getMissionsUseCase = new GetMissionsUseCase(gateway);
@@ -51,15 +52,21 @@ export const MissionsPage: React.FC = () => {
             const startX = x || window.innerWidth / 2;
             const startY = y || window.innerHeight / 2;
 
-            await claimRewardUseCase.execute(missionId);
+            const result = await claimRewardUseCase.execute(missionId);
 
             // Trigger burst effect from the specific position
             setBurstPos({ x: startX, y: startY });
 
-            // Optimistic/Local Update
+            // Update local state with exact data from backend
             setUserMissions(prev => prev.map(um =>
                 um.mission_id === missionId
-                    ? { ...um, status: 'completed' as const }
+                    ? {
+                        ...um,
+                        status: result.status,
+                        progress: result.progress,
+                        completed_at: result.completed_at,
+                        coins_earned: result.coins_earned
+                    }
                     : um
             ));
 
@@ -73,12 +80,12 @@ export const MissionsPage: React.FC = () => {
                 }
             });
 
-            // Refresh hiddenly to get actual data
-            fetchData(true);
+            // Optimistically update balance in store if we know the reward
+            const currentBalance = coinsStore.currentBalance || 0;
+            coinsStore.setBalance(currentBalance + result.coins_earned);
 
             if (user) {
-                // Balance will be updated via WebSocket if separate container is running
-                // or we could manually refresh if needed
+                // Balance will also be synced via WebSocket, but we update locally for instant feel
             }
         } catch (error: any) {
             console.error('Failed to claim reward', error);

@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthState, LoginRequest, RegisterRequest, User } from "./domain/types";
 import { AuthApiGateway } from "./infrastructure/AuthApiGateway";
 import { notificationGateway } from "@/shared/infrastructure/NotificationGateway";
+import { coinsStore } from "../coins/domain/services/CoinsStore";
 
 interface AuthContextType extends AuthState {
   login: (request: LoginRequest) => Promise<void>;
@@ -110,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     authGateway.logout();
+    coinsStore.clear(); // Reset coins balance on logout
     setState({
       user: null,
       isAuthenticated: false,
