@@ -1,4 +1,4 @@
-import { ForumGateway, LikeResult } from '../../domain/ports/ForumGateway';
+import { ForumGateway, LikeResult, GetPostsParams } from '../../domain/ports/ForumGateway';
 import { ForumPost, ForumCategory, ForumComment, ForumStats, ThreadDetails, ForumUser, ContributorStats } from '../../domain/entities/ForumEntities';
 
 import { apiConfig } from "@/shared/config/api.config";
@@ -173,7 +173,10 @@ export class HttpForumGateway implements ForumGateway {
 
     async getCategoryById(id: string): Promise<ForumCategory | null> {
         try {
-            const response = await fetch(`${API_FORUM_URL}/categories/${id}/posts`);
+            // Fetch minimal posts just to get category info, or use dedicated endpoint if available
+            // Optimized: We should probably have a getCategory endpoint, but for now reuse existing logic
+            // or just fetch with limit=1 to save bandwidth
+            const response = await fetch(`${API_FORUM_URL}/categories/${id}/posts?limit=1`);
             if (!response.ok) {
                 return null;
             }
@@ -182,6 +185,24 @@ export class HttpForumGateway implements ForumGateway {
         } catch {
             return null;
         }
+    }
+
+    async getPostsByCategory(categoryId: string, params?: GetPostsParams): Promise<{ posts: ForumPost[]; total: number }> {
+        const query = new URLSearchParams();
+        if (params?.sort) query.append('sort', params.sort);
+        if (params?.search) query.append('search', params.search);
+        if (params?.page) query.append('page', params.page.toString());
+        if (params?.limit) query.append('limit', params.limit.toString());
+
+        const response = await fetch(`${API_FORUM_URL}/categories/${categoryId}/posts?${query.toString()}`);
+        if (!response.ok) {
+            return { posts: [], total: 0 };
+        }
+        const data: CategoryPostsResponse & { total?: number } = await response.json();
+        return {
+            posts: data.posts.map(mapPost),
+            total: data.total || 0
+        };
     }
 
     async getDashboard(): Promise<{ stats: ForumStats; categories: ForumCategory[]; latestPosts: ForumPost[]; topMembers: ForumUser[] }> {
@@ -274,21 +295,7 @@ export class HttpForumGateway implements ForumGateway {
         return data.map(mapPost);
     }
 
-    async getPostsByCategory(categoryId: string): Promise<ForumPost[]> {
-        const headers: HeadersInit = {};
-        const token = localStorage.getItem('token');
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
 
-        const response = await fetch(`${API_FORUM_URL}/categories/${categoryId}/posts`, { headers });
-        if (!response.ok) {
-            throw new Error('Failed to fetch posts by category');
-        }
-        const data: CategoryPostsResponse = await response.json();
-
-        return data.posts.map(mapPost);
-    }
 
     async createPost(post: Omit<ForumPost, 'id' | 'stats' | 'createdAt'>): Promise<ForumPost> {
         const token = localStorage.getItem('token');
@@ -395,6 +402,27 @@ export class HttpForumGateway implements ForumGateway {
             commentsCount: contributor.commentsCount,
             likesReceived: contributor.likesReceived
         }));
+    }
+
+    async getRelatedPosts(postId: string, categoryId?: string, limit: number = 5): Promise<ForumPost[]> {
+        const headers: HeadersInit = {};
+        const token = localStorage.getItem('token');
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const params = new URLSearchParams();
+        if (categoryId) params.append('category_id', categoryId);
+        if (limit) params.append('limit', limit.toString());
+
+        const response = await fetch(`${API_FORUM_URL}/posts/${postId}/related?${params.toString()}`, { headers });
+        if (!response.ok) {
+            console.error('Failed to fetch related posts');
+            return []; // Return empty on error to gracefully degrade
+        }
+
+        const data: PostResponse[] = await response.json();
+        return data.map(mapPost);
     }
 }
 

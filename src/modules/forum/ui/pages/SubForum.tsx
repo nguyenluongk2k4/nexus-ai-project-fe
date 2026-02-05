@@ -37,15 +37,41 @@ export function SubForum() {
   const [category, setCategory] = useState<ForumCategory | null>(null);
   const [threads, setThreads] = useState<ForumPost[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Filter & Pagination States
   const [sortBy, setSortBy] = useState<'latest' | 'popular' | 'hot'>('latest');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const LIMIT = 10;
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1); // Reset page on search
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const data = await getPostsByCategoryUseCase.execute(categoryId);
+        // Map frontend sort keys to backend keys if needed
+        const sortParam = sortBy === 'latest' ? 'newest' : sortBy;
+
+        const data = await getPostsByCategoryUseCase.execute(categoryId, {
+          sort: sortParam,
+          search: debouncedSearch,
+          page: page,
+          limit: LIMIT
+        });
+
         setCategory(data.category);
         setThreads(data.posts);
+        setTotalPages(Math.ceil((data.total || 0) / LIMIT));
       } catch (error) {
         console.error('Failed to load subforum data:', error);
       } finally {
@@ -53,24 +79,11 @@ export function SubForum() {
       }
     };
     loadData();
-  }, [categoryId]);
+  }, [categoryId, sortBy, debouncedSearch, page]);
 
-  const onNavigateToThread = (id: number) => {
+  const onNavigateToThread = (id: string) => {
     navigate(`/thread/${id}`);
   };
-
-  const sortedThreads = [...threads].sort((a, b) => {
-    if (a.isPinned && !b.isPinned) return -1;
-    if (!a.isPinned && b.isPinned) return 1;
-
-    if (sortBy === 'popular') {
-      return (Number(b.stats.views) || 0) - (Number(a.stats.views) || 0);
-    }
-    if (sortBy === 'hot') {
-      return (Number(b.stats.comments) || 0) - (Number(a.stats.comments) || 0);
-    }
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
 
   const getTimeAgo = (dateInput: string | Date) => {
     const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
@@ -82,7 +95,7 @@ export function SubForum() {
     return t('forum.time.daysAgo', { days });
   };
 
-  if (loading) {
+  if (loading && !category) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
@@ -123,12 +136,6 @@ export function SubForum() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-8">
-              <img 
-                src={logo} 
-                alt={t('forum.title')} 
-                onClick={() => navigate('/forum')}
-                className="h-8 cursor-pointer" 
-              />
             <nav className="hidden md:flex items-center text-sm font-medium text-slate-500">
               <button
                 onClick={() => navigate('/forum')}
@@ -145,12 +152,18 @@ export function SubForum() {
             {/* Search */}
             <div className="hidden lg:flex relative group">
               <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="w-5 h-5 text-slate-400 group-focus-within:text-violet-600 transition-colors" />
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-slate-300 border-t-violet-600 rounded-full animate-spin"></div>
+                ) : (
+                  <Search className="w-5 h-5 text-slate-400 group-focus-within:text-violet-600 transition-colors" />
+                )}
               </span>
               <input
                 className="pl-10 pr-4 py-2.5 rounded-full border border-slate-200/60 bg-white/50 text-sm focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all w-64 backdrop-blur-sm shadow-sm outline-none"
                 placeholder={t('forum.search.placeholderCategory', { category: category.name })}
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 
@@ -158,20 +171,6 @@ export function SubForum() {
             <button className="p-2.5 rounded-full text-slate-500 hover:bg-white/60 hover:text-violet-600 transition relative group">
               <Bell className="w-6 h-6 group-hover:animate-pulse" />
               <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 ring-2 ring-white rounded-full"></span>
-            </button>
-
-            {/* Avatar */}
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-600 via-purple-500 to-blue-500 p-[2px] cursor-pointer shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 transition-shadow">
-              <img
-                alt="User Avatar"
-                className="rounded-full bg-white h-full w-full object-cover"
-                src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || 'User')}&background=random`}
-              />
-            </div>
-
-            {/* Dark Mode Toggle - Visual Only */}
-            <button className="p-2.5 rounded-full text-slate-500 hover:bg-white/60 transition">
-              <Moon className="w-6 h-6" />
             </button>
           </div>
         </div>
@@ -211,7 +210,7 @@ export function SubForum() {
         <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 mb-8 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-24 z-40 border border-white/50 shadow-sm">
           <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-xl">
             <button
-              onClick={() => setSortBy('latest')}
+              onClick={() => { setSortBy('latest'); setPage(1); }}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm transition-all ${sortBy === 'latest'
                 ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-lg shadow-violet-500/30'
                 : 'text-slate-600 hover:bg-white hover:text-violet-600'
@@ -221,7 +220,7 @@ export function SubForum() {
               {t('forum.filter.new')}
             </button>
             <button
-              onClick={() => setSortBy('popular')}
+              onClick={() => { setSortBy('popular'); setPage(1); }}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${sortBy === 'popular'
                 ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-lg shadow-violet-500/30'
                 : 'text-slate-600 hover:bg-white hover:text-violet-600'
@@ -231,7 +230,7 @@ export function SubForum() {
               {t('forum.filter.popular')}
             </button>
             <button
-              onClick={() => setSortBy('hot')}
+              onClick={() => { setSortBy('hot'); setPage(1); }}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${sortBy === 'hot'
                 ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-lg shadow-violet-500/30'
                 : 'text-slate-600 hover:bg-white hover:text-orange-500'
@@ -254,7 +253,7 @@ export function SubForum() {
 
         {/* Threads List */}
         <div className="space-y-5">
-          {sortedThreads.map((thread) => (
+          {threads.map((thread) => (
             <article
               key={thread.id}
               onClick={() => onNavigateToThread(thread.id)}
@@ -287,23 +286,6 @@ export function SubForum() {
                     <h3 className="text-xl font-bold text-slate-800 leading-snug group-hover:text-violet-600 transition-colors flex-1 truncate">
                       {thread.title}
                     </h3>
-                    {/* Badges - Inline */}
-                    {(thread.isPinned || thread.isHot) && (
-                      <div className="flex gap-2 flex-shrink-0">
-                        {thread.isPinned && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-600 border border-purple-200 shadow-sm">
-                            <Pin className="w-3 h-3 fill-current" />
-                            {t('forum.badges.pinned')}
-                          </span>
-                        )}
-                        {thread.isHot && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-600 border border-orange-200 shadow-sm animate-pulse">
-                            <Flame className="w-3 h-3 fill-current" />
-                            {t('forum.badges.hot')}
-                          </span>
-                        )}
-                      </div>
-                    )}
                   </div>
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 font-medium">
                     <span className="flex items-center gap-1.5 hover:text-slate-800 transition-colors">
@@ -316,7 +298,7 @@ export function SubForum() {
 
                 {/* Stats */}
                 <div className="hidden md:flex items-center gap-6 absolute top-1/2 -translate-y-1/2 right-8">
-                  <div className="flex flex-col items-center justify-center min-w-[60px]">
+                  <div className="flex flex-col items-center justify-center w-[80px]">
                     <div className="flex items-center gap-1.5 text-violet-600 font-bold text-lg">
                       <MessageSquare className="w-5 h-5" />
                       {thread.stats.comments}
@@ -324,7 +306,7 @@ export function SubForum() {
                     <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">{t('forum.replies')}</span>
                   </div>
                   <div className="w-px h-8 bg-slate-200"></div>
-                  <div className="flex flex-col items-center justify-center min-w-[60px]">
+                  <div className="flex flex-col items-center justify-center w-[80px]">
                     <div className="flex items-center gap-1.5 text-green-500 font-bold text-lg">
                       <Eye className="w-5 h-5" />
                       {thread.stats.views}
@@ -357,19 +339,24 @@ export function SubForum() {
 
         {/* Pagination */}
         <div className="flex justify-center items-center mt-12 gap-2">
-          <button className="px-4 py-2 rounded-xl bg-white text-slate-600 border border-slate-200 hover:border-violet-500 hover:text-violet-600 font-semibold text-sm transition-all hover:shadow-md backdrop-blur-sm">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            className="px-4 py-2 rounded-xl bg-white text-slate-600 border border-slate-200 hover:border-violet-500 hover:text-violet-600 font-semibold text-sm transition-all hover:shadow-md backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {t('forum.pagination.prev')}
           </button>
-          <button className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-blue-600 text-white font-bold shadow-lg shadow-violet-500/30 transform scale-110">
-            1
-          </button>
-          <button className="w-10 h-10 rounded-xl bg-white text-slate-600 border border-slate-200 hover:border-violet-500 hover:text-violet-600 font-bold transition-all hover:shadow-md backdrop-blur-sm">
-            2
-          </button>
-          <button className="w-10 h-10 rounded-xl bg-white text-slate-600 border border-slate-200 hover:border-violet-500 hover:text-violet-600 font-bold transition-all hover:shadow-md backdrop-blur-sm">
-            3
-          </button>
-          <button className="px-4 py-2 rounded-xl bg-white text-slate-600 border border-slate-200 hover:border-violet-500 hover:text-violet-600 font-semibold text-sm transition-all hover:shadow-md backdrop-blur-sm">
+
+          {/* Simple Pagination Logic: Show current page */}
+          <span className="text-slate-600 font-medium px-2">
+            Page {page} of {totalPages}
+          </span>
+
+          <button
+            disabled={page === totalPages || totalPages === 0}
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            className="px-4 py-2 rounded-xl bg-white text-slate-600 border border-slate-200 hover:border-violet-500 hover:text-violet-600 font-semibold text-sm transition-all hover:shadow-md backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {t('forum.pagination.next')}
           </button>
         </div>
