@@ -286,8 +286,8 @@ export function ChatTab({
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading || status === 'error'}
                 className={`p-1.5 rounded-lg transition-colors flex-shrink-0 ${isUploading
-                    ? 'bg-slate-200 text-slate-400 cursor-wait'
-                    : 'hover:bg-slate-200 text-slate-500 hover:text-slate-700'
+                  ? 'bg-slate-200 text-slate-400 cursor-wait'
+                  : 'hover:bg-slate-200 text-slate-500 hover:text-slate-700'
                   }`}
                 title="Upload file"
               >
@@ -295,6 +295,7 @@ export function ChatTab({
               </button>
             )}
             <input
+              id="tour-master-chat-input"
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}

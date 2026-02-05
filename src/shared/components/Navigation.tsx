@@ -25,6 +25,7 @@ export function Navigation() {
 
   return (
     <nav
+      id="tour-navigation"
       className={`
         bg-white border-r border-border min-h-screen p-4 flex flex-col transition-all duration-300 ease-in-out relative z-50
         ${isCollapsed ? 'w-20' : 'w-64'}
@@ -57,6 +58,7 @@ export function Navigation() {
           return (
             <NavLink
               key={item.id}
+              id={item.id === 'skilltree' ? 'tour-master-skilltree' : undefined}
               to={item.path}
               className={({ isActive }) => `
                 flex items-center gap-3 px-3 py-2.5 [@media(max-height:750px)]:py-1.5 rounded-xl transition-all font-medium

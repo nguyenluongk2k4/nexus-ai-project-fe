@@ -395,7 +395,7 @@ export function MySkillTree() {
       {/* Main Content Area - Tree + Resource Panel */}
       <div className="flex-1 flex overflow-hidden">
         {/* Tree Area */}
-        <div className="flex-1 relative overflow-hidden">
+        <div id="tour-tree-container" className="flex-1 relative overflow-hidden">
           {/* Zoom Controls */}
           <div className="absolute bottom-4 left-4 bg-white rounded-xl shadow-lg border border-slate-200 z-20">
             <button
@@ -435,7 +435,7 @@ export function MySkillTree() {
                   <g key="absolute-base" transform={`translate(${baseX}, ${baseY})`}>
                     <circle r={10} fill="url(#soilGradient)" opacity="0.3" />
 
-                    <g className="node-animate">
+                    <g id="tour-tree-avatar" className="node-animate">
                       <circle r={5} fill="none" stroke="#6366f1" strokeWidth="0.1" opacity="0.2" className="animate-ping" style={{ animationDuration: '4s' }} />
                       <circle r={4} fill="white" stroke="#818cf8" strokeWidth="0.4" filter="url(#subtleShadow)" />
                       <image
@@ -610,7 +610,7 @@ export function MySkillTree() {
         <div className="flex flex-col h-full border-l border-slate-200 min-w-[350px] bg-white">
           <div className="flex-1 overflow-hidden flex flex-col">
             {/* Right Panel with Tabs (Replaces ResourcePanel) */}
-            <div className="flex-1 overflow-hidden">
+            <div id="tour-skill-panel" className="flex-1 overflow-hidden">
               <RightPanel
                 selectedNode={selectedNodeAdapter as any}
                 getNodeStatus={(node) => node.status as any}
@@ -666,6 +666,7 @@ export function MySkillTree() {
                   )}
                 </div>
                 <button
+                  id="tour-add-skills"
                   onClick={() => navigate('/skilltree')}
                   className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors flex items-center gap-2"
                 >

@@ -14,6 +14,10 @@ export interface User {
   role: string;
   forumRank: string;
   points: number;
+  hasCompletedTour: boolean;
+  hasCompletedDashboardTour: boolean;
+  hasCompletedSkillTreeTour: boolean;
+  hasCompletedMasterSkillTreeTour: boolean;
   createdAt: string;
   lastLoginAt?: string;
 }
@@ -49,4 +53,5 @@ export interface AuthGateway {
   register(request: RegisterRequest): Promise<AuthResponse>;
   me(): Promise<User>;
   logout(): void;
+  completeTour(phase?: string): Promise<void>;
 }

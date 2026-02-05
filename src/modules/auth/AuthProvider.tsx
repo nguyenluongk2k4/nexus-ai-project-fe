@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthState, LoginRequest, RegisterRequest, User } from "./domain/types";
 import { AuthApiGateway } from "./infrastructure/AuthApiGateway";
+import { CompleteTourUseCase } from "./usecases/CompleteTourUseCase";
 import { notificationGateway } from "@/shared/infrastructure/NotificationGateway";
 import { coinsStore } from "../coins/domain/services/CoinsStore";
 
@@ -10,12 +11,14 @@ interface AuthContextType extends AuthState {
   login: (request: LoginRequest) => Promise<void>;
   register: (request: RegisterRequest) => Promise<void>;
   logout: () => void;
+  completeTour: (phase?: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Singleton gateway
+// Singleton gateway and use case
 export const authGateway = new AuthApiGateway();
+const completeTourUseCase = new CompleteTourUseCase(authGateway);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({
@@ -120,8 +123,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const completeTour = async (phase?: string) => {
+    // 1. Optimistically update local state using functional update to prevent race conditions
+    setState(s => {
+      if (!s.user) return s;
+
+      const updatedUser = { ...s.user };
+      if (phase === 'dashboard') updatedUser.hasCompletedDashboardTour = true;
+      else if (phase === 'skilltree') updatedUser.hasCompletedSkillTreeTour = true;
+      else if (phase === 'masterskilltree') updatedUser.hasCompletedMasterSkillTreeTour = true;
+      else updatedUser.hasCompletedTour = true;
+
+      // Aggregation logic: If all individual tours are done, mark the whole thing as done
+      if (updatedUser.hasCompletedDashboardTour &&
+        updatedUser.hasCompletedSkillTreeTour &&
+        updatedUser.hasCompletedMasterSkillTreeTour) {
+        updatedUser.hasCompletedTour = true;
+      }
+
+      console.log('[DEBUG] user tour flags updated:', {
+        phase,
+        dash: updatedUser.hasCompletedDashboardTour,
+        skill: updatedUser.hasCompletedSkillTreeTour,
+        master: updatedUser.hasCompletedMasterSkillTreeTour,
+        all: updatedUser.hasCompletedTour
+      });
+
+      return {
+        ...s,
+        user: updatedUser
+      };
+    });
+
+    // 2. Then call the backend
+    try {
+      await completeTourUseCase.execute(phase);
+    } catch (error) {
+      console.error('Failed to complete tour on backend:', error);
+      // Optional: Rollback state here if needed, but for tours usually not necessary
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ ...state, login, register, logout }}>
+    <AuthContext.Provider value={{ ...state, login, register, logout, completeTour }}>
       {children}
     </AuthContext.Provider>
   );

@@ -44,7 +44,7 @@ export const TopHeader: React.FC = () => {
         <header className="h-20 bg-white border-b border-slate-100 flex items-center justify-between px-4 md:px-8 sticky top-0 z-50">
             {/* Left: Greeting Info - Hide on Mobile */}
             <div className="hidden md:flex items-center gap-4">
-                <div className="flex flex-col">
+                <div id="tour-greeting" className="flex flex-col">
                     <h2 className="text-lg font-black text-slate-900 leading-tight tracking-tight">
                         {t('header.greeting', { name: user.fullName || user.username })} 👋
                     </h2>
@@ -107,6 +107,7 @@ export const TopHeader: React.FC = () => {
 
                     <div className="relative" ref={dropdownRef}>
                         <button
+                            id="tour-user-menu"
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                             className="flex items-center gap-3 p-1.5 pr-3 rounded-2xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100 group"
                         >
@@ -169,6 +170,7 @@ export const TopHeader: React.FC = () => {
                                         {t('nav.profile')}
                                     </button>
                                     <button
+                                        id="tour-my-roadmap"
                                         onClick={() => { navigate('/my-skills'); setIsDropdownOpen(false); }}
                                         className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-violet-600 rounded-xl transition-all group"
                                     >

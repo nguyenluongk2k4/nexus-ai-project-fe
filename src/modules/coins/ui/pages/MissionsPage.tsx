@@ -80,12 +80,9 @@ export const MissionsPage: React.FC = () => {
                 }
             });
 
-            // Optimistically update balance in store if we know the reward
-            const currentBalance = coinsStore.currentBalance || 0;
-            coinsStore.setBalance(currentBalance + result.coins_earned);
-
             if (user) {
-                // Balance will also be synced via WebSocket, but we update locally for instant feel
+                // Balance will be synced exclusively via WebSocket 'balance_update' notification
+                // to avoid double-counting with the optimistic local update.
             }
         } catch (error: any) {
             console.error('Failed to claim reward', error);

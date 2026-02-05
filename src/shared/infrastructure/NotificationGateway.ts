@@ -18,7 +18,11 @@ export class NotificationGateway {
         this.userId = userId;
         this.statusSubject.next('connecting');
 
-        const wsUrl = apiConfig.getWsUrl('/ws/notifications');
+        // TEMPORARY: Connect directly to notification service on port 8002
+        // TODO: Route through nginx in production
+        const wsUrl = window.location.hostname === 'localhost'
+            ? 'ws://localhost:8002/ws/notifications'
+            : apiConfig.getWsUrl('/ws/notifications');
         const token = localStorage.getItem('token');
 
         try {

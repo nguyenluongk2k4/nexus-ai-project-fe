@@ -65,8 +65,12 @@ export class AuthApiGateway implements AuthGateway {
         role: data.user.role,
         forumRank: data.user.forum_rank,
         points: data.user.points,
+        hasCompletedTour: data.user.has_completed_tour,
+        hasCompletedDashboardTour: data.user.has_completed_dashboard_tour,
+        hasCompletedSkillTreeTour: data.user.has_completed_skilltree_tour,
         createdAt: data.user.created_at,
         lastLoginAt: data.user.last_login_at,
+        hasCompletedMasterSkillTreeTour: data.user.has_completed_master_skilltree_tour
       }
     };
   }
@@ -105,8 +109,12 @@ export class AuthApiGateway implements AuthGateway {
         role: data.user.role,
         forumRank: data.user.forum_rank,
         points: data.user.points,
+        hasCompletedTour: data.user.has_completed_tour,
+        hasCompletedDashboardTour: data.user.has_completed_dashboard_tour,
+        hasCompletedSkillTreeTour: data.user.has_completed_skilltree_tour,
         createdAt: data.user.created_at,
         lastLoginAt: data.user.last_login_at,
+        hasCompletedMasterSkillTreeTour: data.user.has_completed_master_skilltree_tour
       }
     };
   }
@@ -129,6 +137,10 @@ export class AuthApiGateway implements AuthGateway {
       role: response.role,
       forumRank: response.forum_rank,
       points: response.points,
+      hasCompletedTour: response.has_completed_tour,
+      hasCompletedDashboardTour: response.has_completed_dashboard_tour,
+      hasCompletedSkillTreeTour: response.has_completed_skilltree_tour,
+      hasCompletedMasterSkillTreeTour: response.has_completed_master_skilltree_tour,
       createdAt: response.created_at,
       lastLoginAt: response.last_login_at,
     };
@@ -136,6 +148,13 @@ export class AuthApiGateway implements AuthGateway {
 
   logout(): void {
     localStorage.removeItem("token");
+  }
+
+  async completeTour(phase?: string): Promise<void> {
+    const endpoint = phase ? `/tour/complete?phase=${phase}` : "/tour/complete";
+    await this.request(endpoint, {
+      method: "POST",
+    });
   }
 
   private saveToken(token: string) {

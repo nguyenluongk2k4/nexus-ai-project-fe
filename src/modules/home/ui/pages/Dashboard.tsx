@@ -34,9 +34,9 @@ export function Dashboard() {
 
   return (
     <div className="flex-1 bg-white min-h-screen overflow-auto">
-      <div className="mx-auto p-4 md:p-6 lg:p-8">
+      <div className="mx-auto p-4 md:p-6 lg:p-8" id="tour-welcome">
         {/* ============ QUICK STATS (Mobile Only) ============ */}
-        <div className="block lg:hidden mb-6">
+        <div className="block lg:hidden mb-6" id="tour-stats">
           <QuickStatsCard
             streak={stats.streak}
             todayItems={stats.todayItems}
@@ -50,10 +50,12 @@ export function Dashboard() {
           {/* ============ MAIN COLUMN ============ */}
           <div className="space-y-6 lg:col-span-8 order-2 lg:order-1">
             {/* ... ContinueLearningCard, TodayScheduleCard, WeeklyActivityChart ... */}
-            <ContinueLearningCard
-              resource={continueResource}
-              onContinue={() => navigate('/my-skill-tree')}
-            />
+            <div id="tour-continue">
+              <ContinueLearningCard
+                resource={continueResource}
+                onContinue={() => navigate('/my-skills')}
+              />
+            </div>
             <TodayScheduleCard
               items={todayTimelineItems}
               onViewAll={() => navigate('/timeline')}
@@ -72,12 +74,14 @@ export function Dashboard() {
                 treeName={stats.treeName}
               />
             </div>
-            <AIInsightsCard
-              weakTopics={aiInsights.weakTopics}
-              recommendedFocus={aiInsights.recommendedFocus}
-              nodeId={aiInsights.nodeId}
-            />
-            <div className="hidden lg:block bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden text-left">
+            <div id="tour-ai-insights">
+              <AIInsightsCard
+                weakTopics={aiInsights.weakTopics}
+                recommendedFocus={aiInsights.recommendedFocus}
+                nodeId={aiInsights.nodeId}
+              />
+            </div>
+            <div id="tour-stats-desktop" className="hidden lg:block bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden text-left">
               <div className="flex items-center ml-3 mb-2 mt-4">
                 <div className="w-14 h-14 ml-2 mr-2 flex items-center justify-center overflow-hidden">
                   <DotLottiePlayer

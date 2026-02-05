@@ -504,7 +504,7 @@ export function SkillTree() {
           <div className="flex-1 relative overflow-hidden flex flex-col">
             {totalCount === 0 ? (
               /* Empty State - shown before first data */
-              <div className="absolute inset-0 flex items-center justify-center p-4">
+              <div id="tour-master-empty" className="absolute inset-0 flex items-center justify-center p-4">
                 <div className="text-center max-w-lg w-full">
                   {treeState.loading ? (
                     <>
@@ -557,6 +557,7 @@ export function SkillTree() {
 
                 {/* SVG Tree - Always visible (skeleton or filled) */}
                 <svg
+                  id="tour-master-tree"
                   className="w-full h-full"
                   viewBox="0 0 100 80"
                   style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'center' }}
@@ -796,7 +797,7 @@ export function SkillTree() {
           </div>
 
           {/* Bottom Control Bar - explicit height and structure to match ChatTab exactly */}
-          <footer className="h-[64px] border-t border-slate-200 bg-white flex flex-col justify-center z-30 flex-shrink-0">
+          <footer id="tour-master-footer" className="h-[64px] border-t border-slate-200 bg-white flex flex-col justify-center z-30 flex-shrink-0">
             <div className="px-4 flex items-center justify-between">
               <div className="flex items-center gap-2 md:gap-4">
                 <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-2xl border border-slate-200">
