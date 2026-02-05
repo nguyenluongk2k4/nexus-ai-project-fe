@@ -50,8 +50,8 @@ export function Landing() {
                 />
               </div>
 
-              <h1 className="font-bold text-6xl md:text-7xl leading-[1.1] text-slate-900 relative z-10">
-                {t('landing.hero.title')} <span className="italic bg-gradient-to-r from-violet-600 to-amber-600 bg-clip-text text-transparent">{t('landing.hero.titleHighlight')}</span>
+              <h1 className="font-bold text-6xl md:text-7xl leading-[1.3] text-slate-900 relative z-10">
+                {t('landing.hero.title')} <span className="italic bg-gradient-to-r from-violet-600 to-amber-600 bg-clip-text text-transparent inline-block py-4 -my-4">{t('landing.hero.titleHighlight')}</span>
               </h1>
               <p className="text-lg text-slate-600 max-w-lg leading-relaxed font-light">
                 {t('landing.hero.subtitle')}
@@ -72,9 +72,9 @@ export function Landing() {
               </div>
               <div className="flex items-center gap-4 pt-4 text-sm text-slate-500">
                 <div className="flex -space-x-3">
-                  <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-violet-500 to-purple-500"></div>
-                  <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-teal-500 to-cyan-500"></div>
-                  <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-pink-500 to-rose-500"></div>
+                  <img src="/assets/landing/elon-musk.jpg" className="w-10 h-10 rounded-full border-2 border-white object-cover" alt="Elon Musk" />
+                  <img src="/assets/landing/vinfast.jpeg" className="w-10 h-10 rounded-full border-2 border-white object-cover" alt="VinFast" />
+                  <img src="/assets/landing/donaltrump.jpg" className="w-10 h-10 rounded-full border-2 border-white object-cover" alt="Donald Trump" />
                 </div>
                 <p className="font-medium">{t('landing.hero.trustedBy')}</p>
               </div>
@@ -117,12 +117,17 @@ export function Landing() {
                 {/* Floating Achievement Cards */}
                 <div className="absolute top-[20%] right-0 bg-white/90 p-4 rounded-xl shadow-lg animate-float border border-white/50" style={{ animationDelay: '1s' }}>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600">
-                      <Award className="w-5 h-5" />
+                    <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600 overflow-hidden">
+                      <DotLottiePlayer
+                        src="/assets/landing/crown.lottie"
+                        autoplay
+                        loop
+                        style={{ width: '40px', height: '40px' }}
+                      />
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Skill Unlocked</p>
-                      <p className="text-sm font-bold text-slate-900">Neural Networks</p>
+                      <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">{t('landing.hero.skillUnlocked')}</p>
+                      <p className="text-sm font-bold text-slate-900">{t('landing.hero.neuralNetworks')}</p>
                     </div>
                   </div>
                   {/* Lantern Animation - Aligned with Skill Card */}
@@ -138,12 +143,17 @@ export function Landing() {
 
                 <div className="absolute bottom-[20%] left-0 bg-white/90 p-4 rounded-xl shadow-lg animate-float border border-white/50" style={{ animationDelay: '2.5s' }}>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center text-violet-600">
-                      <TrendingUp className="w-5 h-5" />
+                    <div className="w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center text-violet-600 overflow-hidden">
+                      <DotLottiePlayer
+                        src="/assets/landing/trending_up.lottie"
+                        autoplay
+                        loop
+                        style={{ width: '40px', height: '40px' }}
+                      />
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Progress</p>
-                      <p className="text-sm font-bold text-slate-900">+240 XP Gained</p>
+                      <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">{t('landing.hero.progress')}</p>
+                      <p className="text-sm font-bold text-slate-900">{t('landing.hero.xpGained')}</p>
                     </div>
                   </div>
                 </div>
@@ -174,14 +184,19 @@ export function Landing() {
       {/* New Year 2026 Celebration Section */}
       <section className="py-20 relative overflow-hidden bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center backdrop-blur-md bg-violet-50/50 rounded-3xl p-12">
+          <div className="text-center backdrop-blur-md bg-white/50 rounded-3xl p-12 border border-white/50">
             <div className="flex justify-center mb-2">
-              <DotLottiePlayer
-                src="/assets/home/HAPPY NEW YEAR 2026.lottie"
-                autoplay
-                loop
-                style={{ width: '800px', height: '400px', border: 'none' }}
-              />
+              <div
+                className="overflow-hidden rounded-2xl"
+                style={{ clipPath: 'inset(10% 5% 10% 5%)' }}
+              >
+                <DotLottiePlayer
+                  src="/assets/home/HAPPY NEW YEAR 2026.lottie"
+                  autoplay
+                  loop
+                  style={{ width: '800px', height: '400px' }}
+                />
+              </div>
             </div>
             <h2 className="font-bold text-3xl md:text-4xl text-slate-900 mb-4">
               🎊 Chào Mừng Năm Mới 2026! 🎊
@@ -204,14 +219,19 @@ export function Landing() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             {[
-              { icon: Flag, step: 'STEP 01', title: t('landing.howItWorks.step1.title'), desc: t('landing.howItWorks.step1.desc') },
-              { icon: Brain, step: 'STEP 02', title: t('landing.howItWorks.step2.title'), desc: t('landing.howItWorks.step2.desc') },
-              { icon: Flower2, step: 'STEP 03', title: t('landing.howItWorks.step3.title'), desc: t('landing.howItWorks.step3.desc') },
-              { icon: Key, step: 'STEP 04', title: t('landing.howItWorks.step4.title'), desc: t('landing.howItWorks.step4.desc') }
+              { lottie: '/assets/landing/flag.lottie', step: 'STEP 01', title: t('landing.howItWorks.step1.title'), desc: t('landing.howItWorks.step1.desc') },
+              { lottie: '/assets/landing/brain.lottie', step: 'STEP 02', title: t('landing.howItWorks.step2.title'), desc: t('landing.howItWorks.step2.desc') },
+              { lottie: '/assets/landing/flower.lottie', step: 'STEP 03', title: t('landing.howItWorks.step3.title'), desc: t('landing.howItWorks.step3.desc') },
+              { lottie: '/assets/landing/key.lottie', step: 'STEP 04', title: t('landing.howItWorks.step4.title'), desc: t('landing.howItWorks.step4.desc') }
             ].map((item, i) => (
               <div key={i} className="text-center group relative">
-                <div className="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center mb-8 shadow-lg group-hover:shadow-violet-500/50 group-hover:scale-110 transition-all duration-500 border border-slate-100">
-                  <item.icon className="w-10 h-10 text-slate-700 group-hover:text-violet-600 transition-colors" />
+                <div className="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center mb-8 shadow-lg group-hover:shadow-violet-500/50 group-hover:scale-110 transition-all duration-500 border border-slate-100 overflow-hidden">
+                  <DotLottiePlayer
+                    src={item.lottie}
+                    autoplay
+                    loop
+                    style={{ width: '60px', height: '60px' }}
+                  />
                 </div>
                 <span className="text-xs font-bold text-violet-600 mb-3 block tracking-wider">{item.step}</span>
                 <h3 className="font-bold text-xl mb-3 text-slate-900">{item.title}</h3>
@@ -223,7 +243,7 @@ export function Landing() {
       </section>
 
       {/* Features Bento Grid */}
-      <section className="py-24 bg-white/50">
+      <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="font-bold text-4xl md:text-5xl text-slate-900 mb-4">{t('landing.features.title')}</h2>
@@ -233,7 +253,14 @@ export function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
             {/* Large Feature Card - AI Roadmap */}
             <div className="col-span-1 md:col-span-4 md:row-span-2 bg-white rounded-3xl p-10 border border-slate-100 hover:shadow-2xl transition-all shadow-sm">
-              <Brain className="w-14 h-14 text-violet-600 mb-6" />
+              <div className="w-14 h-14 mb-6">
+                <DotLottiePlayer
+                  src="/assets/landing/brain.lottie"
+                  autoplay
+                  loop
+                  style={{ width: '100%', height: '100%' }}
+                />
+              </div>
               <h3 className="font-bold text-3xl text-slate-900 mb-4">{t('landing.features.roadmap.title')}</h3>
               <p className="text-slate-600 max-w-md text-lg mb-8">{t('landing.features.roadmap.desc')}</p>
 
@@ -293,7 +320,14 @@ export function Landing() {
 
             {/* Small Feature Cards */}
             <div className="col-span-1 md:col-span-2 bg-white rounded-3xl p-8 border border-slate-100 hover:shadow-2xl transition-all shadow-sm">
-              <TrendingUp className="w-12 h-12 text-purple-600 mb-6" />
+              <div className="w-14 h-14 mb-6">
+                <DotLottiePlayer
+                  src="/assets/landing/trending_up.lottie"
+                  autoplay
+                  loop
+                  style={{ width: '100%', height: '100%' }}
+                />
+              </div>
               <h3 className="font-bold text-xl text-slate-900 mb-2">{t('landing.features.visual.title')}</h3>
               <p className="text-sm text-slate-600 mb-6">{t('landing.features.visual.desc')}</p>
               <div className="h-24 w-full flex items-end justify-between gap-2">
@@ -304,7 +338,14 @@ export function Landing() {
             </div>
 
             <div className="col-span-1 md:col-span-2 bg-white rounded-3xl p-8 border border-slate-100 hover:shadow-2xl transition-all shadow-sm">
-              <Target className="w-12 h-12 text-amber-600 mb-6" />
+              <div className="w-14 h-14 mb-6">
+                <DotLottiePlayer
+                  src="/assets/landing/target.lottie"
+                  autoplay
+                  loop
+                  style={{ width: '100%', height: '100%' }}
+                />
+              </div>
               <h3 className="font-bold text-xl text-slate-900 mb-2">{t('landing.features.career.title')}</h3>
               <p className="text-sm text-slate-600 mb-4">{t('landing.features.career.desc')}</p>
               <div className="space-y-2">
@@ -334,15 +375,15 @@ export function Landing() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { name: 'Sarah Chen', role: 'Data Scientist @ TechCorp', quote: t('landing.testimonials.q1') },
-              { name: 'Michael Rodriguez', role: 'Full Stack Engineer', quote: t('landing.testimonials.q2') },
-              { name: 'Emily Watson', role: 'Product Designer', quote: t('landing.testimonials.q3') }
+              { name: 'Sarah Chen', role: 'Data Scientist @ TechCorp', quote: t('landing.testimonials.q1'), avatar: '/assets/landing/tung.png' },
+              { name: 'Michael Rodriguez', role: 'Full Stack Engineer', quote: t('landing.testimonials.q2'), avatar: '/assets/landing/thinh.png' },
+              { name: 'Donal Watson', role: 'Product Designer', quote: t('landing.testimonials.q3'), avatar: '/assets/landing/luong.png' }
             ].map((testimonial, i) => (
-              <div key={i} className="bg-white p-10 rounded-2xl border border-slate-100 hover:shadow-2xl transition-all shadow-sm">
+              <div key={i} className="bg-white p-10 rounded-2xl border border-slate-100 hover:shadow-2xl transition-all shadow-sm flex flex-col h-full">
                 <Quote className="w-10 h-10 text-violet-600 mb-6" />
                 <p className="text-slate-600 italic leading-relaxed text-lg mb-6 font-serif">"{testimonial.quote}"</p>
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-teal-500" />
+                <div className="flex items-center gap-4 mt-auto">
+                  <img src={testimonial.avatar} className="w-16 h-16 rounded-full object-cover shadow-md border-2 border-white" alt={testimonial.name} />
                   <div>
                     <h4 className="font-bold text-lg text-slate-900">{testimonial.name}</h4>
                     <p className="text-xs text-violet-600 font-bold uppercase tracking-wide">{testimonial.role}</p>
@@ -355,30 +396,32 @@ export function Landing() {
       </section>
 
       {/* FAQ */}
-      <section className="py-24 max-w-4xl mx-auto px-4">
-        <h2 className="font-bold text-3xl md:text-4xl text-center text-slate-900 mb-2">{t('landing.faq.title')}</h2>
-        <p className="text-center text-slate-500 mb-12">{t('landing.faq.subtitle')}</p>
+      <section className="py-24 bg-white">
+        <div className="max-w-4xl mx-auto px-4">
+          <h2 className="font-bold text-3xl md:text-4xl text-center text-slate-900 mb-2">{t('landing.faq.title')}</h2>
+          <p className="text-center text-slate-500 mb-12">{t('landing.faq.subtitle')}</p>
 
-        <div className="space-y-4">
-          {[
-            { q: t('landing.faq.q1'), a: t('landing.faq.a1') },
-            { q: t('landing.faq.q2'), a: t('landing.faq.a2') },
-            { q: t('landing.faq.q3'), a: t('landing.faq.a3') },
-            { q: t('landing.faq.q4'), a: t('landing.faq.a4') }
-          ].map((faq, i) => (
-            <div key={i} className="bg-white rounded-xl px-6 py-4 border border-slate-100 hover:bg-slate-50 transition-all shadow-sm">
-              <button
-                onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                className="w-full flex justify-between items-center text-left"
-              >
-                <span className="font-medium text-slate-900 text-lg">{faq.q}</span>
-                <ChevronDown className={`w-5 h-5 transition-transform ${openFaq === i ? 'rotate-180' : ''}`} />
-              </button>
-              {openFaq === i && (
-                <p className="text-slate-600 mt-4 leading-relaxed">{faq.a}</p>
-              )}
-            </div>
-          ))}
+          <div className="space-y-4">
+            {[
+              { q: t('landing.faq.q1'), a: t('landing.faq.a1') },
+              { q: t('landing.faq.q2'), a: t('landing.faq.a2') },
+              { q: t('landing.faq.q3'), a: t('landing.faq.a3') },
+              { q: t('landing.faq.q4'), a: t('landing.faq.a4') }
+            ].map((faq, i) => (
+              <div key={i} className="bg-white rounded-xl px-6 py-4 border border-slate-100 hover:bg-slate-50 transition-all shadow-sm">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex justify-between items-center text-left"
+                >
+                  <span className="font-medium text-slate-900 text-lg">{faq.q}</span>
+                  <ChevronDown className={`w-5 h-5 transition-transform ${openFaq === i ? 'rotate-180' : ''}`} />
+                </button>
+                {openFaq === i && (
+                  <p className="text-slate-600 mt-4 leading-relaxed">{faq.a}</p>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -405,7 +448,7 @@ export function Landing() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-4">
-                <img src="/logo.png" alt="NexusAI" className="w-10 h-10 object-contain" />
+                <img src="/logo-icon.png" alt="NexusAI" className="w-10 h-10 object-contain" />
                 <span className="font-bold text-xl">NexusAI</span>
               </div>
               <p className="text-sm text-slate-500 leading-relaxed">{t('landing.footer.desc')}</p>

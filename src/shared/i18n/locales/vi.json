@@ -27,12 +27,16 @@
       "getStarted": "Bắt đầu ngay"
     },
     "hero": {
-      "title": "Nâng Tầm Tư Duy Cùng",
-      "titleHighlight": "Sự Làm Chủ Từ AI.",
+      "title": "Nâng Tầm Tư Duy,",
+      "titleHighlight": "Bứt Phá Mọi Giới Hạn Bằng AI.",
       "subtitle": "Xây dựng lộ trình học tập cá nhân hóa được hỗ trợ bởi AI tiên tiến. Theo dõi tiến độ, mở khóa kỹ năng mới và khám phá cơ hội nghề nghiệp dành riêng cho bạn.",
       "startLearning": "Bắt đầu học ngay",
       "learnMore": "Tìm hiểu thêm",
-      "trustedBy": "Được tin dùng bởi 10,000+ Học viên"
+      "trustedBy": "Được tin dùng bởi 10,000+ Học viên",
+      "skillUnlocked": "Kỹ năng mới",
+      "neuralNetworks": "Mạng nơ-ron",
+      "progress": "Tiến độ",
+      "xpGained": "+240 XP đã nhận"
     },
     "stats": {
       "learners": "Học viên tích cực",

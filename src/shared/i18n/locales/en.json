@@ -32,7 +32,11 @@
       "subtitle": "Build personalized learning roadmaps powered by advanced AI. Track your progress, unlock new skills, and discover career opportunities tailored to your unique journey.",
       "startLearning": "Start Learning Now",
       "learnMore": "Learn More",
-      "trustedBy": "Trusted by 10,000+ Learners"
+      "trustedBy": "Trusted by 10,000+ Learners",
+      "skillUnlocked": "Skill Unlocked",
+      "neuralNetworks": "Neural Networks",
+      "progress": "Progress",
+      "xpGained": "+240 XP Gained"
     },
     "stats": {
       "learners": "Active Learners",
