@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { ChevronRight, ThumbsUp, MessageSquare, Share2, Bookmark, Clock, Reply, MoreHorizontal, Send, Image as ImageIcon, Code, Eye, Award } from 'lucide-react';
-import { getThreadDetailsUseCase, addCommentUseCase, likePostUseCase } from '../../providers';
+import { getThreadDetailsUseCase, addCommentUseCase, likePostUseCase, forumGateway } from '../../providers';
 import { ForumPost, ForumComment } from '../../domain/entities/ForumEntities';
 import { useTranslation } from 'react-i18next';
 import { ForumUserBadge } from '../components/ForumUserBadge';
 import { useTopContributors } from '../hooks/useTopContributors';
+import { RelatedPosts } from '../components/RelatedPosts';
 
 // Monthly Contributors Component (moved from ForumSidebar)
 const MonthlyContributors = () => {
@@ -100,8 +101,8 @@ const MonthlyContributors = () => {
             </div>
 
             <div className={`text-sm font-bold ${index === 0 ? 'text-yellow-500' :
-                index === 1 ? 'text-slate-500' :
-                  index === 2 ? 'text-orange-500' : 'text-slate-400'
+              index === 1 ? 'text-slate-500' :
+                index === 2 ? 'text-orange-500' : 'text-slate-400'
               }`}>
               {contributor.totalPoints >= 1000
                 ? `${(contributor.totalPoints / 1000).toFixed(1)}k`
@@ -273,6 +274,10 @@ export function ThreadDetail() {
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
   const [inlineReplyContent, setInlineReplyContent] = useState('');
 
+  // Related Posts State
+  const [relatedPosts, setRelatedPosts] = useState<ForumPost[]>([]);
+  const [relatedLoading, setRelatedLoading] = useState(true);
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -284,6 +289,11 @@ export function ThreadDetail() {
         if (data.post) {
           setLikeCount(data.post.stats.likes);
           setIsLiked(data.post.isLiked || false);
+
+          // Fetch related posts after getting the main post (to know category, though gateway handles it too)
+          // But actually we can just pass categoryId if we had it, but here we just pass thread ID
+          // and let backend handle lookup if category not passed, OR we pass it from data.post
+          loadRelatedPosts(data.post.id, data.post.categoryId);
         }
       } catch (error) {
         console.error('Failed to load thread details:', error);
@@ -293,6 +303,18 @@ export function ThreadDetail() {
     };
     loadData();
   }, [id]);
+
+  const loadRelatedPosts = async (postId: string, categoryId?: string) => {
+    try {
+      setRelatedLoading(true);
+      const posts = await forumGateway.getRelatedPosts(postId, categoryId, 5);
+      setRelatedPosts(posts);
+    } catch (error) {
+      console.error("Failed to load related posts", error);
+    } finally {
+      setRelatedLoading(false);
+    }
+  };
 
   const onNavigateToSubForum = () => {
     if (post) {
@@ -635,61 +657,7 @@ export function ThreadDetail() {
           {/* Sidebar */}
           <aside className="lg:col-span-4 space-y-6 sticky top-24">
             {/* Related Threads */}
-            <div
-              className="rounded-2xl p-6"
-              style={{
-                background: 'rgba(255, 255, 255, 0.75)',
-                backdropFilter: 'blur(16px)',
-                border: '1px solid rgba(255, 255, 255, 0.6)'
-              }}
-            >
-              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200/50">
-                <span className="p-2 bg-pink-100 rounded-lg text-pink-600 shadow-sm">
-                  <MessageSquare className="w-5 h-5" />
-                </span>
-                <h3 className="font-bold text-lg text-slate-800">Chủ đề liên quan</h3>
-              </div>
-              <div className="space-y-4">
-                <a className="flex gap-3 group hover:bg-slate-50/80 p-2 -mx-2 rounded-xl transition-all cursor-pointer" href="#">
-                  <div className="mt-1">
-                    <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-600">
-                      <Code className="w-4 h-4" />
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-800 leading-snug group-hover:text-violet-600 transition-colors line-clamp-2">
-                      GPT-5 leak features: Multimodal native?
-                    </h4>
-                    <div className="flex items-center gap-2 mt-1.5 text-[11px] text-slate-500">
-                      <span className="flex items-center gap-0.5">
-                        <MessageSquare className="w-3 h-3" /> 32
-                      </span>
-                      <span>•</span>
-                      <span>4 giờ trước</span>
-                    </div>
-                  </div>
-                </a>
-                <a className="flex gap-3 group hover:bg-slate-50/80 p-2 -mx-2 rounded-xl transition-all cursor-pointer" href="#">
-                  <div className="mt-1">
-                    <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-50 text-orange-600">
-                      <Code className="w-4 h-4" />
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-800 leading-snug group-hover:text-violet-600 transition-colors line-clamp-2">
-                      Copilot X vs Cursor: Trải nghiệm thực tế cho Dev
-                    </h4>
-                    <div className="flex items-center gap-2 mt-1.5 text-[11px] text-slate-500">
-                      <span className="flex items-center gap-0.5">
-                        <MessageSquare className="w-3 h-3" /> 85
-                      </span>
-                      <span>•</span>
-                      <span>1 ngày trước</span>
-                    </div>
-                  </div>
-                </a>
-              </div>
-            </div>
+            <RelatedPosts posts={relatedPosts} loading={relatedLoading} />
 
             {/* Top Contributors */}
             <div

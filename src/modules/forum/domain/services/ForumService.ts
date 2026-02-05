@@ -17,8 +17,8 @@ export class ForumService {
     return this.gateway.getCategoryById(categoryId);
   }
 
-  async getPostsByCategory(categoryId: string): Promise<ForumPost[]> {
-    return this.gateway.getPostsByCategory(categoryId);
+  async getPostsByCategory(categoryId: string, params?: any): Promise<{ posts: ForumPost[]; total: number }> {
+    return this.gateway.getPostsByCategory(categoryId, params);
   }
 
   async getPostDetails(postId: string): Promise<ThreadDetails> {
