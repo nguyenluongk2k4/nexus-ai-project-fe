@@ -231,7 +231,7 @@ export function ChatTab({
       </div>
 
       {/* Input - matched height and structure with SkillTree bottom bar */}
-      <div className="h-[64px] border-t border-slate-200 bg-white flex flex-col justify-center flex-shrink-0">
+      <div className="min-h-[64px] py-2 border-t border-slate-200 bg-white flex flex-col justify-center flex-shrink-0">
         <div className="px-4">
           {/* Attachment Tokens */}
           {attachments.length > 0 && (

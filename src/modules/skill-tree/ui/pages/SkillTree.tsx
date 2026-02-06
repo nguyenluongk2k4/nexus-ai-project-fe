@@ -797,7 +797,7 @@ export function SkillTree() {
           </div>
 
           {/* Bottom Control Bar - explicit height and structure to match ChatTab exactly */}
-          <footer id="tour-master-footer" className="h-[64px] border-t border-slate-200 bg-white flex flex-col justify-center z-30 flex-shrink-0">
+          <footer id="tour-master-footer" className="min-h-[64px] border-t border-slate-200 bg-white flex flex-col justify-center z-30 flex-shrink-0">
             <div className="px-4 flex items-center justify-between">
               <div className="flex items-center gap-2 md:gap-4">
                 <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-2xl border border-slate-200">
