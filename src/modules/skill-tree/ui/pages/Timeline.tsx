@@ -680,7 +680,11 @@ export function Timeline() {
               <label className="block text-sm font-medium text-foreground mb-1">{t('mySkillTree.timeline.date')}</label>
               <input
                 type="date"
-                value={editFormData.scheduledDate ? new Date(editFormData.scheduledDate).toISOString().split('T')[0] : ''}
+                value={(() => {
+                  if (!editFormData.scheduledDate) return '';
+                  const d = new Date(editFormData.scheduledDate);
+                  return isNaN(d.getTime()) ? '' : d.toISOString().split('T')[0];
+                })()}
                 onChange={(e) => {
                   const newDate = e.target.value ? new Date(e.target.value) : undefined;
                   setEditFormData(prev => ({ ...prev, scheduledDate: newDate }));
@@ -705,7 +709,11 @@ export function Timeline() {
               <label className="block text-sm font-medium text-foreground mb-1">{t('mySkillTree.timeline.deadline')}</label>
               <input
                 type="date"
-                value={editFormData.deadline ? new Date(editFormData.deadline).toISOString().split('T')[0] : ''}
+                value={(() => {
+                  if (!editFormData.deadline) return '';
+                  const d = new Date(editFormData.deadline);
+                  return isNaN(d.getTime()) ? '' : d.toISOString().split('T')[0];
+                })()}
                 onChange={(e) => {
                   const newDeadline = e.target.value ? new Date(e.target.value) : undefined;
                   setEditFormData(prev => ({ ...prev, deadline: newDeadline }));

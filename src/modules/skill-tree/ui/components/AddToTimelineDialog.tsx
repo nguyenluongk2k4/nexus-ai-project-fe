@@ -47,7 +47,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
     const [selectedResourceId, setSelectedResourceId] = useState('');
     const [scheduledDate, setScheduledDate] = useState('');
     const [deadline, setDeadline] = useState('');
-    const [priority, setPriority] = useState('medium'); 
+    const [priority, setPriority] = useState('medium');
 
     // AI mode state
     const [aiPrompt, setAiPrompt] = useState('');
@@ -71,11 +71,15 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
             // Set default date to tomorrow
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
-            setScheduledDate(tomorrow.toISOString().split('T')[0]);
+            if (!isNaN(tomorrow.getTime())) {
+                setScheduledDate(tomorrow.toISOString().split('T')[0]);
+            }
 
             const nextWeek = new Date();
             nextWeek.setDate(nextWeek.getDate() + 7);
-            setDeadline(nextWeek.toISOString().split('T')[0]);
+            if (!isNaN(nextWeek.getTime())) {
+                setDeadline(nextWeek.toISOString().split('T')[0]);
+            }
         }
     }, [isOpen]);
 
@@ -95,15 +99,15 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                 const timelineData = await timelineRes.json();
                 // API returns { items: [...], stats: {...} }
                 const items = Array.isArray(timelineData) ? timelineData : (timelineData.items || []);
-                
+
                 // Filter items with no scheduledDate (Backlog)
                 const backlogIds = new Set<string>();
                 if (Array.isArray(items)) {
                     items.forEach((item: any) => {
-                         // Check for null date, empty string, or explicit "null" string
-                         if (!item.scheduledDate || item.scheduledDate === '' || item.scheduledDate === 'null') {
-                             backlogIds.add(item.resourceId);
-                         }
+                        // Check for null date, empty string, or explicit "null" string
+                        if (!item.scheduledDate || item.scheduledDate === '' || item.scheduledDate === 'null') {
+                            backlogIds.add(item.resourceId);
+                        }
                     });
                 }
                 setBacklogItems(backlogIds);
@@ -289,7 +293,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                                     className="w-full p-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500"
                                 >
                                     <option value="">{t('mySkillTree.timeline.selectPlaceholder')}</option>
-                                    
+
                                     {/* Group 1: Backlog Items (Highest Priority) */}
                                     {resources.filter(r => backlogItems.has(r.id)).length > 0 && (
                                         <optgroup label="🛑 Backlog (Đã chọn học)">
@@ -311,7 +315,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                                             ))}
                                         </optgroup>
                                     )}
-                                    
+
                                     {/* Removed 'not_started' items as requested */}
                                 </select>
                             </div>

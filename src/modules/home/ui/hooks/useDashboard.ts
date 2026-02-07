@@ -179,6 +179,13 @@ export function useDashboard() {
     items.forEach(item => {
       if (item.status === 'completed' && item.scheduledDate) {
         const itemDate = new Date(item.scheduledDate);
+
+        // Safety check for invalid date
+        if (isNaN(itemDate.getTime())) {
+          console.warn('⚠️ [useDashboard] Invalid date for item:', item.resourceName, item.scheduledDate);
+          return;
+        }
+
         console.log('  📅 Item:', item.resourceName, 'scheduledDate:', itemDate.toISOString(), 'status:', item.status);
         if (itemDate >= weekStart) {
           const dayIndex = itemDate.getDay();
