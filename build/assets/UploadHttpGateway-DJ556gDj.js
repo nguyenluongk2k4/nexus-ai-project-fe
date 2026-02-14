@@ -1,1 +1,0 @@
-import{A as e}from"./index-eQaan-Fa.js";const s=`${e}/api/upload`;class n{async upload(t){const o=new FormData;o.append("file",t);const a=await fetch(s,{method:"POST",body:o});if(!a.ok)throw new Error(`Upload failed: ${a.statusText}`);return await a.json()}}const d=new n;export{n as UploadHttpGateway,d as uploadGateway};

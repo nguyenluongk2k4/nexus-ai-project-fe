@@ -49,4 +49,21 @@ export class SessionHttpGateway implements SessionGateway {
       return false;
     }
   }
+
+  async getSession(sessionId: string): Promise<any> {
+    return await httpClient.get<any>(
+      apiConfig.endpoints.chat.session(sessionId)
+    );
+  }
+
+  async getSessionProgress(sessionId: string): Promise<{
+    status: 'idle' | 'rendering' | 'error';
+    progress: number;
+    step: string;
+    request_id: string | null;
+  }> {
+    return await httpClient.get<any>(
+      apiConfig.endpoints.chat.sessionProgress(sessionId)
+    );
+  }
 }

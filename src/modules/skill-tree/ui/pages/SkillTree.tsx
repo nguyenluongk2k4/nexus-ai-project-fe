@@ -58,7 +58,9 @@ export function SkillTree() {
     uploadFile,
     attachments,
     isUploading,
-    removeAttachment
+    removeAttachment,
+    startStreaming,
+    sessionStatus
   } = useChat({ disableNavigation: true });
 
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -91,12 +93,15 @@ export function SkillTree() {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Handle session selection - stay on SkillTree page (don't redirect to /chat)
-  // Handle session selection - stay on SkillTree page (don't redirect to /chat)
   const handleSelectSession = (sessionId: string) => {
-    // Manually load session messages since we're not changing URL
+    // Only load messages from chat history, NOT the full session data
+    // loadFullSession triggers navigation, which we want to avoid on SkillTree page
+    // selectSession = loadSessionMessages, which only gets messages without navigation side effects
     selectSession(sessionId);
-    loadSessionTree(sessionId); // Load tree for history sessions
-    console.log('Session selected:', sessionId);
+    
+    // Load tree for history sessions
+    loadSessionTree(sessionId);
+    console.log('Session selected on SkillTree:', sessionId);
   };
 
   // DISABLED: Don't auto-load tree from API on session change
@@ -107,6 +112,21 @@ export function SkillTree() {
   //     loadSessionTree(currentSessionId);
   //   }
   // }, [currentSessionId, loadSessionTree]);
+
+  // Auto-start stream when URL session changes (from /skilltree/c/{sessionId})
+  // Only stream if session status is 'rendering' (task is actively processing)
+  useEffect(() => {
+    if (currentSessionId) {
+      // Only start stream if status indicates task is rendering
+      // Otherwise tree data is already available in session.context_data
+      if (sessionStatus === 'rendering') {
+        console.log('📡 [SkillTree] Starting HTTP stream for rendering task...');
+        startStreaming(currentSessionId);
+      } else {
+        console.log(`✅ [SkillTree] Session status is ${sessionStatus}, stream not needed`);
+      }
+    }
+  }, [currentSessionId, sessionStatus, startStreaming]);
 
   // Listen for tree-updated event from WebSocket (keeping this for debugging)
   useEffect(() => {

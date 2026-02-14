@@ -15,11 +15,12 @@ export class ChatWsGateway implements ChatGateway {
     onStatusChange: (status: ConnectionStatus) => void,
     onError: (error: string) => void
   ): void {
+    console.log(`🔌 [WS] Initializing WebSocket to: ${this.wsUrl}`);
     this.ws = new WebSocket(this.wsUrl);
 
     this.ws.onopen = () => {
       onStatusChange('idle');
-      // Don't auto-create session - let it happen when user sends first message
+      console.log('✅ [WS] Connected!');
     };
 
     this.ws.onmessage = (event) => {
@@ -90,6 +91,62 @@ export class ChatWsGateway implements ChatGateway {
           case 'tree_loading':
             treeNodeService.setLoading(true);
             break;
+          case 'tree_task_started':
+            // Backend auto-triggered Celery task with request_id + session_id
+            console.log(`🌳 [WS] tree_task_started: ${data.request_id}`);
+            treeNodeService.setLoading(true);
+
+            // Send system message with session_id so useChat can navigate
+            onMessage({
+              id: crypto.randomUUID(),
+              role: 'system',
+              text: `Bắt đầu session: ${data.session_id}`,
+              timestamp: new Date().toISOString()
+            });
+
+            // Also dispatch event for Chat component to start polling
+            window.dispatchEvent(new CustomEvent('tree-task-started', {
+              detail: {
+                sessionId: data.session_id,
+                requestId: data.request_id,
+                message: data.message
+              }
+            }));
+            break;
+
+          // 🔥 NEW: Async Celery worker events
+          case 'rendering_progress':
+            // Progress update from Celery worker (10%, 40%, 70%)
+            console.log(`📊 [WS] Rendering progress: ${data.progress}%`);
+            treeNodeService.setLoading(true);
+
+            // Show progress message
+            onMessage({
+              id: crypto.randomUUID(),
+              role: 'system',
+              text: `⏳ Đang xử lý... ${data.progress}% (${data.step || ''})`,
+              timestamp: new Date().toISOString()
+            });
+            break;
+
+          case 'tree_ready':
+            // Tree completed from Celery worker (100%)
+            console.log(`✅ [WS] Tree ready with ${data.tree?.nodes?.length || 0} nodes`);
+
+            if (data.tree && data.tree.nodes) {
+              treeNodeService.setNodes(data.tree.nodes as TreeNodeData[]);
+
+              onMessage({
+                id: crypto.randomUUID(),
+                role: 'system',
+                text: `✅ Skill tree đã sẵn sàng! (${data.tree.nodes.length} nodes)`,
+                timestamp: new Date().toISOString()
+              });
+            }
+
+            treeNodeService.setLoading(false);
+            break;
+
           case 'tree_generating':
             // SET FLAG IMMEDIATELY to block tree_nodes from socket
             (window as any).__treeStreamingActive = true;
@@ -150,20 +207,63 @@ export class ChatWsGateway implements ChatGateway {
       }
     };
 
-    this.ws.onerror = () => {
+    this.ws.onerror = (event) => {
+      console.error('❌ [WS] Error event:', event);
+      console.error('❌ [WS] URL was:', this.wsUrl);
       onStatusChange('error');
       onError('Không kết nối được tới máy chủ');
       treeNodeService.setError('Không kết nối được tới máy chủ');
     };
 
-    this.ws.onclose = () => {
+    this.ws.onclose = (event) => {
+      console.warn('⚠️ [WS] Disconnected');
+      console.warn('⚠️ [WS] Close code:', event.code);
+      console.warn('⚠️ [WS] Close reason:', event.reason);
+      console.warn('⚠️ [WS] Was clean:', event.wasClean);
+      console.warn('⚠️ [WS] URL was:', this.wsUrl);
       onStatusChange('error');
       treeNodeService.setLoading(false);
     };
   }
 
   sendMessage(text: string, sessionId: string | null, attachments: any[] = []): void {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+    if (!this.ws) {
+      console.error('❌ [WS] WebSocket not initialized');
+      return;
+    }
+
+    // If not open yet, wait up to 2 seconds
+    if (this.ws.readyState !== WebSocket.OPEN) {
+      console.warn(`⏳ [WS] Not ready (state: ${this.ws.readyState}). Retrying...`);
+
+      let retries = 20; // 20 * 100ms = 2s
+      const retry = () => {
+        if (!this.ws) return;
+
+        if (this.ws.readyState === WebSocket.OPEN) {
+          console.log('✅ [WS] Now ready after retry, sending...');
+          this._sendNow(text, sessionId, attachments);
+        } else if (retries > 0) {
+          retries--;
+          setTimeout(retry, 100);
+        } else {
+          console.error('❌ [WS] Timeout waiting for connection');
+        }
+      };
+
+      setTimeout(retry, 100);
+      return;
+    }
+
+    this._sendNow(text, sessionId, attachments);
+  }
+
+  private _sendNow(text: string, sessionId: string | null, attachments: any[] = []): void {
+    try {
+      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+        console.error('❌ [WS] Cannot send - WebSocket not open');
+        return;
+      }
 
       const token = localStorage.getItem('token');
       this.ws.send(JSON.stringify({
@@ -173,6 +273,9 @@ export class ChatWsGateway implements ChatGateway {
         token: token,
         attachments: attachments
       }));
+      console.log('✅ [WS] Message sent:', text.substring(0, 50));
+    } catch (err) {
+      console.error('❌ [WS] Send failed:', err);
     }
   }
 

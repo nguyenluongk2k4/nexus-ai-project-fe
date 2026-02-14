@@ -1,10 +1,33 @@
 import { useRef, useState, useEffect } from 'react';
-import { MessageSquare, Send, Loader2, Copy, Check, History } from 'lucide-react';
+import { MessageSquare, Send, Loader2, Copy, Check, History, Zap, Trees } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useChat } from '../hooks/useChat';
 import { ChatHistoryDialog } from '../components/ChatSessionList';
 import { CHAT_SUGGESTIONS, CHAT_CONFIG } from '@/modules/chat/domain/constants';
+
+interface SkillTree {
+  id: string;
+  name: string;
+  nodes: Array<{
+    id: string;
+    label: string;
+    difficulty?: string;
+    description?: string;
+  }>;
+  edges: Array<{
+    source: string;
+    target: string;
+  }>;
+}
+
+interface TaskStatus {
+  status: 'idle' | 'rendering' | 'ready' | 'error';
+  progress: number;
+  tree?: SkillTree;
+  error?: string;
+  request_id?: string;
+}
 
 export function Chat() {
   const {
@@ -16,24 +39,39 @@ export function Chat() {
     sessionsLoading,
     hasMore,
     loadMoreSessions,
-    loadingMore
+    loadingMore,
+    currentSessionId,
+    // Polling & Progress
+    sessionStatus,
+    progress,
+    progressStep
   } = useChat();
 
   const [input, setInput] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
+  
+  // Async tree rendering state (can be removed now, using hook state instead)
+  const [currentTree, setCurrentTree] = useState<SkillTree | null>(null);
+  const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
   useEffect(() => {
     if (listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight;
     }
-  }, [messages, status]);
+  }, [messages, status, progress]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
-    send(input);
+    if (status !== 'idle') return; // Prevent sending while processing
+    
+    const messageText = input;
     setInput('');
+    
+    // Send message via WebSocket
+    // Backend will auto-trigger Celery task on tree query
+    send(messageText);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -221,6 +259,73 @@ export function Chat() {
               <div className="flex items-center gap-2 text-gray-500">
                 <Loader2 className="w-4 h-4 animate-spin text-violet-600" />
                 <span className="text-sm">Đang phân tích và tìm kiếm thông tin...</span>
+              </div>
+            </div>
+          )}
+
+          {/* Task Progress Bar */}
+          {sessionStatus === 'rendering' && (
+            <div className="w-full px-4 py-3 bg-gradient-to-r from-violet-50 to-teal-50 border border-violet-200 rounded-lg">
+              <div className="flex items-center gap-3 mb-2">
+                <Zap className="w-4 h-4 text-violet-600 animate-pulse" />
+                <span className="text-sm font-semibold text-violet-900">
+                  Đang xây dựng skill tree...
+                </span>
+                <span className="ml-auto text-xs font-bold text-violet-600">{progress}%</span>
+              </div>
+              <div className="w-full h-2 bg-violet-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-violet-500 to-teal-500 transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              {progressStep && (
+                <p className="mt-2 text-xs text-gray-600">Bước: {progressStep}</p>
+              )}
+            </div>
+          )}
+
+          {/* Skill Tree Visualization */}
+          {currentTree && sessionStatus === 'idle' && (
+            <div className="w-full p-4 bg-white border-2 border-teal-500 rounded-lg shadow-md">
+              <div className="flex items-center gap-2 mb-4">
+                <Trees className="w-5 h-5 text-teal-600" />
+                <h3 className="font-bold text-lg text-gray-900">{currentTree.name}</h3>
+                <span className="ml-auto text-xs bg-teal-100 text-teal-700 px-3 py-1 rounded-full font-medium">
+                  {currentTree.nodes.length} nodes
+                </span>
+              </div>
+              
+              <div className="space-y-3">
+                {currentTree.nodes.map((node) => (
+                  <div
+                    key={node.id}
+                    onClick={() => setSelectedNode(selectedNode === node.id ? null : node.id)}
+                    className={`p-3 rounded-lg cursor-pointer transition-all ${
+                      node.difficulty === 'advanced'
+                        ? 'bg-red-50 border border-red-200 hover:bg-red-100'
+                        : node.difficulty === 'intermediate'
+                        ? 'bg-amber-50 border border-amber-200 hover:bg-amber-100'
+                        : 'bg-blue-50 border border-blue-200 hover:bg-blue-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-block w-2.5 h-2.5 rounded-full ${
+                        node.difficulty === 'advanced' ? 'bg-red-500' :
+                        node.difficulty === 'intermediate' ? 'bg-amber-500' :
+                        'bg-blue-500'
+                      }`} />
+                      <span className="font-semibold text-gray-800">{node.label}</span>
+                      <span className="ml-auto text-xs px-2 py-1 bg-white rounded-full">
+                        {node.difficulty || 'general'}
+                      </span>
+                    </div>
+                    
+                    {selectedNode === node.id && node.description && (
+                      <p className="mt-2 text-sm text-gray-600 pl-5">{node.description}</p>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           )}

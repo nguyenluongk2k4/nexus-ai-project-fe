@@ -19,6 +19,13 @@ export function useChat(options: UseChatOptions = {}) {
   const [error, setError] = useState<string | null>(null);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(urlSessionId || null);
 
+  // Streaming state
+  const [sessionStatus, setSessionStatus] = useState<'idle' | 'rendering' | 'error'>('idle');
+  const [progress, setProgress] = useState(0);
+  const [progressStep, setProgressStep] = useState('');
+  const streamingSessionRef = useRef<string | null>(null);
+  const isMountedRef = useRef(true); // Track if component is mounted
+
   // Sessions state
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
@@ -90,6 +97,33 @@ export function useChat(options: UseChatOptions = {}) {
     }
   }, [sessionGateway]);
 
+  // Load full session on page enter
+  const loadFullSession = useCallback(async (sessionId: string) => {
+    try {
+      const sessionData = await sessionGateway.getSession(sessionId);
+      
+      // Load messages and context
+      setMessages(sessionData.messages || []);
+      setCurrentSessionId(sessionId);
+      setSessionStatus(sessionData.status);
+      setProgress(sessionData.progress || 0);
+      
+      // Note: If status is 'rendering', streaming will be auto-triggered 
+      // when WebSocket sends tree_task_started event
+    } catch (err: any) {
+      console.error('Failed to load full session:', err);
+      setError('Không thể tải session');
+    }
+  }, [sessionGateway]);
+
+  // Cleanup streaming on unmount
+  const stopStreaming = useCallback(() => {
+    if (streamingSessionRef.current) {
+      console.log('🛑 [useChat] Stopped streaming');
+      streamingSessionRef.current = null;
+    }
+  }, []);
+
   // Start new chat
   const startNewChat = useCallback(() => {
     setMessages([]);
@@ -100,39 +134,59 @@ export function useChat(options: UseChatOptions = {}) {
     }
   }, [navigate, disableNavigation]);
 
-  // Initial load - only once
+  // Track loaded session to avoid duplicate API calls (especially from React StrictMode)
+  const loadedSessionIdRef = useRef<string | null>(null);
+
+  // Load sessions when component mounts - always load for both /chat and /skilltree
   useEffect(() => {
+    // Always load session history (for sidebar on both pages)
     loadSessions(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadSessions]);
 
   // Load messages when URL changes
   useEffect(() => {
     if (urlSessionId) {
-      loadSessionMessages(urlSessionId);
+      // Only load if not already loaded (prevent React StrictMode double-fetch)
+      if (loadedSessionIdRef.current !== urlSessionId) {
+        loadedSessionIdRef.current = urlSessionId;
+        loadFullSession(urlSessionId);
+      }
       setCurrentSessionId(urlSessionId);
     } else {
       // Only clear if actually at /chat (new chat)
       setMessages([]);
       setCurrentSessionId(null);
+      loadedSessionIdRef.current = null;
+      stopStreaming();
     }
-  }, [urlSessionId, loadSessionMessages]);
 
-  // WebSocket connection - separate effect
+    // Cleanup: stop streaming only when urlSessionId actually changes to null/different
+    return () => {
+      // Only stop if we're leaving the /chat/c/{id} page
+      if (!urlSessionId) {
+        stopStreaming();
+      }
+    };
+  }, [urlSessionId]);
+
+  // Track previous sessionId to detect new session creation
+  const prevSessionIdRef = useRef<string | null>(null);
+
+  // WebSocket connection - init ONCE, never disconnect
   useEffect(() => {
     const service = getChatService();
 
     const handleMessage = (msg: Message) => {
-      // Handle new session creation - navigate but don't add to messages
+      // Handle new session creation
       if (msg.role === 'system' && msg.text.startsWith('Bắt đầu session: ')) {
         const newSessionId = msg.text.replace('Bắt đầu session: ', '');
         setCurrentSessionId(newSessionId);
-        // Navigate to the new session URL only if navigation is enabled
+        prevSessionIdRef.current = newSessionId;
+        
+        // Navigate to new session (session list loaded on-demand)
         if (!disableNavigation) {
           navigate(`/chat/c/${newSessionId}`, { replace: true });
         }
-        // Reload sessions after a brief delay to show new one
-        setTimeout(() => loadSessions(true), 500);
         return; // Don't add system message to chat
       }
 
@@ -148,8 +202,9 @@ export function useChat(options: UseChatOptions = {}) {
       (err) => setError(err)
     );
 
-    return () => service.disconnect();
-  }, [navigate, loadSessions]);
+    // Never disconnect - socket stays alive across all navigation
+    return () => {}; // No cleanup
+  }, [disableNavigation, navigate, loadSessions]); // Include deps to access latest values
 
   // Restore tree context when session changes
   useEffect(() => {
@@ -257,6 +312,215 @@ export function useChat(options: UseChatOptions = {}) {
     }
   }, [currentSessionId, attachments, uploadFile]);
 
+  // Cleanup streaming on unmount
+  useEffect(() => {
+    isMountedRef.current = true; // Mark as mounted
+    return () => {
+      stopStreaming();
+      isMountedRef.current = false; // Mark component as unmounted
+    };
+  }, [stopStreaming]);
+
+  // Listen for tree-task-started event from WebSocket: navigate + load messages + start stream
+  useEffect(() => {
+    const handleTreeTaskStarted = async (event: CustomEvent<any>) => {
+      // Extract session_id and user_message from WS event (message has DB id from backend)
+      const sessionId = event.detail?.session_id || event.detail?.sessionId;
+      const userMessageData = event.detail?.user_message; // Can be string or {id, text, role}
+      
+      if (!sessionId) {
+        console.warn('⚠️ [useChat] No session_id in tree-task-started event:', event.detail);
+        return;
+      }
+
+      console.log(`🌊 [useChat] tree-task-started: session=${sessionId}, message received from backend`);
+
+      try {
+        // Step 1: Add user message to state (received from DB via backend)
+        if (userMessageData && isMountedRef.current) {
+          // Backend MUST send object format: {id, text, role}
+          if (typeof userMessageData !== 'object' || !userMessageData.id) {
+            console.error('❌ [useChat] Invalid user_message format from backend:', userMessageData);
+            return; // Don't display invalid message
+          }
+          
+          const userMsg: Message = {
+            id: userMessageData.id,
+            role: 'user',
+            text: userMessageData.text,
+            attachments: userMessageData.attachments || [],
+            timestamp: new Date().toISOString()
+          };
+          
+          setMessages([userMsg]); // Start with user message from DB
+          setCurrentSessionId(sessionId);
+          console.log('💬 [useChat] User message added to UI (ID from DB:', userMsg.id, ')');
+        }
+
+        // Step 2: Navigate to skill tree page with session ID
+        // SkillTree page will auto-detect rendering status and start stream
+        navigate(`/skilltree/c/${sessionId}`);
+        console.log(`📍 [useChat] Navigated to /skilltree/c/${sessionId}`);
+
+      } catch (err) {
+        console.error('❌ [useChat] Error handling tree-task-started:', err);
+        if (isMountedRef.current) {
+          setError('Lỗi khởi tạo session');
+        }
+      }
+    };
+
+    window.addEventListener('tree-task-started', handleTreeTaskStarted as unknown as EventListener);
+    return () => {
+      window.removeEventListener('tree-task-started', handleTreeTaskStarted as unknown as EventListener);
+    };
+  }, [navigate]);
+
+  // Streaming from server endpoint (called after tree_task_started event)
+  const startStreamingFromServer = useCallback(async (sessionId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('❌ [useChat] No auth token found');
+        if (isMountedRef.current) {
+          setSessionStatus('error');
+          setProgressStep('Lỗi xác thực');
+        }
+        return;
+      }
+
+      console.log(`📡 [useChat] Starting stream for session: ${sessionId}`);
+      
+      // Set initial rendering status
+      if (isMountedRef.current) {
+        setSessionStatus('rendering');
+        setProgress(0);
+        setProgressStep('Bắt đầu...');
+      }
+      
+      // Create abort controller with 180s timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+        console.warn('⏱️ [useChat] Stream request timeout after 180s');
+      }, 180000);
+      
+      const response = await fetch(`/api/chat/session/${sessionId}/progress-stream`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        signal: controller.signal
+      }).catch(err => {
+        clearTimeout(timeoutId);
+        console.error('❌ [useChat] Stream fetch error:', err.name, err.message);
+        if (isMountedRef.current) {
+          setSessionStatus('error');
+          setProgressStep('Lỗi kết nối: ' + (err.name === 'AbortError' ? 'Timeout' : err.message || 'Network error'));
+        }
+        throw err;
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        console.error(`❌ [useChat] Stream failed: ${response.status} ${response.statusText}`);
+        if (isMountedRef.current) {
+          setSessionStatus('error');
+          setProgressStep(`Lỗi: ${response.status}`);
+        }
+        return;
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) return;
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      const readChunk = async (): Promise<void> => {
+        // Stop reading if component unmounted
+        if (!isMountedRef.current) return;
+
+        try {
+          const { done, value } = await reader.read();
+          if (done) {
+            console.log('✅ [useChat] Stream completed');
+            return;
+          }
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ''; // Keep incomplete line
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const event = JSON.parse(line.substring(6));
+                console.log(`📊 [useChat] Stream event:`, event.type);
+
+                // Only update state if mounted
+                if (!isMountedRef.current) return;
+
+                switch (event.type) {
+                  case 'progress':
+                    setProgress(event.progress || 0);
+                    setProgressStep(event.step || '');
+                    console.log(
+`📈 [useChat] Progress: ${event.progress}% - ${event.step}`);
+                    break;
+
+                  case 'completed':
+                    setProgress(100);
+                    setProgressStep('Hoàn thành!');
+                    setSessionStatus('idle');
+                    console.log('✅ [useChat] Stream: Completed');
+                    // Reload session to get tree data (with small delay to avoid overlap)
+                    setTimeout(() => {
+                      loadedSessionIdRef.current = null; // Allow reload
+                      loadFullSession(sessionId);
+                    }, 500);
+                    break;
+
+                  case 'error':
+                    setSessionStatus('error');
+                    setProgressStep(event.message || 'Lỗi xử lý');
+                    console.error('❌ [useChat] Stream error:', event.message);
+                    break;
+
+                  case 'timeout':
+                    setSessionStatus('error');
+                    setProgressStep('Timeout');
+                    console.warn('⏱️ [useChat] Stream timeout');
+                    break;
+                }
+              } catch (parseErr) {
+                console.warn('[useChat] Failed to parse stream event:', line);
+              }
+            }
+          }
+
+          // Continue reading
+          await readChunk();
+        } catch (err) {
+          console.error('❌ [useChat] Stream reading error:', err);
+          if (isMountedRef.current) {
+            setSessionStatus('error');
+            setProgressStep('Lỗi kết nối');
+          }
+        }
+      };
+
+      // Start reading
+      await readChunk();
+    } catch (err) {
+      console.error('❌ [useChat] Stream error:', err);
+      if (isMountedRef.current) {
+        setSessionStatus('error');
+        setProgressStep('Lỗi');
+      }
+    }
+  }, [loadFullSession]);
   const clearError = () => {
     setError(null);
     if (status === 'error') {
@@ -279,6 +543,11 @@ export function useChat(options: UseChatOptions = {}) {
     currentSessionId,
     startNewChat,
     selectSession: loadSessionMessages,
+    // Polling & Progress
+    sessionStatus,
+    progress,
+    progressStep,
+    startStreaming: startStreamingFromServer,
     // Upload
     uploadFile,
     attachments,

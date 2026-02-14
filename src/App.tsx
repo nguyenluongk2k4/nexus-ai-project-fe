@@ -66,6 +66,7 @@ export default function App() {
                         <div className="flex-1 overflow-auto">
                           <Routes>
                             <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/skilltree/c/:sessionId?" element={<SkillTree />} />
                             <Route path="/skilltree" element={<SkillTree />} />
                             <Route path="/my-skills" element={<MySkillTree />} />
                             <Route path="/quiz" element={<Quiz />} />

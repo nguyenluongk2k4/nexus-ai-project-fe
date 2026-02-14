@@ -74,8 +74,29 @@ const getWsBaseUrl = () => {
     return `${protocol}//${envWsUrl}`;
   }
 
-  // Default to current host with upgrading protocol
-  return `${protocol}//${window.location.host}/api`;
+  // Derive from VITE_API_URL - most reliable
+  if (envApiUrl) {
+    // Extract hostname and add backend port
+    try {
+      const apiUrl = new URL(envApiUrl);
+      const wsProtocol = apiUrl.protocol === 'https:' ? 'wss://' : 'ws://';
+      const hostname = apiUrl.hostname;
+      const port = apiUrl.port || (apiUrl.protocol === 'https:' ? '443' : '80');
+      return `${wsProtocol}${hostname}:${port}`;
+    } catch (e) {
+      console.error('Failed to parse VITE_API_URL:', envApiUrl);
+    }
+  }
+
+  // Final fallback: localhost:8000 (backend default)
+  // Never use window.location.host as it may be dev server port
+  const hostname = window.location.hostname;
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return `${protocol}//localhost:8000`;
+  }
+  
+  // Production: use current protocol + host
+  return `${protocol}//${window.location.host}`;
 };
 
 export const apiConfig = {
@@ -95,6 +116,9 @@ export const apiConfig = {
       ws: '/chat/ws',
       message: '/chat/message',
       sessions: '/chat/sessions',
+      session: (sessionId: string) => `/chat/session/${sessionId}`,
+      sessionProgress: (sessionId: string) => `/chat/session/${sessionId}/progress`,
+      sessionProgressStream: (sessionId: string) => `/chat/session/${sessionId}/progress-stream`,
       sessionMessages: (sessionId: string) => `/chat/sessions/${sessionId}/messages`,
       sessionDelete: (sessionId: string) => `/chat/sessions/${sessionId}`,
     },

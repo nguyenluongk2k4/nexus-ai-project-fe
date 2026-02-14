@@ -20,4 +20,19 @@ export interface SessionGateway {
    * Delete a session
    */
   deleteSession(sessionId: string): Promise<boolean>;
+
+  /**
+   * Load full session state on page enter
+   */
+  getSession(sessionId: string): Promise<any>;
+  
+  /**
+   * Get session progress for polling during rendering
+   */
+  getSessionProgress(sessionId: string): Promise<{
+    status: 'idle' | 'rendering' | 'error';
+    progress: number;
+    step: string;
+    request_id: string | null;
+  }>;
 }
