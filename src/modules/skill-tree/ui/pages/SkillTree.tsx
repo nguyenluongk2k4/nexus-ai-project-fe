@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Check, Lock, Minus, Plus, MessageSquare, Loader2, Save, CheckCircle, BookOpen } from 'lucide-react';
 import { useSkillTree, SkillNode } from '@/modules/skill-tree/ui/hooks/useSkillTree';
 import { useChat } from '@/modules/chat/ui/hooks/useChat';
@@ -20,6 +21,7 @@ interface TreeNode extends SkillNode {
 
 export function SkillTree() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   // Subscribe to tree state Observable
   const [treeState, setTreeState] = useState<TreeState>({ nodes: [], loading: false, error: null });
   const { t } = useTranslation();
@@ -94,39 +96,36 @@ export function SkillTree() {
 
   // Handle session selection - stay on SkillTree page (don't redirect to /chat)
   const handleSelectSession = (sessionId: string) => {
-    // Only load messages from chat history, NOT the full session data
-    // loadFullSession triggers navigation, which we want to avoid on SkillTree page
-    // selectSession = loadSessionMessages, which only gets messages without navigation side effects
+    // Navigate to preserve session in URL
+    navigate(`/skilltree/c/${sessionId}`, { replace: true });
+
+    // selectSession loads messages
     selectSession(sessionId);
-    
-    // Load tree for history sessions
-    loadSessionTree(sessionId);
+
+
     console.log('Session selected on SkillTree:', sessionId);
   };
 
-  // DISABLED: Don't auto-load tree from API on session change
-  // This was loading the default template before WS could send generated tree
-  // Tree will now only come from WebSocket tree_nodes message
-  // useEffect(() => {
-  //   if (currentSessionId) {
-  //     loadSessionTree(currentSessionId);
-  //   }
-  // }, [currentSessionId, loadSessionTree]);
+
+
+  // Auto-clear tree when there is no session (e.g. navigating to /skilltree)
+  useEffect(() => {
+    if (!currentSessionId) {
+      console.log('🧹 [SkillTree] No session active, clearing tree state');
+      treeNodeService.clear();
+    }
+  }, [currentSessionId]);
 
   // Auto-start stream when URL session changes (from /skilltree/c/{sessionId})
-  // Only stream if session status is 'rendering' (task is actively processing)
   useEffect(() => {
     if (currentSessionId) {
-      // Only start stream if status indicates task is rendering
-      // Otherwise tree data is already available in session.context_data
-      if (sessionStatus === 'rendering') {
-        console.log('📡 [SkillTree] Starting HTTP stream for rendering task...');
-        startStreaming(currentSessionId);
-      } else {
-        console.log(`✅ [SkillTree] Session status is ${sessionStatus}, stream not needed`);
-      }
+      // Always attempt to start stream when session loads
+      // If sessionStatus is 'rendering', stream will get progress updates
+      // If sessionStatus is 'idle' or 'error', stream will timeout but won't break anything
+      console.log(`📡 [SkillTree] Starting HTTP stream for session: ${currentSessionId}, status: ${sessionStatus}`);
+      startStreaming(currentSessionId);
     }
-  }, [currentSessionId, sessionStatus, startStreaming]);
+  }, [currentSessionId, startStreaming]);
 
   // Listen for tree-updated event from WebSocket (keeping this for debugging)
   useEffect(() => {
@@ -168,6 +167,8 @@ export function SkillTree() {
     treeNodeService.clear();
     startNewChat();
     setSaveSuccess(false); // Reset save status for new chat
+    // Navigate back to /skilltree (clear session from URL)
+    navigate('/skilltree', { replace: true });
   };
 
   // Handle Save to My Tree
@@ -192,9 +193,9 @@ export function SkillTree() {
   // Convert tree nodes from Observable to SkillNode format for visualization
   // Build connections from parentId relationships
   const skillNodes: SkillNode[] = useMemo(() => {
-    if (!showTree) return [];
-
-    // 1. Prioritize nodes from service (Session Tree)
+    // 1. Prioritize nodes from service (Session Tree - loaded via useChat)
+    // CRITICAL FIX: Always show proper tree nodes if they exist, ignoring showTree flag
+    // (showTree flag is only for the "Wizard" mode with mock data)
     if (treeState.nodes.length > 0) {
       const nodes = treeState.nodes;
 

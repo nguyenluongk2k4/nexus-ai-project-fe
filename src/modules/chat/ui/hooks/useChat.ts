@@ -101,15 +101,68 @@ export function useChat(options: UseChatOptions = {}) {
   const loadFullSession = useCallback(async (sessionId: string) => {
     try {
       const sessionData = await sessionGateway.getSession(sessionId);
-      
-      // Load messages and context
-      setMessages(sessionData.messages || []);
+
+      // Merge messages instead of overwriting (preserve user message from tree_task_started event)
+      setMessages(prev => {
+        if (prev.length > 0) {
+          // Keep existing messages (from tree_task_started event)
+          // Add new messages from API that aren't already present
+          const existingIds = new Set(prev.map((m: Message) => m.id));
+          const newMessages = (sessionData.messages || []).filter(
+            (m: any) => !existingIds.has(m.id)
+          );
+          console.log(`📥 [useChat] Merging ${newMessages.length} new messages with ${prev.length} existing`);
+          return [...prev, ...newMessages];
+        } else {
+          // No existing messages, use API data
+          return sessionData.messages || [];
+        }
+      });
+
       setCurrentSessionId(sessionId);
       setSessionStatus(sessionData.status);
       setProgress(sessionData.progress || 0);
-      
+
+      console.log(`✅ [useChat] Session loaded - status: ${sessionData.status}, progress: ${sessionData.progress}%`);
+
+      // Option 1: Optimistically add to session list if not present
+      setSessions(prev => {
+        if (prev.some(s => s.id === sessionData.id)) return prev;
+
+        // Construct minimal session object for list
+        const newSession: ChatSession = {
+          id: sessionData.id,
+          title: sessionData.title || 'New Session',
+          created_at: sessionData.created_at || new Date().toISOString(),
+          updated_at: sessionData.updated_at || new Date().toISOString(),
+          context_data: sessionData.context_data
+        };
+        return [newSession, ...prev];
+      });
+
+
+      // Fix: Directly update tree nodes from the loaded session data
+      if (sessionData.context_data?.tree_nodes) {
+        import('../../../skill-tree/domain/services/treeNodeService').then(({ treeNodeService }) => {
+          const nodes = sessionData.context_data.tree_nodes;
+          console.log(`🌳 [useChat] Found tree nodes in context: ${nodes.length}`);
+          if (nodes.length > 0) {
+            console.log('🌳 [useChat] First node sample:', nodes[0]);
+          }
+
+          // Use setNodes to REPLACE the tree state for this session (avoid mixing with previous session)
+          treeNodeService.setNodes(nodes);
+          console.log(`🌳 [useChat] Updated tree nodes from loadFullSession via setNodes`);
+
+          // Also stop loading
+          if (sessionData.status === 'idle') {
+            treeNodeService.setLoading(false);
+          }
+        });
+      }
+
       // Note: If status is 'rendering', streaming will be auto-triggered 
-      // when WebSocket sends tree_task_started event
+      // when SkillTree detects sessionStatus === 'rendering'
     } catch (err: any) {
       console.error('Failed to load full session:', err);
       setError('Không thể tải session');
@@ -182,7 +235,7 @@ export function useChat(options: UseChatOptions = {}) {
         const newSessionId = msg.text.replace('Bắt đầu session: ', '');
         setCurrentSessionId(newSessionId);
         prevSessionIdRef.current = newSessionId;
-        
+
         // Navigate to new session (session list loaded on-demand)
         if (!disableNavigation) {
           navigate(`/chat/c/${newSessionId}`, { replace: true });
@@ -203,7 +256,7 @@ export function useChat(options: UseChatOptions = {}) {
     );
 
     // Never disconnect - socket stays alive across all navigation
-    return () => {}; // No cleanup
+    return () => { }; // No cleanup
   }, [disableNavigation, navigate, loadSessions]); // Include deps to access latest values
 
   // Restore tree context when session changes
@@ -327,7 +380,7 @@ export function useChat(options: UseChatOptions = {}) {
       // Extract session_id and user_message from WS event (message has DB id from backend)
       const sessionId = event.detail?.session_id || event.detail?.sessionId;
       const userMessageData = event.detail?.user_message; // Can be string or {id, text, role}
-      
+
       if (!sessionId) {
         console.warn('⚠️ [useChat] No session_id in tree-task-started event:', event.detail);
         return;
@@ -343,7 +396,7 @@ export function useChat(options: UseChatOptions = {}) {
             console.error('❌ [useChat] Invalid user_message format from backend:', userMessageData);
             return; // Don't display invalid message
           }
-          
+
           const userMsg: Message = {
             id: userMessageData.id,
             role: 'user',
@@ -351,7 +404,7 @@ export function useChat(options: UseChatOptions = {}) {
             attachments: userMessageData.attachments || [],
             timestamp: new Date().toISOString()
           };
-          
+
           setMessages([userMsg]); // Start with user message from DB
           setCurrentSessionId(sessionId);
           console.log('💬 [useChat] User message added to UI (ID from DB:', userMsg.id, ')');
@@ -390,21 +443,21 @@ export function useChat(options: UseChatOptions = {}) {
       }
 
       console.log(`📡 [useChat] Starting stream for session: ${sessionId}`);
-      
+
       // Set initial rendering status
       if (isMountedRef.current) {
         setSessionStatus('rendering');
         setProgress(0);
         setProgressStep('Bắt đầu...');
       }
-      
+
       // Create abort controller with 180s timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => {
         controller.abort();
         console.warn('⏱️ [useChat] Stream request timeout after 180s');
       }, 180000);
-      
+
       const response = await fetch(`/api/chat/session/${sessionId}/progress-stream`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -467,7 +520,7 @@ export function useChat(options: UseChatOptions = {}) {
                     setProgress(event.progress || 0);
                     setProgressStep(event.step || '');
                     console.log(
-`📈 [useChat] Progress: ${event.progress}% - ${event.step}`);
+                      `📈 [useChat] Progress: ${event.progress}% - ${event.step}`);
                     break;
 
                   case 'completed':
