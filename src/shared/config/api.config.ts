@@ -63,6 +63,8 @@ const getBaseUrl = () => {
 
 // Helper to determine WS URL
 const getWsBaseUrl = () => {
+  if (typeof window === 'undefined') return envWsUrl || '/api';
+
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 
   if (envWsUrl) {
@@ -74,29 +76,21 @@ const getWsBaseUrl = () => {
     return `${protocol}//${envWsUrl}`;
   }
 
-  // Derive from VITE_API_URL - most reliable
-  if (envApiUrl) {
-    // Extract hostname and add backend port
-    try {
-      const apiUrl = new URL(envApiUrl);
-      const wsProtocol = apiUrl.protocol === 'https:' ? 'wss://' : 'ws://';
-      const hostname = apiUrl.hostname;
-      const port = apiUrl.port || (apiUrl.protocol === 'https:' ? '443' : '80');
-      return `${wsProtocol}${hostname}:${port}`;
-    } catch (e) {
-      console.error('Failed to parse VITE_API_URL:', envApiUrl);
-    }
+  // Derive from getBaseUrl() to guarantee the exact same host and prefix (e.g. /api)
+  const apiBase = getBaseUrl();
+
+  if (apiBase.startsWith('/')) {
+    // It's a relative path on production (like "/api")
+    return `${protocol}//${window.location.host}${apiBase}`;
   }
 
-  // Final fallback: localhost:8000 (backend default)
-  // Never use window.location.host as it may be dev server port
-  const hostname = window.location.hostname;
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return `${protocol}//localhost:8000`;
+  // It's an absolute path (like "http://localhost:8000/api")
+  if (apiBase.startsWith('http')) {
+    return apiBase.replace(/^http/, 'ws');
   }
-  
-  // Production: use current protocol + host
-  return `${protocol}//${window.location.host}`;
+
+  // Fallback
+  return `${protocol}//${window.location.host}/api`;
 };
 
 export const apiConfig = {
