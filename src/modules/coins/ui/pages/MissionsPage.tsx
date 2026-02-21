@@ -131,39 +131,39 @@ export const MissionsPage: React.FC = () => {
                                     <div className="absolute inset-0 to-indigo-50/50" />
                                 </div>
 
-                                <div className="relative p-12 flex flex-col items-center">
-                                    <div className="flex items-center gap-8 mb-8">
+                                <div className="relative p-6 md:p-12 flex flex-col items-center">
+                                    <div className="flex items-center gap-8 mb-6 md:mb-8 text-center">
                                         <div>
-                                            <h3 className="text-4xl font-black italic uppercase tracking-tighter text-slate-900 leading-none">
+                                            <h3 className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter text-slate-900 leading-none">
                                                 {t('missions.title')}
                                             </h3>
                                         </div>
                                     </div>
 
                                     {/* Big Progress Bar */}
-                                    <div className="w-full max-w-4xl mt-6">
-                                        <div className="flex justify-between items-end mb-6 px-4">
-                                            <div className="flex flex-col">
+                                    <div className="w-full max-w-4xl mt-4 md:mt-6 px-2 md:px-6">
+                                        <div className="flex flex-col sm:flex-row justify-between sm:items-end mb-4 md:mb-6 px-2 md:px-4 gap-4 sm:gap-0">
+                                            <div className="flex flex-col items-center sm:items-start">
                                                 {/* <span className="text-xs font-black text-slate-400 tracking-[0.3em] uppercase mb-1">{t('missions.event_status')}</span> */}
-                                                <h3 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900 leading-none">
+                                                <h3 className="text-xl md:text-2xl font-black italic uppercase tracking-tighter text-slate-900 leading-none">
                                                     {t('missions.event_progress')}
                                                 </h3>
                                             </div>
-                                            <div className="flex flex-col items-end">
+                                            <div className="flex flex-col items-center sm:items-end">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-3xl font-black italic text-violet-600 leading-none">{earnedCoins}</span>
-                                                    <span className="text-sm font-black text-slate-300 uppercase leading-none self-end mb-1">/ {totalCoinsGoal} {t('missions.coins')}</span>
+                                                    <span className="text-2xl md:text-3xl font-black italic text-violet-600 leading-none">{earnedCoins}</span>
+                                                    <span className="text-xs md:text-sm font-black text-slate-300 uppercase leading-none self-end mb-1">/ {totalCoinsGoal} {t('missions.coins')}</span>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="h-10 w-full bg-slate-100/50 rounded-2xl border-[6px] border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative">
+                                        <div className="h-8 md:h-10 w-full bg-slate-100/50 rounded-2xl border-[4px] md:border-[6px] border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative">
                                             <div
                                                 className="h-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-violet-600 shadow-[0_0_20px_rgba(124,58,237,0.3)] transition-all duration-1000 relative rounded-xl"
                                                 style={{ width: `${overallProgress}%` }}
                                             >
                                                 {/* Visual Shine */}
                                                 <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent rounded-xl" />
-                                                <div className="absolute top-0 right-0 h-full w-24 bg-white/20 blur-xl animate-pulse" />
+                                                <div className="absolute top-0 right-0 h-full w-12 md:w-24 bg-white/20 blur-xl animate-pulse" />
 
                                                 {/* User Avatar Checkpoint */}
                                                 <div
@@ -171,7 +171,7 @@ export const MissionsPage: React.FC = () => {
                                                 >
                                                     <div className="relative">
                                                         <div className="absolute inset-0 bg-violet-400 blur-md rounded-full animate-ping opacity-50" />
-                                                        <div className="w-14 h-14 rounded-2xl border-4 border-white shadow-2xl overflow-hidden bg-white rotate-3 group-hover:rotate-0 transition-transform duration-300">
+                                                        <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl border-2 md:border-4 border-white shadow-xl md:shadow-2xl overflow-hidden bg-white rotate-3 group-hover:rotate-0 transition-transform duration-300">
                                                             <img
                                                                 src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || user?.username || 'User')}&background=random`}
                                                                 alt="You"
@@ -179,7 +179,7 @@ export const MissionsPage: React.FC = () => {
                                                             />
                                                         </div>
                                                         {/* Progress Bubble */}
-                                                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-black px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                        <div className="absolute -top-8 md:-top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[9px] md:text-[10px] font-black px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                                                             {Math.round(overallProgress)}% Done
                                                         </div>
                                                     </div>
@@ -192,10 +192,10 @@ export const MissionsPage: React.FC = () => {
                         </div>
 
                         {/* Mission List */}
-                        <div className="pt-4 space-y-4 p-20 mx-auto w-full">
-                            <div className="flex items-center justify-between mb-2 px-2">
-                                <h4 className="text-[12px] font-black text-slate-500 tracking-[0.2em] uppercase italic">{t('missions.available_missions')}</h4>
-                                <div className="flex gap-4">
+                        <div className="pt-2 md:pt-4 space-y-4 px-4 py-8 md:px-8 md:py-12 lg:p-20 mx-auto w-full">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4 px-2">
+                                <h4 className="text-[10px] md:text-[12px] font-black text-slate-500 tracking-[0.2em] uppercase italic text-center sm:text-left">{t('missions.available_missions')}</h4>
+                                <div className="flex gap-4 justify-center sm:justify-start">
                                     <span className={`text-[10px] font-black cursor-pointer transition-all ${activeTab === 'all' ? 'text-violet-600 border-b-2 border-violet-600' : 'text-slate-400 hover:text-slate-900'}`} onClick={() => setActiveTab('all')}>{t('missions.all')}</span>
                                     <span className={`text-[10px] font-black cursor-pointer transition-all ${activeTab === 'incomplete' ? 'text-violet-600 border-b-2 border-violet-600' : 'text-slate-400 hover:text-slate-900'}`} onClick={() => setActiveTab('incomplete')}>{t('missions.incomplete')}</span>
                                 </div>

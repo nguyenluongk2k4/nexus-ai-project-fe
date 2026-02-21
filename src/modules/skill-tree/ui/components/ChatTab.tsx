@@ -9,6 +9,7 @@ import { UploadResponse } from '@/modules/chat/domain/entities/UploadResponse';
 interface ChatTabProps {
   messages: Message[];
   status: ConnectionStatus;
+  sessionStatus?: 'idle' | 'rendering' | 'error';
   error: string | null;
   onSend: (text: string) => void;
   onClearError?: () => void;
@@ -31,6 +32,7 @@ interface ChatTabProps {
 export function ChatTab({
   messages,
   status,
+  sessionStatus,
   error,
   onSend,
   onClearError,
@@ -227,6 +229,20 @@ export function ChatTab({
             </div>
           ))
         )}
+
+        {/* Typing indicator... */}
+        {(sessionStatus === 'rendering' || status === 'thinking') && messages.length > 0 && messages[messages.length - 1].role === 'user' && (
+          <div className="flex justify-start animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="max-w-[85%] rounded-2xl px-4 py-3 bg-slate-100 text-slate-500">
+              <div className="flex space-x-1 items-center h-4">
+                <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 

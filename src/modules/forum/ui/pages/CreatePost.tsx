@@ -76,92 +76,161 @@ export function CreatePost() {
     }
 
     return (
-        <div className="flex-1 overflow-auto bg-white">
-            <div className="max-w-[800px] mx-auto p-6">
+        <div className="flex-1 overflow-auto min-h-screen relative">
+            {/* Mesh Background */}
+            <div
+                className="fixed inset-0 -z-10"
+                style={{
+                    backgroundColor: '#f3f6ff',
+                    backgroundImage: `
+                        radial-gradient(at 10% 10%, hsla(256, 80%, 96%, 1) 0px, transparent 50%),
+                        radial-gradient(at 90% 10%, hsla(220, 80%, 96%, 1) 0px, transparent 50%),
+                        radial-gradient(at 50% 50%, hsla(280, 70%, 97%, 1) 0px, transparent 50%),
+                        radial-gradient(at 10% 90%, hsla(240, 70%, 96%, 1) 0px, transparent 50%),
+                        radial-gradient(at 90% 90%, hsla(200, 70%, 96%, 1) 0px, transparent 50%)
+                    `,
+                    backgroundAttachment: 'fixed'
+                }}
+            />
+
+            <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
                 {/* Breadcrumb */}
-                <div className="flex items-center gap-2 text-sm mb-6 text-muted-foreground">
+                <div className="flex items-center gap-2 text-sm text-slate-500 mb-8 overflow-x-auto whitespace-nowrap pb-2 font-medium">
                     <button
                         onClick={() => navigate('/forum')}
-                        className="hover:text-violet-600 transition-colors"
+                        className="hover:text-violet-600 transition-colors flex items-center"
                     >
                         {t('forum.home')}
                     </button>
-                    <ChevronRight className="w-4 h-4" />
-                    <span className="text-foreground font-medium">{t('forum.create.breadcrumb')}</span>
+                    <ChevronRight className="w-4 h-4 text-slate-300" />
+                    <span className="text-slate-800">{t('forum.create.breadcrumb')}</span>
                 </div>
 
-                {/* Page Title */}
-                <h1 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-teal-500">
-                    {t('forum.create.title')}
-                </h1>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    <div className="lg:col-span-8 space-y-8">
+                        {/* Glass Card */}
+                        <div
+                            className="rounded-3xl p-1 relative overflow-hidden shadow-lg"
+                            style={{
+                                background: 'rgba(255, 255, 255, 0.75)',
+                                backdropFilter: 'blur(16px)',
+                                border: '1px solid rgba(255, 255, 255, 0.6)',
+                                boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.5)'
+                            }}
+                        >
+                            {/* Purple glow effect */}
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
 
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    {error && (
-                        <div className="bg-red-50 text-red-600 p-4 rounded-lg border border-red-200">
-                            {error}
+                            <div className="bg-white/50 rounded-[1.3rem] p-6 sm:p-10 backdrop-blur-sm relative z-10">
+                                {/* Page Title */}
+                                <h1 className="text-3xl sm:text-4xl font-extrabold mb-8 text-slate-900 tracking-tight flex items-center gap-4">
+                                    <span className="p-3 bg-violet-100 text-violet-600 rounded-2xl shadow-sm">
+                                        <Send className="w-6 h-6" />
+                                    </span>
+                                    {t('forum.create.title')}
+                                </h1>
+
+                                {/* Form */}
+                                <form onSubmit={handleSubmit} className="space-y-6">
+                                    {error && (
+                                        <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-200 text-sm font-medium flex items-center gap-2 shadow-sm">
+                                            ⚠️ {error}
+                                        </div>
+                                    )}
+
+                                    {/* Category Select */}
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-bold text-slate-700">{t('forum.create.form.category')}</label>
+                                        <div className="relative">
+                                            <select
+                                                value={categoryId}
+                                                onChange={(e) => setCategoryId(e.target.value)}
+                                                className="appearance-none w-full p-4 bg-white/80 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-300 font-medium text-slate-700 cursor-pointer shadow-sm hover:bg-white transition-all"
+                                            >
+                                                {categories.map((cat) => (
+                                                    <option key={cat.id} value={cat.id}>
+                                                        {cat.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none rotate-90" />
+                                        </div>
+                                    </div>
+
+                                    {/* Title */}
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-bold text-slate-700">{t('forum.create.form.title')}</label>
+                                        <input
+                                            type="text"
+                                            value={title}
+                                            onChange={(e) => setTitle(e.target.value)}
+                                            placeholder={t('forum.create.form.titlePlaceholder')}
+                                            className="w-full p-4 bg-white/80 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-300 font-medium text-slate-900 placeholder:text-slate-400 shadow-sm hover:bg-white transition-all"
+                                        />
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-bold text-slate-700">{t('forum.create.form.content')}</label>
+                                        <textarea
+                                            value={content}
+                                            onChange={(e) => setContent(e.target.value)}
+                                            placeholder={t('forum.create.form.contentPlaceholder')}
+                                            rows={12}
+                                            className="w-full p-4 bg-white/80 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-300 font-medium text-slate-900 placeholder:text-slate-400 shadow-sm hover:bg-white transition-all resize-none leading-relaxed"
+                                        />
+                                    </div>
+
+                                    {/* Actions */}
+                                    <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-4 pt-8 border-t border-slate-200/50 mt-8">
+                                        <button
+                                            type="button"
+                                            onClick={() => navigate('/forum')}
+                                            className="w-full sm:w-auto px-6 py-3.5 text-slate-500 hover:text-slate-800 font-bold transition-colors"
+                                        >
+                                            {t('forum.create.form.cancel')}
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={submitting || !title.trim() || !content.trim()}
+                                            className="w-full sm:w-auto px-8 py-3.5 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+                                        >
+                                            <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                            {submitting ? t('forum.create.form.submitting') : t('forum.create.form.submit')}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    )}
-
-                    {/* Category Select */}
-                    <div>
-                        <label className="block text-sm font-medium mb-2">{t('forum.create.form.category')}</label>
-                        <select
-                            value={categoryId}
-                            onChange={(e) => setCategoryId(e.target.value)}
-                            className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
-                        >
-                            {categories.map((cat) => (
-                                <option key={cat.id} value={cat.id}>
-                                    {cat.name}
-                                </option>
-                            ))}
-                        </select>
                     </div>
 
-                    {/* Title */}
-                    <div>
-                        <label className="block text-sm font-medium mb-2">{t('forum.create.form.title')}</label>
-                        <input
-                            type="text"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            placeholder={t('forum.create.form.titlePlaceholder')}
-                            className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
-                        />
+                    {/* Right column: Posting Rules */}
+                    <div className="lg:col-span-4 space-y-6">
+                        <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-white/60 p-6 shadow-lg">
+                            <h3 className="font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
+                                💡 Mẹo đăng bài
+                            </h3>
+                            <ul className="space-y-4 text-sm text-slate-600 font-medium">
+                                <li className="flex gap-3">
+                                    <span className="text-violet-500">•</span>
+                                    <span>Nên đặt tiêu đề ngắn gọn súc tích, tóm tắt được nội dung chính.</span>
+                                </li>
+                                <li className="flex gap-3">
+                                    <span className="text-violet-500">•</span>
+                                    <span>Viết Tiếng Việt có dấu, không sử dụng teencode.</span>
+                                </li>
+                                <li className="flex gap-3">
+                                    <span className="text-violet-500">•</span>
+                                    <span>Chọn đúng danh mục để mọi người dễ dàng tìm thấy và thảo luận chéo.</span>
+                                </li>
+                                <li className="flex gap-3">
+                                    <span className="text-violet-500">•</span>
+                                    <span>Hãy tôn trọng các thành viên khác để xây dựng cộng đồng văn minh.</span>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-
-                    {/* Content */}
-                    <div>
-                        <label className="block text-sm font-medium mb-2">{t('forum.create.form.content')}</label>
-                        <textarea
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                            placeholder={t('forum.create.form.contentPlaceholder')}
-                            rows={12}
-                            className="w-full p-4 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
-                        />
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center justify-between pt-4">
-                        <button
-                            type="button"
-                            onClick={() => navigate('/forum')}
-                            className="px-6 py-3 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                            {t('forum.create.form.cancel')}
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={submitting || !title.trim() || !content.trim()}
-                            className="px-8 py-3 bg-gradient-to-r from-violet-600 to-teal-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
-                            <Send className="w-5 h-5" />
-                            {submitting ? t('forum.create.form.submitting') : t('forum.create.form.submit')}
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     );

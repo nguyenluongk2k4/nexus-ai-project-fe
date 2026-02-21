@@ -366,6 +366,8 @@ export function SkillTree() {
     const nodes = visibleNodes.map(n => ({ ...n }));
     if (nodes.length === 0) return [];
 
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
     // Group nodes by level
     const byLevel: Record<number, SkillNode[]> = {};
     nodes.forEach(node => {
@@ -373,12 +375,12 @@ export function SkillTree() {
       byLevel[node.level].push(node);
     });
 
-    // Y positions for pyramid (percentage of viewBox height 0-80)
+    // Y positions for pyramid (percentage of viewBox height)
     const levelY: Record<number, number> = {
-      0: 10,   // Root at top
-      1: 28,   // Abilities
-      2: 50,   // Skills
-      3: 72    // Knowledge at bottom
+      0: isMobile ? 15 : 10,   // Root at top
+      1: isMobile ? 50 : 28,   // Abilities
+      2: isMobile ? 85 : 50,   // Skills
+      3: isMobile ? 120 : 72    // Knowledge at bottom
     };
 
     // Calculate X positions for each level with smart centering
@@ -428,7 +430,11 @@ export function SkillTree() {
   const handleNodeClick = async (node: SkillNode) => {
     setSelectedNodeId(node.id);
     setActiveTab('resource'); // Auto-switch to resource tab
-    setRightPanelCollapsed(false); // Ensure Right Panel is open (especially on mobile)
+
+    // Auto-open panel only on desktop/tablet to allow tree climbing on mobile
+    if (window.innerWidth >= 768) {
+      setRightPanelCollapsed(false);
+    }
 
     if (node.level === 1) {
       // Level 1 (Ability): Toggle expand to show/hide level 2 children (skills)
@@ -488,9 +494,14 @@ export function SkillTree() {
     // Chỉ cần gọi send() - WebSocket sẽ trigger tree_generating event
     // Event listener sẽ tự động gọi HTTP streaming (generateTree)
     // KHÔNG gọi generateTree trực tiếp ở đây để tránh duplicate
+    if (!currentSessionId) {
+      // Instant visual feedback: switch canvas to loading state mimicking ChatGPT's instant reaction
+      treeNodeService.setLoading(true);
+    }
     send(message);
 
     // Flow: send() → WS → backend → tree_generating → trigger-tree-stream event → generateTree()
+    setRightPanelCollapsed(false); // Open panel to show generating UI
   };
 
   // Main layout - always show with tree canvas (empty or with data)
@@ -554,15 +565,28 @@ export function SkillTree() {
             ) : (
               /* Tree Visualization - shown after first data */
               <>
-                {/* Floating Manage Button - moved inside relative canvas container to stay above footer */}
+                {/* Floating Action Buttons - moved inside relative canvas container to stay above footer */}
                 {selectedNode && (
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex flex-col sm:flex-row gap-2">
+                    {/* View Details button for Mobile only */}
+                    {rightPanelCollapsed && (
+                      <button
+                        onClick={() => setRightPanelCollapsed(false)}
+                        className="md:hidden shiny-tag relative px-6 py-3 bg-indigo-500 text-white rounded-full text-sm font-black uppercase tracking-tight border border-white/20 shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all whitespace-nowrap"
+                      >
+                        <span className="relative z-10 drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">
+                          {t('skillTree.page.viewDetails', 'Xem chi tiết')}
+                        </span>
+                      </button>
+                    )}
+
                     <button
                       onClick={(e) => handleManageClick(selectedNode, e)}
-                      className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 text-white rounded-full shadow-lg transition-transform hover:scale-105 font-semibold"
+                      className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 text-white rounded-full shadow-lg transition-transform hover:scale-105 font-semibold whitespace-nowrap"
                     >
                       <Settings className="w-5 h-5" />
-                      <span>{t('skillTree.manageNode')}</span>
+                      <span className="hidden sm:inline">{t('skillTree.manageNode')}</span>
+                      <span className="sm:hidden">Sửa</span>
                     </button>
                   </div>
                 )}
@@ -580,7 +604,7 @@ export function SkillTree() {
                 <svg
                   id="tour-master-tree"
                   className="w-full h-full"
-                  viewBox="0 0 100 80"
+                  viewBox={typeof window !== 'undefined' && window.innerWidth < 768 ? "0 0 100 140" : "0 0 100 80"}
                   style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'center' }}
                 >
                   {/* Connection Paths - Draw from parent to children */}
@@ -819,11 +843,13 @@ export function SkillTree() {
 
           {/* Bottom Control Bar - explicit height and structure to match ChatTab exactly */}
           <footer id="tour-master-footer" className="h-[64px] border-t border-slate-200 bg-white flex flex-col justify-center z-30 flex-shrink-0">
-            <div className="px-4 flex items-center justify-between">
-              <div className="flex items-center gap-2 md:gap-4">
-                <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-2xl border border-slate-200">
+            <div className="px-2 md:px-4 flex items-center justify-between md:justify-between w-full overflow-x-auto no-scrollbar gap-2 sm:gap-4 md:gap-0">
+              <div className="flex items-center gap-2 md:gap-4 shrink-0">
+                <div className="flex items-center gap-1.5 md:gap-2 bg-slate-100 px-2 py-1.5 md:px-3 md:py-1.5 rounded-2xl border border-slate-200 shrink-0">
                   <span className="text-[10px] md:text-xs font-black text-slate-500 uppercase tracking-wider">
-                    {filledCount}/{totalCount} {t('skillTree.page.nodes')}
+                    {filledCount}/{totalCount}
+                    <span className="hidden sm:inline"> {t('skillTree.page.nodes')}</span>
+                    <span className="sm:hidden"> N</span>
                   </span>
                   {treeState.loading && <Loader2 className="w-3 h-3 animate-spin text-indigo-500" />}
                 </div>
@@ -847,14 +873,14 @@ export function SkillTree() {
               </div>
 
               {/* Zoom Controls */}
-              <div className="flex items-center bg-white border border-slate-200 rounded-2xl px-2 py-1 gap-1 md:gap-3 shadow-sm">
+              <div className="flex items-center bg-white border border-slate-200 rounded-2xl px-1 py-1 md:px-2 md:py-1 gap-1 md:gap-3 shadow-sm shrink-0">
                 <button onClick={() => setZoomLevel(Math.max(50, zoomLevel - 10))} className="p-1 hover:text-indigo-600 transition-colors text-slate-400"><Minus className="w-4 h-4" /></button>
                 <span className="text-xs font-black w-8 md:w-10 text-center text-slate-700">{zoomLevel}%</span>
                 <button onClick={() => setZoomLevel(Math.min(150, zoomLevel + 10))} className="p-1 hover:text-indigo-600 transition-colors text-slate-400"><Plus className="w-4 h-4" /></button>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-2 md:gap-3">
+              <div className="flex items-center gap-1.5 md:gap-3 shrink-0 pr-2 md:pr-0">
                 <button
                   onClick={() => setRightPanelCollapsed(!rightPanelCollapsed)}
                   className="md:hidden p-2 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100"
@@ -887,6 +913,7 @@ export function SkillTree() {
           getNodeStatus={getNodeStatus}
           messages={messages}
           status={status}
+          sessionStatus={sessionStatus}
           error={error}
           onClearError={clearError}
           onSend={handleChatSend}

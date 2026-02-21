@@ -19,6 +19,7 @@ interface RightPanelProps {
   // Chat props
   messages: Message[];
   status: ConnectionStatus;
+  sessionStatus?: 'idle' | 'rendering' | 'error';
   error?: string | null;
   onSend: (text: string) => void;
   onClearError?: () => void;
@@ -54,6 +55,7 @@ export function RightPanel({
   getNodeStatus,
   messages,
   status,
+  sessionStatus,
   error,
   onSend,
   onClearError,
@@ -125,8 +127,8 @@ export function RightPanel({
           <button
             onClick={() => handleTabChange('chat')}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'chat'
-                ? 'border-indigo-500 text-indigo-600 bg-indigo-50/50'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+              ? 'border-indigo-500 text-indigo-600 bg-indigo-50/50'
+              : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
               }`}
           >
             <MessageSquare className="w-4 h-4" />
@@ -136,8 +138,8 @@ export function RightPanel({
         <button
           onClick={() => handleTabChange('resource')}
           className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'resource'
-              ? 'border-indigo-500 text-indigo-600 bg-indigo-50/50'
-              : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+            ? 'border-indigo-500 text-indigo-600 bg-indigo-50/50'
+            : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
             }`}
         >
           <BookOpen className="w-4 h-4" />
@@ -162,6 +164,7 @@ export function RightPanel({
           <ChatTab
             messages={messages}
             status={status}
+            sessionStatus={sessionStatus}
             error={error || null}
             onSend={onSend}
             onClearError={onClearError}

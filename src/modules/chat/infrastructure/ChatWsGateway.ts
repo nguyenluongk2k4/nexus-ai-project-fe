@@ -35,6 +35,13 @@ export class ChatWsGateway implements ChatGateway {
               text: `Bắt đầu session: ${data.session_id}`,
               timestamp: new Date().toISOString()
             });
+
+            // Dispatch event for UI rapid navigation
+            window.dispatchEvent(new CustomEvent('session-created', {
+              detail: {
+                sessionId: data.session_id
+              }
+            }));
             break;
           case 'status':
             onStatusChange(data.status as ConnectionStatus);
@@ -109,7 +116,8 @@ export class ChatWsGateway implements ChatGateway {
               detail: {
                 sessionId: data.session_id,
                 requestId: data.request_id,
-                message: data.message
+                message: data.message,
+                user_message: data.user_message
               }
             }));
             break;

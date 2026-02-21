@@ -6,6 +6,8 @@
 import { format } from "date-fns";
 import { apiConfig } from "@/shared/config/api.config";
 import { useState, useEffect } from 'react';
+import { DotLottiePlayer } from '@dotlottie/react-player';
+import '@dotlottie/react-player/dist/index.css';
 
 const API_TIMELINE_URL = apiConfig.getHttpUrl('/timeline');
 import { X, Calendar, Sparkles, Clock, Loader2, Check, AlertCircle } from 'lucide-react';
@@ -258,22 +260,26 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                 <div className="flex border-b border-border">
                     <button
                         onClick={() => setActiveTab('manual')}
-                        className={`flex-1 py-3 px-4 font-medium transition-colors flex items-center justify-center gap-2 ${activeTab === 'manual'
-                            ? 'text-violet-600 border-b-2 border-violet-600 bg-violet-50'
-                            : 'text-muted-foreground hover:bg-gray-50'
+                        className={`flex-1 py-3 px-4 font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'manual'
+                            ? 'text-violet-700 border-b-2 border-violet-600'
+                            : 'text-slate-500 hover:text-slate-700 border-b-2 border-transparent hover:bg-slate-50/50'
                             }`}
                     >
-                        <Calendar className="w-4 h-4" />
+                        <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center relative">
+                            <DotLottiePlayer src="/assets/dashboard/Calendar.lottie" autoplay loop style={{ width: '100%', height: '100%', transform: 'scale(3)' }} />
+                        </div>
                         {t('mySkillTree.timeline.manual')}
                     </button>
                     <button
                         onClick={() => setActiveTab('ai')}
-                        className={`flex-1 py-3 px-4 font-medium transition-colors flex items-center justify-center gap-2 ${activeTab === 'ai'
-                            ? 'text-violet-600 border-b-2 border-violet-600 bg-violet-50'
-                            : 'text-muted-foreground hover:bg-gray-50'
+                        className={`flex-1 py-3 px-4 font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'ai'
+                            ? 'text-amber-500 border-b-2 border-amber-500'
+                            : 'text-slate-500 hover:text-slate-700 border-b-2 border-transparent hover:bg-slate-50/50'
                             }`}
                     >
-                        <Sparkles className="w-4 h-4" />
+                        <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center relative">
+                            <DotLottiePlayer src="/assets/dashboard/AI.lottie" autoplay loop style={{ width: '100%', height: '100%', transform: 'scale(1.3)' }} />
+                        </div>
                         {t('mySkillTree.timeline.ai')}
                     </button>
                 </div>
@@ -290,7 +296,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                                 <select
                                     value={selectedResourceId}
                                     onChange={(e) => setSelectedResourceId(e.target.value)}
-                                    className="w-full p-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                    className="w-full p-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-white"
                                 >
                                     <option value="">{t('mySkillTree.timeline.selectPlaceholder')}</option>
 
@@ -315,8 +321,6 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                                             ))}
                                         </optgroup>
                                     )}
-
-                                    {/* Removed 'not_started' items as requested */}
                                 </select>
                             </div>
 
@@ -330,7 +334,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                                         type="date"
                                         value={scheduledDate}
                                         onChange={(e) => setScheduledDate(e.target.value)}
-                                        className="w-full p-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                        className="w-full p-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-white"
                                     />
                                 </div>
                                 <div>
@@ -341,7 +345,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                                         type="date"
                                         value={deadline}
                                         onChange={(e) => setDeadline(e.target.value)}
-                                        className="w-full p-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                        className="w-full p-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-white"
                                     />
                                 </div>
                             </div>
@@ -361,8 +365,8 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                                                     ? 'border-red-500 bg-red-50 text-red-700'
                                                     : p === 'medium'
                                                         ? 'border-amber-500 bg-amber-50 text-amber-700'
-                                                        : 'border-gray-400 bg-gray-50 text-gray-700'
-                                                : 'border-border hover:bg-gray-50'
+                                                        : 'border-slate-400 bg-slate-50 text-slate-700'
+                                                : 'border-border hover:bg-slate-50'
                                                 }`}
                                         >
                                             {p === 'high' ? t('mySkillTree.timeline.priorities.high') : p === 'medium' ? t('mySkillTree.timeline.priorities.medium') : t('mySkillTree.timeline.priorities.low')}
@@ -373,20 +377,27 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                         </div>
                     ) : (
                         <div className="space-y-4">
+                            {/* AI Header/Lottie */}
+                            <div className="flex flex-col items-center justify-center mt-2 mb-4">
+                                <h3 className="text-2xl font-black text-amber-500">
+                                    Tạo Lịch Bằng AI
+                                </h3>
+                                <p className="text-sm text-slate-500 mt-2 max-w-sm text-center">
+                                    {t('mySkillTree.timeline.aiHint')}
+                                </p>
+                            </div>
+
                             {/* AI Prompt Input */}
                             <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">
-                                    {t('mySkillTree.timeline.aiPromptLabel')}
+                                <label className="block text-sm font-bold text-slate-700 mb-2">
+                                    {t('mySkillTree.timeline.aiPromptLabel', 'Bạn muốn xếp lịch như thế nào?')}
                                 </label>
                                 <textarea
                                     value={aiPrompt}
                                     onChange={(e) => setAiPrompt(e.target.value)}
                                     placeholder={t('mySkillTree.timeline.aiPromptPlaceholder')}
-                                    className="w-full p-4 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 min-h-[100px] resize-none"
+                                    className="w-full p-4 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 min-h-[100px] resize-none bg-white placeholder:text-slate-400 text-slate-900"
                                 />
-                                <p className="text-xs text-muted-foreground mt-2">
-                                    {t('mySkillTree.timeline.aiHint')}
-                                </p>
                             </div>
 
                             {/* Generate Button */}
@@ -394,7 +405,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                                 <button
                                     onClick={handleAIGenerate}
                                     disabled={loading || !aiPrompt.trim()}
-                                    className="w-full py-3 bg-gradient-to-r from-violet-600 to-teal-500 text-white rounded-xl font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+                                    className="w-full py-4 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg shadow-md"
                                 >
                                     {loading ? (
                                         <>
@@ -403,7 +414,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                                         </>
                                     ) : (
                                         <>
-                                            <Sparkles className="w-5 h-5" />
+                                            <Sparkles className="w-6 h-6" />
                                             {t('mySkillTree.timeline.generate')}
                                         </>
                                     )}
@@ -412,7 +423,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
 
                             {/* Error */}
                             {aiError && (
-                                <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg">
+                                <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg border border-red-100">
                                     <AlertCircle className="w-5 h-5" />
                                     {aiError}
                                 </div>
@@ -420,17 +431,17 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
 
                             {/* AI Parsed Info */}
                             {aiParsed && (
-                                <div className="p-4 bg-violet-50 rounded-xl">
-                                    <h4 className="font-medium text-violet-900 mb-2 flex items-center gap-2">
-                                        <Sparkles className="w-4 h-4" />
+                                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <h4 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                                        <Sparkles className="w-5 h-5 text-amber-500" />
                                         {t('mySkillTree.timeline.aiunderstood')}
                                     </h4>
-                                    <div className="text-sm text-violet-700 space-y-1">
-                                        <p>📅 {t('mySkillTree.timeline.days')}: {aiParsed.days_of_week?.map((d: number) =>
+                                    <div className="text-sm text-slate-700 space-y-2 bg-white p-3 rounded-lg border border-slate-100">
+                                        <p className="flex items-center gap-2"><span className="text-lg">📅</span> {t('mySkillTree.timeline.days')}: <span className="font-semibold">{aiParsed.days_of_week?.map((d: number) =>
                                             ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'][d]
-                                        ).join(', ')}</p>
-                                        <p>🕐 {t('mySkillTree.timeline.time')}: {aiParsed.time_start}</p>
-                                        <p>⏱️ {t('mySkillTree.timeline.duration')}: {aiParsed.duration_minutes} phút</p>
+                                        ).join(', ')}</span></p>
+                                        <p className="flex items-center gap-2"><span className="text-lg">🕐</span> {t('mySkillTree.timeline.time')}: <span className="font-semibold">{aiParsed.time_start}</span></p>
+                                        <p className="flex items-center gap-2"><span className="text-lg">⏱️</span> {t('mySkillTree.timeline.duration')}: <span className="font-semibold">{aiParsed.duration_minutes} phút</span></p>
                                     </div>
                                 </div>
                             )}
@@ -447,7 +458,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                                                 key={index}
                                                 className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl"
                                             >
-                                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-teal-500 flex items-center justify-center text-white font-bold">
+                                                <div className="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center text-white font-bold shadow-sm">
                                                     {index + 1}
                                                 </div>
                                                 <div className="flex-1">
@@ -467,10 +478,10 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-end gap-3 p-6 border-t border-border bg-gray-50">
+                <div className="flex items-center justify-end gap-3 p-6 border-t border-border bg-slate-50/80">
                     <button
                         onClick={handleCancel}
-                        className="px-6 py-2.5 text-muted-foreground hover:text-foreground transition-colors"
+                        className="px-6 py-2.5 font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 rounded-xl transition-colors"
                     >
                         {t('mySkillTree.timeline.cancel')}
                     </button>
@@ -479,7 +490,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                         <button
                             onClick={handleManualSubmit}
                             disabled={loading || !selectedResourceId || !scheduledDate}
-                            className="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-teal-500 text-white rounded-xl font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+                            className="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-violet-200 transition-all disabled:opacity-50 flex items-center gap-2"
                         >
                             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                             {t('mySkillTree.timeline.add')}
@@ -488,7 +499,7 @@ export function AddToTimelineDialog({ isOpen, onClose, onSuccess }: AddToTimelin
                         <button
                             onClick={handleAIConfirm}
                             disabled={loading}
-                            className="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-teal-500 text-white rounded-xl font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+                            className="px-6 py-2.5 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 transition-all disabled:opacity-50 flex items-center gap-2 shadow-sm"
                         >
                             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                             {t('mySkillTree.timeline.confirm')}

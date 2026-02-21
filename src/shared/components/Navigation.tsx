@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GitBranch, Calendar, Users, FileQuestion, ChevronDown, Home } from 'lucide-react';
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +8,22 @@ import { DotLottiePlayer } from '@dotlottie/react-player';
 export function Navigation() {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // Auto-collapse on mobile/tablet devices (width < 1024px)
+  const [isCollapsed, setIsCollapsed] = useState(() => window.innerWidth < 1024);
+
+  useEffect(() => {
+    const checkWidth = () => {
+      if (window.innerWidth < 1024) {
+        setIsCollapsed(true);
+      }
+    };
+
+    // Check once on mount in case initial state missed it
+    checkWidth();
+
+    window.addEventListener('resize', checkWidth);
+    return () => window.removeEventListener('resize', checkWidth);
+  }, []);
 
   const navItems = [
     { id: 'dashboard', label: t('nav.dashboard'), icon: Home, path: '/dashboard' },

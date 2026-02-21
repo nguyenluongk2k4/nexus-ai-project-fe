@@ -148,35 +148,35 @@ function CommentItem({
 
   return (
     <>
-      <div className={`${depth > 0 ? 'relative mt-6 ml-6 pl-6 sm:ml-10 sm:pl-8' : ''}`}>
+      <div className={`${depth > 0 ? 'relative mt-4 ml-3 pl-3 sm:mt-6 sm:ml-10 sm:pl-8' : ''}`}>
         {/* Thread line for nested comments */}
         {depth > 0 && (
           <div
-            className="absolute left-7 top-[-20px] bottom-8 w-[2px] z-0"
+            className="absolute left-4 sm:left-7 top-[-20px] bottom-8 w-[2px] z-0"
             style={{
               background: 'linear-gradient(to bottom, #e2e8f0 0%, #e2e8f0 80%, transparent 100%)'
             }}
           />
         )}
 
-        <div className="flex gap-4 relative z-10">
+        <div className="flex gap-3 sm:gap-4 relative z-10">
           <div className="flex-shrink-0">
             <img
               alt={comment.author.name}
-              className={`${depth > 0 ? 'w-8 h-8' : 'w-10 h-10'} rounded-full object-cover border border-white shadow-sm`}
+              className={`${depth > 0 ? 'w-6 h-6 sm:w-8 sm:h-8' : 'w-8 h-8 sm:w-10 sm:h-10'} rounded-full object-cover border border-white shadow-sm`}
               src={comment.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author.name)}&background=random`}
             />
           </div>
-          <div className="flex-1">
-            <div className={`${comment.author.id === postAuthorId ? 'bg-violet-500/5 border-violet-500/20' : 'bg-white border-slate-200'} rounded-2xl ${depth > 0 ? 'p-4' : 'p-6'} shadow-sm border hover:border-violet-200 transition-colors`}>
+          <div className="flex-1 min-w-0">
+            <div className={`${comment.author.id === postAuthorId ? 'bg-violet-500/5 border-violet-500/20' : 'bg-white border-slate-200'} rounded-2xl ${depth > 0 ? 'p-3 sm:p-4' : 'p-4 sm:p-6'} shadow-sm border hover:border-violet-200 transition-colors`}>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-sm font-bold text-slate-900">{comment.author.name}</span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-900">{comment.author.name}</span>
                   <ForumUserBadge rank={comment.author.rank} />
                   {comment.author.id === postAuthorId && (
                     <ForumUserBadge isAuthor />
                   )}
-                  <span className="text-xs text-slate-400 font-medium ml-1">
+                  <span className="text-[10px] sm:text-xs text-slate-400 font-medium ml-1">
                     {new Date(comment.createdAt).toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'vi-VN')}
                   </span>
                 </div>
@@ -184,13 +184,13 @@ function CommentItem({
                   <MoreHorizontal className="w-4 h-4" />
                 </button>
               </div>
-              <p className="text-slate-700 text-sm leading-relaxed">
+              <p className="text-slate-700 text-xs sm:text-sm leading-relaxed overflow-wrap-anywhere">
                 {comment.content}
               </p>
             </div>
             <div className="flex items-center gap-4 mt-2 ml-2">
               <button className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-violet-600 transition-colors">
-                <ThumbsUp className="w-4 h-4" /> {comment.likes > 0 ? comment.likes : '0'}
+                <ThumbsUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> {comment.likes > 0 ? comment.likes : '0'}
               </button>
               {depth < maxDepth && (
                 <button
@@ -200,7 +200,7 @@ function CommentItem({
                   }}
                   className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-blue-500 transition-colors"
                 >
-                  <Reply className="w-4 h-4" /> {t('forum.thread.reply')}
+                  <Reply className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> {t('forum.thread.reply')}
                 </button>
               )}
             </div>
@@ -212,13 +212,13 @@ function CommentItem({
                   value={inlineReplyContent}
                   onChange={(e) => setInlineReplyContent(e.target.value)}
                   placeholder={t('forum.thread.replyPlaceholder', { author: comment.author.name })}
-                  className="w-full min-h-[60px] p-3 border border-slate-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-violet-500/50 text-sm bg-white/80"
+                  className="w-full min-h-[60px] p-2 sm:p-3 border border-slate-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-violet-500/50 text-xs sm:text-sm bg-white/80"
                 />
                 <div className="flex items-center gap-2 mt-2">
                   <button
                     onClick={() => onSubmitReply(comment.id)}
                     disabled={isSubmitting || !inlineReplyContent.trim()}
-                    className="px-4 py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 transition-all disabled:opacity-50"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white text-[10px] sm:text-xs font-bold rounded-xl shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 transition-all disabled:opacity-50"
                   >
                     {isSubmitting ? t('forum.thread.submitting') : t('forum.thread.submitComment')}
                   </button>
@@ -227,7 +227,7 @@ function CommentItem({
                       setReplyingToId(null);
                       setInlineReplyContent('');
                     }}
-                    className="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-semibold text-slate-500 hover:text-slate-700"
                   >
                     {t('forum.thread.cancel')}
                   </button>
@@ -235,7 +235,7 @@ function CommentItem({
               </div>
             )}
             {/* Render nested replies */}
-            <div className="mt-4 space-y-4">
+            <div className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
               {replies.map(reply => (
                 <CommentItem
                   key={reply.id}
@@ -429,37 +429,37 @@ export function ThreadDetail() {
               {/* Purple glow effect */}
               <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
 
-              <div className="bg-white/40 rounded-[1.3rem] p-6 sm:p-8 backdrop-blur-sm relative z-10">
+              <div className="bg-white/40 rounded-[1.3rem] p-4 sm:p-8 backdrop-blur-sm relative z-10">
                 {/* Header */}
-                <div className="flex items-start justify-between mb-8">
-                  <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-6 sm:mb-8 gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4">
                     {/* Avatar with ring */}
-                    <div className="relative group cursor-pointer">
+                    <div className="relative group cursor-pointer flex-shrink-0">
                       <div className="p-0.5 rounded-full" style={{ background: 'linear-gradient(135deg, #6366f1, #ec4899)' }}>
                         <img
                           alt={post.author.name}
-                          className="w-14 h-14 rounded-full object-cover border-2 border-white"
+                          className="w-10 h-10 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-white"
                           src={post.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=random`}
                         />
                       </div>
-                      <span className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full shadow-sm"></span>
+                      <span className="absolute bottom-0 right-0 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 border-2 border-white rounded-full shadow-sm"></span>
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="text-lg font-bold text-slate-900 hover:text-violet-600 cursor-pointer transition-colors">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5 sm:mb-1 flex-wrap">
+                        <h4 className="text-base sm:text-lg font-bold text-slate-900 hover:text-violet-600 cursor-pointer transition-colors truncate">
                           {post.author.name}
                         </h4>
                         <ForumUserBadge rank={post.author.rank} />
                         <ForumUserBadge isAuthor />
                         {post.author.points !== undefined && (
-                          <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md">
+                          <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md whitespace-nowrap">
                             {post.author.points} pts
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-slate-500 font-medium">
+                      <div className="flex items-center gap-3 text-[10px] sm:text-xs text-slate-500 font-medium">
                         <span className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" /> {getTimeAgo(post.createdAt)}
+                          <Clock className="w-3 sm:w-3.5 h-3 sm:h-3.5" /> {getTimeAgo(post.createdAt)}
                         </span>
                       </div>
                     </div>
@@ -468,10 +468,10 @@ export function ThreadDetail() {
                   {post.categoryName && (
                     <button
                       onClick={onNavigateToSubForum}
-                      className="group flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-50 border border-violet-100 hover:bg-violet-100 transition-all cursor-pointer"
+                      className="group flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-violet-50 border border-violet-100 hover:bg-violet-100 transition-all cursor-pointer self-start sm:self-auto max-w-full"
                     >
-                      <span className="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></span>
-                      <span className="text-xs font-bold text-violet-600 group-hover:text-violet-700">
+                      <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-violet-500 animate-pulse flex-shrink-0"></span>
+                      <span className="text-[10px] sm:text-xs font-bold text-violet-600 group-hover:text-violet-700 truncate">
                         {post.categoryName}
                       </span>
                     </button>

@@ -107,15 +107,31 @@ export function useChat(options: UseChatOptions = {}) {
         if (prev.length > 0) {
           // Keep existing messages (from tree_task_started event)
           // Add new messages from API that aren't already present
-          const existingIds = new Set(prev.map((m: Message) => m.id));
-          const newMessages = (sessionData.messages || []).filter(
-            (m: any) => !existingIds.has(m.id)
-          );
+          const newMessages = (sessionData.messages || [])
+            .filter((m: any) => {
+              const apiRole = m.role === 'assistant' ? 'bot' : m.role;
+              return !prev.some(p => p.id === m.id || ((p.text || '').trim() === (m.content || '').trim() && p.role === apiRole));
+            })
+            .map((m: any) => ({
+              id: m.id,
+              text: m.content || '',
+              role: m.role === 'assistant' ? 'bot' : m.role,
+              timestamp: m.created_at,
+              attachments: m.attachments || []
+            }));
           console.log(`📥 [useChat] Merging ${newMessages.length} new messages with ${prev.length} existing`);
-          return [...prev, ...newMessages];
+          const merged = [...prev, ...newMessages];
+          return merged.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
         } else {
-          // No existing messages, use API data
-          return sessionData.messages || [];
+          // No existing messages, use API data and map role
+          const newMessages = (sessionData.messages || []).map((m: any) => ({
+            id: m.id,
+            text: m.content || '',
+            role: m.role === 'assistant' ? 'bot' : m.role,
+            timestamp: m.created_at,
+            attachments: m.attachments || []
+          }));
+          return newMessages.sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
         }
       });
 
@@ -141,9 +157,16 @@ export function useChat(options: UseChatOptions = {}) {
       });
 
 
-      // Fix: Directly update tree nodes from the loaded session data
-      if (sessionData.context_data?.tree_nodes) {
-        import('../../../skill-tree/domain/services/treeNodeService').then(({ treeNodeService }) => {
+      // Fix: Always import treeNodeService to handle loading state
+      import('../../../skill-tree/domain/services/treeNodeService').then(({ treeNodeService }) => {
+        if (sessionData.status === 'rendering') {
+          treeNodeService.setLoading(true);
+          console.log(`⏳ [useChat] Session is rendering, setting tree loading to true`);
+        } else if (sessionData.status === 'idle') {
+          treeNodeService.setLoading(false);
+        }
+
+        if (sessionData.context_data?.tree_nodes) {
           const nodes = sessionData.context_data.tree_nodes;
           console.log(`🌳 [useChat] Found tree nodes in context: ${nodes.length}`);
           if (nodes.length > 0) {
@@ -153,13 +176,8 @@ export function useChat(options: UseChatOptions = {}) {
           // Use setNodes to REPLACE the tree state for this session (avoid mixing with previous session)
           treeNodeService.setNodes(nodes);
           console.log(`🌳 [useChat] Updated tree nodes from loadFullSession via setNodes`);
-
-          // Also stop loading
-          if (sessionData.status === 'idle') {
-            treeNodeService.setLoading(false);
-          }
-        });
-      }
+        }
+      });
 
       // Note: If status is 'rendering', streaming will be auto-triggered 
       // when SkillTree detects sessionStatus === 'rendering'
@@ -356,12 +374,16 @@ export function useChat(options: UseChatOptions = {}) {
 
       setMessages((prev) => [...prev, userMsg]);
 
+      // Optimistically show typing indicator
+      setSessionStatus('rendering');
+
       // Clear attachments after sending
       setAttachments([]);
 
       await sendMessageUseCase.execute(finalText, currentSessionId, finalAttachments);
     } catch (err: any) {
       setError(err.message);
+      setSessionStatus('error');
     }
   }, [currentSessionId, attachments, uploadFile]);
 
@@ -424,8 +446,20 @@ export function useChat(options: UseChatOptions = {}) {
     };
 
     window.addEventListener('tree-task-started', handleTreeTaskStarted as unknown as EventListener);
+
+    // Fast navigation on session-created
+    const handleSessionCreated = (event: CustomEvent<any>) => {
+      const sessionId = event.detail?.sessionId;
+      if (sessionId && !window.location.pathname.includes(`/c/${sessionId}`)) {
+        console.log(`⚡ [useChat] Fast navigation triggered via session-created: ${sessionId}`);
+        navigate(`/skilltree/c/${sessionId}`);
+      }
+    };
+    window.addEventListener('session-created', handleSessionCreated as unknown as EventListener);
+
     return () => {
       window.removeEventListener('tree-task-started', handleTreeTaskStarted as unknown as EventListener);
+      window.removeEventListener('session-created', handleSessionCreated as unknown as EventListener);
     };
   }, [navigate]);
 
@@ -516,6 +550,23 @@ export function useChat(options: UseChatOptions = {}) {
                 if (!isMountedRef.current) return;
 
                 switch (event.type) {
+                  case 'bot_message':
+                    // Prevent duplicate messages
+                    setMessages(prev => {
+                      const incomingText = (event.text || '').trim();
+                      if (!prev.some(m => (m.text || '').trim() === incomingText)) {
+                        return [...prev, {
+                          id: event.id || crypto.randomUUID(),
+                          role: 'bot',
+                          text: event.text,
+                          timestamp: new Date().toISOString()
+                        }];
+                      }
+                      return prev;
+                    });
+                    console.log('💬 [useChat] Stream received initial bot_message');
+                    break;
+
                   case 'progress':
                     setProgress(event.progress || 0);
                     setProgressStep(event.step || '');

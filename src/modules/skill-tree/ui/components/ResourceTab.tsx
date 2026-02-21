@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Share2, Zap, Clock, Star, BookOpen, Play, Bell, Calendar, Edit3, Rocket, Check, ChevronDown, Lock, Brain, TrendingUp, History, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { SkillNode } from '../hooks/useSkillTree';
@@ -20,6 +20,8 @@ interface ResourceTabProps {
 export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isMySkillTree = location.pathname.startsWith('/my-skills');
   const { getProgress, updateProgress } = useLearningProgress();
 
   // Local state for resources (moved up to avoid conditional hook error)
@@ -228,36 +230,38 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
       </div>
 
       {/* Take Quiz Button - Direct access for testing */}
-      <div className="mb-6 bg-gradient-to-r border border-purple-100 rounded-xl p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 flex items-center justify-center">
-              <DotLottiePlayer
-                src="/assets/dashboard/AI.lottie"
-                autoplay
-                loop
-                className="w-10 h-10"
-              />
+      {isMySkillTree && (
+        <div className="mb-6 bg-gradient-to-r border border-purple-100 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 flex items-center justify-center">
+                <DotLottiePlayer
+                  src="/assets/dashboard/AI.lottie"
+                  autoplay
+                  loop
+                  className="w-10 h-10"
+                />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-800">{t('mySkillTree.panel.takeQuiz', { defaultValue: 'Kiểm tra kiến thức' })}</h4>
+                <p className="text-xs text-slate-500">{t('mySkillTree.panel.quizDesc', { defaultValue: 'Làm quiz cá nhân hóa' })}</p>
+              </div>
             </div>
-            <div>
-              <h4 className="text-sm font-bold text-slate-800">{t('mySkillTree.panel.takeQuiz', { defaultValue: 'Kiểm tra kiến thức' })}</h4>
-              <p className="text-xs text-slate-500">{t('mySkillTree.panel.quizDesc', { defaultValue: 'Làm quiz cá nhân hóa' })}</p>
-            </div>
+            <button
+              onClick={() => navigate(`/quiz?nodeId=${selectedNode.originalNodeId || selectedNode.id}&nodeName=${encodeURIComponent(selectedNode.fullName || selectedNode.label)}`)}
+              className="shiny-tag relative px-4 py-2 bg-orange-400 text-white rounded-lg text-xs font-black uppercase tracking-tight border border-white/20 shadow-md transition-all hover:shadow-lg flex items-center gap-2"
+            >
+              <span className="relative z-10 drop-shadow-[0_0_8px_rgba(255,255,255,0.4)] flex items-center gap-2">
+                <Play className="w-3 h-3 fill-current" />
+                {t('mySkillTree.panel.startQuiz', { defaultValue: 'Bắt đầu' })}
+              </span>
+            </button>
           </div>
-          <button
-            onClick={() => navigate(`/quiz?nodeId=${selectedNode.originalNodeId || selectedNode.id}&nodeName=${encodeURIComponent(selectedNode.fullName || selectedNode.label)}`)}
-            className="shiny-tag relative px-4 py-2 bg-orange-400 text-white rounded-lg text-xs font-black uppercase tracking-tight border border-white/20 shadow-md transition-all hover:shadow-lg flex items-center gap-2"
-          >
-            <span className="relative z-10 drop-shadow-[0_0_8px_rgba(255,255,255,0.4)] flex items-center gap-2">
-              <Play className="w-3 h-3 fill-current" />
-              {t('mySkillTree.panel.startQuiz', { defaultValue: 'Bắt đầu' })}
-            </span>
-          </button>
         </div>
-      </div>
+      )}
 
       {/* Quiz History & Progress Section */}
-      {(quizHistory.length > 0 || quizHistoryLoading) && (
+      {isMySkillTree && (quizHistory.length > 0 || quizHistoryLoading) && (
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -390,43 +394,45 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
                   </div>
 
                   {/* Actions Row */}
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-50 mt-auto">
-                    {status === 'not-started' ? (
-                      <button
-                        onClick={() => handleStatusUpdate(resource.id, 'in-progress')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all"
-                      >
-                        <Play className="w-3 h-3 fill-current" />
-                        {t('mySkillTree.panel.learnNow')}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleStatusUpdate(resource.id, status === 'completed' ? 'not_started' : 'completed')}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${status === 'completed' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                          }`}
-                      >
-                        {status === 'completed' ? <Check className="w-3 h-3" /> : <BookOpen className="w-3 h-3" />}
-                        {status === 'completed' ? t('mySkillTree.panel.finished') : t('mySkillTree.panel.markFinished')}
-                      </button>
-                    )}
-
-                    <div className="flex items-center gap-1">
-                      {resource.url && (
-                        <a
-                          href={resource.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
-                          title={t('mySkillTree.panel.openResource')}
+                  {isMySkillTree && (
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-50 mt-auto">
+                      {status === 'not-started' ? (
+                        <button
+                          onClick={() => handleStatusUpdate(resource.id, 'in-progress')}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all"
                         >
-                          <Rocket className="w-4 h-4" />
-                        </a>
+                          <Play className="w-3 h-3 fill-current" />
+                          {t('mySkillTree.panel.learnNow')}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleStatusUpdate(resource.id, status === 'completed' ? 'not_started' : 'completed')}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${status === 'completed' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                            }`}
+                        >
+                          {status === 'completed' ? <Check className="w-3 h-3" /> : <BookOpen className="w-3 h-3" />}
+                          {status === 'completed' ? t('mySkillTree.panel.finished') : t('mySkillTree.panel.markFinished')}
+                        </button>
                       )}
-                      <button className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors" title={t('mySkillTree.panel.addToCalendar')}>
-                        <Calendar className="w-4 h-4" />
-                      </button>
+
+                      <div className="flex items-center gap-1">
+                        {resource.url && (
+                          <a
+                            href={resource.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
+                            title={t('mySkillTree.panel.openResource')}
+                          >
+                            <Rocket className="w-4 h-4" />
+                          </a>
+                        )}
+                        <button className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors" title={t('mySkillTree.panel.addToCalendar')}>
+                          <Calendar className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               );
             })

@@ -330,10 +330,10 @@ export const NodeManagementModal = ({
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[85vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg">
-              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <div className="flex items-start md:items-center justify-between px-4 md:px-6 py-4 md:py-5 border-b border-slate-100">
+          <div className="flex items-center gap-3 md:gap-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shrink-0">
+              <svg className="w-5 h-5 md:w-6 md:h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="3" y="3" width="7" height="7" rx="1" />
                 <rect x="14" y="3" width="7" height="7" rx="1" />
                 <rect x="3" y="14" width="7" height="7" rx="1" />
@@ -341,20 +341,20 @@ export const NodeManagementModal = ({
               </svg>
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-800">{t('skillTree.rightPanel.nodeManagement.title')}</h2>
-              <p className="text-sm text-slate-500">{t('skillTree.rightPanel.nodeManagement.subtitle')}</p>
+              <h2 className="text-lg md:text-xl font-bold text-slate-800 leading-tight">{t('skillTree.rightPanel.nodeManagement.title')}</h2>
+              <p className="text-xs md:text-sm text-slate-500">{t('skillTree.rightPanel.nodeManagement.subtitle')}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
+          <button onClick={onClose} className="p-2 -mr-2 md:mr-0 hover:bg-slate-100 rounded-xl transition-colors shrink-0">
             <X className="w-5 h-5 text-slate-400" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden flex">
+        <div className="flex-1 overflow-y-auto md:overflow-hidden flex flex-col md:flex-row">
 
           {/* Left - Current Node & Preview */}
-          <div className="flex-1 p-6 overflow-y-auto border-r border-slate-100">
+          <div className="md:flex-1 p-4 md:p-6 md:overflow-y-auto border-b md:border-b-0 md:border-r border-slate-100">
 
             {/* Current Active Node */}
             <div className="mb-6">
@@ -443,7 +443,7 @@ export const NodeManagementModal = ({
           </div>
 
           {/* Right - Alternatives */}
-          <div className="w-[380px] p-6 overflow-y-auto bg-slate-50/50">
+          <div className="w-full md:w-[380px] shrink-0 p-4 md:p-6 md:overflow-y-auto bg-slate-50/50">
             <div className="flex items-center justify-between mb-4">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t('skillTree.rightPanel.nodeManagement.title')}</span>
               <button
@@ -495,10 +495,10 @@ export const NodeManagementModal = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-white">
+        <div className="flex flex-col md:flex-row items-center justify-between px-4 md:px-6 py-4 border-t border-slate-100 bg-white gap-3 md:gap-0">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-800 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
+            className="w-full md:w-auto order-2 md:order-1 px-5 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-800 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
           >
             {t('skillTree.rightPanel.nodeManagement.actions.close')}
           </button>
@@ -507,14 +507,14 @@ export const NodeManagementModal = ({
             <button
               onClick={() => handleSwap(selectedAlt)}
               disabled={swappingId !== null}
-              className="px-6 py-2.5 bg-indigo-500 hover:bg-indigo-600 rounded-xl text-sm font-semibold text-white transition-colors flex items-center gap-2 disabled:opacity-50"
+              className="w-full md:w-auto order-1 md:order-2 px-6 py-2.5 bg-indigo-500 hover:bg-indigo-600 rounded-xl text-sm font-semibold text-white transition-colors flex justify-center items-center gap-2 disabled:opacity-50"
             >
               {swappingId ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin shrink-0" />
               ) : (
-                <ArrowRightLeft className="w-4 h-4" />
+                <ArrowRightLeft className="w-4 h-4 shrink-0" />
               )}
-              {t('skillTree.rightPanel.nodeManagement.alternatives.swapTo')} "{selectedAlt.name?.length > 20 ? selectedAlt.name.slice(0, 20) + '...' : selectedAlt.name}"
+              <span className="truncate">{t('skillTree.rightPanel.nodeManagement.alternatives.swapTo')} "{selectedAlt.name?.length > 20 ? selectedAlt.name.slice(0, 20) + '...' : selectedAlt.name}"</span>
             </button>
           )}
         </div>
