@@ -27,3 +27,5 @@ Thumbs.db
 
 # ChromaDB (đừng ignore, cần giữ data)
 # chroma_db/
+build/assets/chunk-B7OIQIGJ-CQd8tGRf.js
+build/assets/lottie_svg-MJGYILXD-Bm5KN93f.js

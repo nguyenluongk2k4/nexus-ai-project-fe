@@ -1,0 +1,1 @@
+import{a as e}from"./index-DQnrQSZR.js";const n=e.getHttpUrl("/upload");class p{async upload(o){const t=new FormData;t.append("file",o);const a=await fetch(n,{method:"POST",body:t});if(!a.ok)throw new Error(`Upload failed: ${a.statusText}`);return await a.json()}}const d=new p;export{p as UploadHttpGateway,d as uploadGateway};
