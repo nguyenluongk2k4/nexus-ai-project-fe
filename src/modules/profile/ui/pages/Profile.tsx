@@ -32,6 +32,7 @@ import { DotLottiePlayer } from '@dotlottie/react-player';
 import { PageLoading } from '@/shared/components/PageLoading';
 import { CurrencyExchangeModal } from '../components/CurrencyExchangeModal';
 import { coinsStore } from '@/modules/coins/domain/services/CoinsStore';
+import { formatImageUrl } from '@/shared/utils/url';
 
 const ACTIVITY_ICONS: Record<string, any> = {
     login: LogIn,
@@ -250,7 +251,7 @@ export function Profile() {
                                     />
                                     <div className={`w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-purple-100 p-1 bg-white shadow-sm overflow-hidden relative transition-opacity ${isUploadingAvatar ? 'opacity-50' : 'group-hover:opacity-90'}`}>
                                         <img
-                                            src={displayProfile.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayProfile.fullName || displayProfile.username || 'User')}&background=random`}
+                                            src={formatImageUrl(displayProfile.avatarUrl) || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayProfile.fullName || displayProfile.username || 'User')}&background=random`}
                                             alt={displayProfile.fullName || displayProfile.username}
                                             className="w-full h-full rounded-full object-cover"
                                         />

@@ -6,6 +6,7 @@ import { Bell, Settings, Flame, User, ChevronDown, TreeDeciduous, Globe, Wallet,
 import { CoinsDisplay } from '@/modules/coins/ui/components/CoinsDisplay';
 import { DotLottiePlayer } from '@dotlottie/react-player';
 import { useDashboard } from '@/modules/home/ui/hooks/useDashboard';
+import { formatImageUrl } from '@/shared/utils/url';
 
 export const TopHeader: React.FC = () => {
     const navigate = useNavigate();
@@ -112,7 +113,7 @@ export const TopHeader: React.FC = () => {
                             className="flex items-center gap-3 p-1.5 pr-3 rounded-2xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100 group"
                         >
                             <img
-                                src={user.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName || user.username || 'User')}&background=random`}
+                                src={formatImageUrl(user.avatarUrl) || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName || user.username || 'User')}&background=random`}
                                 alt={user.fullName || user.username}
                                 className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm flex-shrink-0"
                             />

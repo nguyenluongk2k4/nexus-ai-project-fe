@@ -10,6 +10,7 @@ import { useAuth } from '@/modules/auth/AuthProvider';
 import { toast } from 'sonner';
 import { CoinBurst } from '@/shared/components/ui/CoinBurst';
 import { coinsStore } from '@/modules/coins/domain/services/CoinsStore';
+import { formatImageUrl } from '@/shared/utils/url';
 
 const gateway = new CoinsApiGateway();
 const getMissionsUseCase = new GetMissionsUseCase(gateway);
@@ -173,7 +174,7 @@ export const MissionsPage: React.FC = () => {
                                                         <div className="absolute inset-0 bg-violet-400 blur-md rounded-full animate-ping opacity-50" />
                                                         <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl border-2 md:border-4 border-white shadow-xl md:shadow-2xl overflow-hidden bg-white rotate-3 group-hover:rotate-0 transition-transform duration-300">
                                                             <img
-                                                                src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || user?.username || 'User')}&background=random`}
+                                                                src={formatImageUrl(user?.avatarUrl) || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || user?.username || 'User')}&background=random`}
                                                                 alt="You"
                                                                 className="w-full h-full object-cover"
                                                             />
