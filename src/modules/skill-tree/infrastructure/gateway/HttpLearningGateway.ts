@@ -50,7 +50,7 @@ export class HttpLearningGateway implements LearningGateway {
                 id: item.id,
                 resourceId: item.resourceId,
                 resourceName: item.resourceName,
-                nodeId: '', // Not tracked in DB
+                nodeId: item.nodeId || '', // Map from DB
                 nodeName: item.nodeName,
                 scheduledDate: new Date(item.scheduledDate),
                 scheduledTime: item.scheduledTime,
@@ -176,7 +176,7 @@ export class HttpLearningGateway implements LearningGateway {
                 id: data.id,
                 resourceId: data.resourceId,
                 resourceName: data.resourceName,
-                nodeId: '',
+                nodeId: data.nodeId || '',
                 nodeName: data.nodeName,
                 scheduledDate: new Date(data.scheduledDate),
                 deadline: data.deadline ? new Date(data.deadline) : undefined,

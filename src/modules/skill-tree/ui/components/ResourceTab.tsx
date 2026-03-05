@@ -15,9 +15,12 @@ type NodeStatus = 'completed' | 'in-progress' | 'locked';
 interface ResourceTabProps {
   selectedNode: SkillNode | null;
   getNodeStatus: (node: SkillNode) => NodeStatus;
+
+  // Optional callback to trigger parent component reload
+  onResourceUpdate?: () => void;
 }
 
-export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
+export function ResourceTab({ selectedNode, getNodeStatus, onResourceUpdate }: ResourceTabProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,7 +34,7 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
 
   // Quiz history hook
   const { history: quizHistory, isLoading: quizHistoryLoading } = useQuizHistory(
-    selectedNode?.originalNodeId || selectedNode?.id || null
+    selectedNode?.id || null
   );
 
   const status = selectedNode ? getNodeStatus(selectedNode) : 'locked';
@@ -119,6 +122,9 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
           [selectedNode.id]: updatedResources
         });
       }
+
+      // Trigger callback if provided so parent can refresh (e.g., node completed)
+      onResourceUpdate?.();
 
     } catch (e) {
       console.error("Failed to update status", e);
@@ -248,7 +254,7 @@ export function ResourceTab({ selectedNode, getNodeStatus }: ResourceTabProps) {
               </div>
             </div>
             <button
-              onClick={() => navigate(`/quiz?nodeId=${selectedNode.originalNodeId || selectedNode.id}&nodeName=${encodeURIComponent(selectedNode.fullName || selectedNode.label)}`)}
+              onClick={() => navigate(`/quiz?nodeId=${selectedNode.id}&nodeName=${encodeURIComponent(selectedNode.fullName || selectedNode.label)}`)}
               className="shiny-tag relative px-4 py-2 bg-orange-400 text-white rounded-lg text-xs font-black uppercase tracking-tight border border-white/20 shadow-md transition-all hover:shadow-lg flex items-center gap-2"
             >
               <span className="relative z-10 drop-shadow-[0_0_8px_rgba(255,255,255,0.4)] flex items-center gap-2">

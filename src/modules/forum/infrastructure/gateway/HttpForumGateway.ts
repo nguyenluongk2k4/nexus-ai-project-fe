@@ -37,6 +37,7 @@ interface PostResponse {
     categoryId: string;
     categoryName: string | null;
     categoryColor: string | null;
+    images?: string[];
     stats: {
         views: number;
         comments: number;
@@ -117,6 +118,7 @@ function mapPost(post: PostResponse): ForumPost {
         categoryId: post.categoryId,
         categoryName: post.categoryName || undefined,
         categoryColor: post.categoryColor || undefined,
+        images: post.images || [],
         stats: {
             views: post.stats.views,
             comments: post.stats.comments,
@@ -313,6 +315,7 @@ export class HttpForumGateway implements ForumGateway {
                 categoryId: post.categoryId,
                 title: post.title,
                 content: post.content || post.excerpt,
+                images: post.images || [],
             }),
         });
 
@@ -323,6 +326,30 @@ export class HttpForumGateway implements ForumGateway {
 
         const data: PostResponse = await response.json();
 
+        return mapPost(data);
+    }
+
+    async updatePost(postId: string, payload: Partial<Pick<ForumPost, 'title' | 'content' | 'categoryId' | 'images'>>): Promise<ForumPost> {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('Authentication required');
+        }
+
+        const response = await fetch(`${API_FORUM_URL}/posts/${postId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ detail: 'Failed to update post' }));
+            throw new Error(error.detail || 'Failed to update post');
+        }
+
+        const data: PostResponse = await response.json();
         return mapPost(data);
     }
 
@@ -423,6 +450,27 @@ export class HttpForumGateway implements ForumGateway {
 
         const data: PostResponse[] = await response.json();
         return data.map(mapPost);
+    }
+
+    async deletePost(postId: string): Promise<boolean> {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('Authentication required');
+        }
+
+        const response = await fetch(`${API_FORUM_URL}/posts/${postId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ detail: 'Failed to delete post' }));
+            throw new Error(error.detail || 'Failed to delete post');
+        }
+
+        return true;
     }
 }
 

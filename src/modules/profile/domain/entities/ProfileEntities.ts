@@ -14,6 +14,7 @@ export interface UserProfile {
     subscriptionTier: string;
     subscriptionTierName: string;
     subscriptionExpiresAt: string | null;
+    streak: number;
 }
 
 export interface ProfileStats {

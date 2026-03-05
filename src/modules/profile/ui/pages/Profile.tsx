@@ -1,6 +1,6 @@
 // Profile Page - Vibrant True Purple Design
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     User,
@@ -23,12 +23,15 @@ import {
     Diamond,
     Copy,
     ChevronRight,
+    ArrowRightLeft,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useProfile } from '../hooks/useProfile';
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { DotLottiePlayer } from '@dotlottie/react-player';
 import { PageLoading } from '@/shared/components/PageLoading';
+import { CurrencyExchangeModal } from '../components/CurrencyExchangeModal';
+import { coinsStore } from '@/modules/coins/domain/services/CoinsStore';
 
 const ACTIVITY_ICONS: Record<string, any> = {
     login: LogIn,
@@ -42,13 +45,47 @@ export function Profile() {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { user } = useAuth();
-    const { profile, stats, activities, loading, error, updateProfile } = useProfile();
+    const { profile, stats, activities, loading, error, updateProfile, refresh } = useProfile();
 
     // Form state
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [saveMessage, setSaveMessage] = useState<string | null>(null);
+    const [isExchangeOpen, setIsExchangeOpen] = useState(false);
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+    const [currentCoins, setCurrentCoins] = useState<number>(0);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        // Subscribe to global coins store
+        const subscription = coinsStore.balance$.subscribe(val => {
+            if (val !== null) setCurrentCoins(val);
+        });
+
+        // Ensure coins store fetches data initially if zero/null
+        if (coinsStore.currentBalance === null) {
+            fetchCoinsInitial();
+        } else {
+            setCurrentCoins(coinsStore.currentBalance);
+        }
+
+        return () => subscription.unsubscribe();
+    }, []);
+
+    const fetchCoinsInitial = async () => {
+        try {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_URL}/coins/balance`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                coinsStore.setBalance(data.current_coins);
+            }
+        } catch { }
+    };
 
     // Initialize form when profile loads
     useEffect(() => {
@@ -59,8 +96,7 @@ export function Profile() {
     }, [profile]);
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat(i18n.language === 'en' ? 'en-US' : 'vi-VN', { style: 'currency', currency: i18n.language === 'en' ? 'USD' : 'VND' }).format(i18n.language === 'en' ? amount / 23000 : amount);
-        // Note: Simple conversion for demo, ideally backend provides currency
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
     };
 
     const formatDate = (dateStr: string) => {
@@ -89,12 +125,55 @@ export function Profile() {
                 fullName: fullName || undefined,
                 email: email || undefined,
             });
-            setSaveMessage(t('profile.messages.saveSuccess'));
+            setSaveMessage(t('profile.messages.saveSuccess', 'Profile saved successfully!'));
             setTimeout(() => setSaveMessage(null), 3000);
         } catch (err: any) {
-            setSaveMessage(err.message || t('profile.messages.saveError'));
+            setSaveMessage(err.message || t('profile.messages.saveError', 'Error saving profile!'));
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleAvatarClick = () => {
+        if (!isUploadingAvatar) {
+            fileInputRef.current?.click();
+        }
+    };
+
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        setIsUploadingAvatar(true);
+        setSaveMessage(null);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/upload`, {
+                method: 'POST',
+                headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.detail || 'Upload failed');
+            }
+
+            const data = await response.json();
+            const newAvatarUrl = data.file_uri;
+
+            await updateProfile({ avatarUrl: newAvatarUrl });
+            setSaveMessage('Avatar updated successfully!');
+            setTimeout(() => setSaveMessage(null), 3000);
+        } catch (err: any) {
+            setSaveMessage(err.message || 'Avatar upload failed');
+        } finally {
+            setIsUploadingAvatar(false);
+            if (fileInputRef.current) fileInputRef.current.value = ''; // reset input
         }
     };
 
@@ -161,15 +240,30 @@ export function Profile() {
                         <div className="bg-white rounded-2xl p-8 shadow-lg border border-purple-100/50">
                             {/* Avatar Section */}
                             <div className="flex flex-col md:flex-row items-start md:items-center gap-8 mb-10 pb-8 border-b border-purple-100">
-                                <div className="relative group cursor-pointer">
-                                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-purple-100 p-1 bg-white shadow-sm overflow-hidden relative">
+                                <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        className="hidden"
+                                        accept="image/png, image/jpeg, image/webp"
+                                        onChange={handleFileChange}
+                                    />
+                                    <div className={`w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-purple-100 p-1 bg-white shadow-sm overflow-hidden relative transition-opacity ${isUploadingAvatar ? 'opacity-50' : 'group-hover:opacity-90'}`}>
                                         <img
                                             src={displayProfile.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayProfile.fullName || displayProfile.username || 'User')}&background=random`}
                                             alt={displayProfile.fullName || displayProfile.username}
                                             className="w-full h-full rounded-full object-cover"
                                         />
+                                        {isUploadingAvatar && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                                                <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
+                                            </div>
+                                        )}
                                     </div>
-                                    <button className="absolute bottom-1 right-1 bg-white text-purple-600 p-2.5 rounded-full shadow-md border border-purple-100 hover:bg-purple-50 transition-colors">
+                                    <button
+                                        type="button"
+                                        className="absolute bottom-1 right-1 bg-white text-purple-600 p-2.5 rounded-full shadow-md border border-purple-100 hover:bg-purple-50 transition-colors"
+                                    >
                                         <Camera className="w-4 h-4" />
                                     </button>
                                 </div>
@@ -421,10 +515,17 @@ export function Profile() {
                                 </div>
                                 <button
                                     onClick={() => navigate('/purchase')}
-                                    className="w-full bg-white text-purple-900 font-bold py-3.5 px-4 rounded-xl shadow-lg hover:bg-purple-50 transition-colors flex items-center justify-center gap-2"
+                                    className="w-full bg-white text-purple-900 font-bold py-3.5 px-4 rounded-xl shadow-lg hover:bg-purple-50 transition-colors flex items-center justify-center gap-2 mb-3"
                                 >
                                     <Wallet className="w-5 h-5" />
-                                    {t('profile.balance.deposit')}
+                                    {t('profile.balance.deposit', 'Deposit')}
+                                </button>
+                                <button
+                                    onClick={() => setIsExchangeOpen(true)}
+                                    className="w-full bg-purple-800/80 hover:bg-purple-700 border border-purple-600/50 text-white font-bold py-2.5 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <ArrowRightLeft className="w-4 h-4" />
+                                    {t('profile.balance.exchange', 'Currency Exchange')}
                                 </button>
                             </div>
                         </div>
@@ -475,6 +576,18 @@ export function Profile() {
                     {t('profile.footer')}
                 </footer>
             </div>
+
+            <CurrencyExchangeModal
+                isOpen={isExchangeOpen}
+                onClose={() => setIsExchangeOpen(false)}
+                currentBalance={displayProfile.balance}
+                currentCoins={currentCoins}
+                onExchangeSuccess={() => {
+                    setIsExchangeOpen(false);
+                    fetchCoinsInitial(); // Refresh coins store
+                    refresh(); // Soft-refresh profile state instantly
+                }}
+            />
         </div>
     );
 }

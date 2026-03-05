@@ -56,6 +56,7 @@ export class ProfileApiGateway implements ProfileGateway {
             subscriptionTier: data.subscription_tier || 'free',
             subscriptionTierName: data.subscription_tier_name || 'Free',
             subscriptionExpiresAt: data.subscription_expires_at,
+            streak: data.streak || 0,
         };
     }
 

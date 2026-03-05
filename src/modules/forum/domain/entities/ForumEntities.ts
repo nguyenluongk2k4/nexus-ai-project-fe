@@ -37,6 +37,7 @@ export interface ForumPost {
   categoryId: string;
   categoryName?: string;
   categoryColor?: string;
+  images?: string[];
   tags?: string[];
   stats: {
     views: number | string; // string for "2.5k" etc

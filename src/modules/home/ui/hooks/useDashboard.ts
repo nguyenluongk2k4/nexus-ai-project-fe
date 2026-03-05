@@ -6,6 +6,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useLearningProgress } from '@/modules/skill-tree/ui/hooks/useLearningProgress';
 import { QuizHttpGateway } from '@/modules/quiz/infrastructure/http/QuizHttpGateway';
+import { skillTreeGateway } from '@/modules/skill-tree/providers';
+import { useAuth } from '@/modules/auth/AuthProvider';
 
 interface ContinueResource {
   id: string;
@@ -13,6 +15,7 @@ interface ContinueResource {
   nodeName?: string;
   progress?: number;
   type?: string;
+  nodeId?: string;
 }
 
 interface AIInsightsData {
@@ -53,6 +56,7 @@ export function useDashboard() {
     timelineItems,
     stats: learningStats
   } = useLearningProgress();
+  const { user } = useAuth();
 
   const [aiInsights, setAiInsights] = useState<AIInsightsData>({
     weakTopics: [],
@@ -60,6 +64,8 @@ export function useDashboard() {
     nodeId: undefined
   });
   const [quizCount, setQuizCount] = useState(0);
+  const [treeTotalNodes, setTreeTotalNodes] = useState(0);
+  const [treeCompletedNodes, setTreeCompletedNodes] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -78,6 +84,7 @@ export function useDashboard() {
         id: inProgressTimeline.resourceId || inProgressTimeline.id,
         name: inProgressTimeline.resourceName,
         nodeName: inProgressTimeline.nodeName,
+        nodeId: inProgressTimeline.nodeId,
         type: 'Timeline'
       };
     }
@@ -90,6 +97,7 @@ export function useDashboard() {
             id,
             name: resource.resourceName || 'Learning Resource',
             progress: resource.progress,
+            nodeId: resource.nodeId,
             type: 'Resource'
           };
         }
@@ -127,27 +135,26 @@ export function useDashboard() {
       }
     }
 
-    const overallProgress = totalNodes > 0
-      ? Math.round((completedNodes / totalNodes) * 100)
-      : 0;
+    const overallProgress = treeTotalNodes > 0
+      ? Math.round((treeCompletedNodes / treeTotalNodes) * 100)
+      : totalNodes > 0
+        ? Math.round((completedNodes / totalNodes) * 100)
+        : 0;
 
-    // Calculate streak from learning stats or timeline activity
-    let streak = 0;
-    if (learningStats) {
-      streak = learningStats.currentStreak || 0;
-    }
+    // Calculate streak from auth user
+    const streak = user?.streak || 0;
 
     return {
       streak,
       todayItems: todayTimelineItems.length,
       completedToday,
       totalQuizzes: quizCount,
-      totalNodes,
-      completedNodes,
+      totalNodes: treeTotalNodes || totalNodes,
+      completedNodes: treeCompletedNodes || completedNodes,
       overallProgress,
       treeName: undefined
     };
-  }, [todayTimelineItems, progressData, quizCount, learningStats]);
+  }, [todayTimelineItems, progressData, quizCount, learningStats, treeTotalNodes, treeCompletedNodes]);
 
   // Weekly activity based on completed timeline items count
   const weeklyActivity = useMemo((): WeeklyActivityData[] => {
@@ -204,9 +211,9 @@ export function useDashboard() {
     }));
   }, [timelineItems]);
 
-  // Fetch quiz insights using new user-stats endpoint
+  // Fetch quiz insights and actual tree sizes
   useEffect(() => {
-    const fetchQuizData = async () => {
+    const fetchDashboardData = async () => {
       try {
         const userStats = await quizGateway.getUserStats();
 
@@ -219,14 +226,22 @@ export function useDashboard() {
             nodeId: userStats.recentNodeId
           });
         }
+
+        // Also fetch user tree to know actual total/completed nodes
+        const tree = await skillTreeGateway.getMyTree();
+        if (tree && tree.nodes) {
+          setTreeTotalNodes(tree.nodes.length);
+          const completed = tree.nodes.filter((n: any) => n.status === 'completed').length;
+          setTreeCompletedNodes(completed);
+        }
       } catch (err) {
-        console.error('Failed to fetch quiz data:', err);
+        console.error('Failed to fetch dashboard data:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchQuizData();
+    fetchDashboardData();
   }, []);
 
   const data: DashboardData = {

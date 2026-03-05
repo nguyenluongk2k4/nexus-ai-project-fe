@@ -9,9 +9,10 @@ import {
     Sparkles,
     Diamond as DiamondIcon
 } from 'lucide-react';
-import { ForumPost } from '../../domain/entities/ForumEntities';
 import { useTranslation } from 'react-i18next';
+import { ForumPost } from '../../domain/entities/ForumEntities';
 import { ForumUserBadge } from './ForumUserBadge';
+import { ImageGrid } from '../../../../shared/components/ImageGrid';
 
 interface ForumPostCardProps {
     post: ForumPost;
@@ -91,6 +92,9 @@ export const ForumPostCard: React.FC<ForumPostCardProps> = ({
                         <p className="text-sm sm:text-base text-slate-600 leading-relaxed line-clamp-2">
                             {post.excerpt}
                         </p>
+                        {post.images && post.images.length > 0 && (
+                            <ImageGrid images={post.images} className="mt-4" />
+                        )}
                     </div>
 
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-4 border-t border-slate-100 mt-4 gap-4">

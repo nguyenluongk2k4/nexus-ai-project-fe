@@ -7,6 +7,7 @@ import { GetThreadDetailsUseCase } from './usecases/GetThreadDetailsUseCase';
 import { AddCommentUseCase } from './usecases/AddCommentUseCase';
 import { LikePostUseCase } from './usecases/LikePostUseCase';
 import { GetTopContributorsUseCase } from './usecases/GetTopContributorsUseCase';
+import { DeletePostUseCase } from './usecases/DeletePostUseCase';
 
 // Use HTTP gateway for real API calls (switch to MockForumGateway for offline dev)
 const forumGateway = new HttpForumGateway();
@@ -18,6 +19,7 @@ export const getThreadDetailsUseCase = new GetThreadDetailsUseCase(forumService)
 export const addCommentUseCase = new AddCommentUseCase(forumService);
 export const likePostUseCase = new LikePostUseCase(forumService);
 export const getTopContributorsUseCase = new GetTopContributorsUseCase(forumGateway);
+export const deletePostUseCase = new DeletePostUseCase(forumService);
 
 // Export gateway for direct access when needed (e.g., for UUID mapping)
 export { forumGateway };

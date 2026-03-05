@@ -48,6 +48,9 @@ interface RightPanelProps {
   attachments?: UploadResponse[];
   isUploading?: boolean;
   removeAttachment?: (index: number) => void;
+
+  // Callback for resource status changes
+  onResourceUpdate?: () => void;
 }
 
 export function RightPanel({
@@ -75,7 +78,8 @@ export function RightPanel({
   uploadFile,
   attachments,
   isUploading,
-  removeAttachment
+  removeAttachment,
+  onResourceUpdate
 }: RightPanelProps) {
   const { t } = useTranslation();
   const [internalTab, setInternalTab] = useState<TabType>('chat');
@@ -185,6 +189,7 @@ export function RightPanel({
           <ResourceTab
             selectedNode={selectedNode}
             getNodeStatus={getNodeStatus}
+            onResourceUpdate={onResourceUpdate}
           />
         )}
       </div>

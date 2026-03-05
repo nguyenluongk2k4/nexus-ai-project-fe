@@ -10,8 +10,12 @@ import { coinsStore } from "../coins/domain/services/CoinsStore";
 interface AuthContextType extends AuthState {
   login: (request: LoginRequest) => Promise<void>;
   register: (request: RegisterRequest) => Promise<void>;
+  forgotPassword: (request: { email: string }) => Promise<{ status: string, message: string }>;
+  verifyOtp: (request: { email: string, otp: string }) => Promise<{ status: string, message: string, reset_token: string }>;
+  resetPassword: (request: { email: string, resetToken: string, newPassword: string }) => Promise<{ status: string, message: string }>;
   logout: () => void;
   completeTour: (phase?: string) => Promise<void>;
+  updateUser: (updates: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -112,6 +116,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const forgotPassword = async (request: { email: string }) => {
+    return await authGateway.forgotPassword(request);
+  };
+
+  const verifyOtp = async (request: { email: string, otp: string }) => {
+    return await authGateway.verifyOtp(request);
+  };
+
+  const resetPassword = async (request: { email: string, resetToken: string, newPassword: string }) => {
+    return await authGateway.resetPassword(request);
+  };
+
   const logout = () => {
     authGateway.logout();
     coinsStore.clear(); // Reset coins balance on logout
@@ -164,8 +180,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateUser = (updates: Partial<User>) => {
+    setState(s => {
+      if (!s.user) return s;
+      return {
+        ...s,
+        user: { ...s.user, ...updates }
+      };
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ ...state, login, register, logout, completeTour }}>
+    <AuthContext.Provider value={{ ...state, login, register, forgotPassword, verifyOtp, resetPassword, logout, completeTour, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -28,6 +28,10 @@ import { ReferralPage } from '@/modules/coins/ui/pages/ReferralPage';
 import { TopHeader } from '@/shared/components/TopHeader';
 import { Toaster } from 'sonner';
 import { GlobalDailyAgenda } from '@/modules/skill-tree/ui/components/GlobalDailyAgenda';
+import { AnalyticsTracker } from '@/shared/components/AnalyticsTracker';
+import { initGA } from '@/shared/utils/analytics';
+import { useEffect } from 'react';
+
 // Protected Route Wrapper
 const ProtectedRoute = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -40,10 +44,18 @@ const ProtectedRoute = () => {
 };
 
 export default function App() {
+  useEffect(() => {
+    const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+    if (measurementId) {
+      initGA(measurementId);
+    }
+  }, []);
+
   return (
     <AuthProvider>
       <Toaster position="top-right" richColors />
       <BrowserRouter>
+        <AnalyticsTracker />
         <TourProvider>
           <LearningProgressProvider>
             <GlobalDailyAgenda />

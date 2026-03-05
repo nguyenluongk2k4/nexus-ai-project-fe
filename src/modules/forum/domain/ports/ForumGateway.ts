@@ -28,9 +28,11 @@ export interface ForumGateway {
     topMembers: ForumUser[];
   }>;
   createPost(post: Omit<ForumPost, 'id' | 'stats' | 'createdAt'>): Promise<ForumPost>;
+  updatePost(postId: string, data: Partial<Pick<ForumPost, 'title' | 'content' | 'categoryId' | 'images'>>): Promise<ForumPost>;
   addComment(postId: string, content: string, parentId?: string): Promise<ForumComment>;
   likePost(postId: string): Promise<LikeResult>;
   getTopContributors(limit?: number, month?: number, year?: number): Promise<ContributorStats[]>;
   getRelatedPosts(postId: string, categoryId?: string, limit?: number): Promise<ForumPost[]>;
+  deletePost(postId: string): Promise<boolean>;
 }
 

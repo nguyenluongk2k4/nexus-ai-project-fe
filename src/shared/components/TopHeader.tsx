@@ -68,7 +68,7 @@ export const TopHeader: React.FC = () => {
                     </div>
                     <div className="flex flex-col items-start justify-center -ml-2 md:-ml-3 h-full">
                         <span className="text-lg md:text-2xl font-black text-orange-600 leading-tight whitespace-nowrap">
-                            {stats?.streak || 0}
+                            {user.streak || 0}
                         </span>
                         <span className="hidden md:block text-[9px] font-black text-orange-400 tracking-[0.2em] uppercase whitespace-nowrap">
                             {t('header.streak')}

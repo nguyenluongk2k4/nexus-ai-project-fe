@@ -53,7 +53,10 @@ export function Dashboard() {
             <div id="tour-continue">
               <ContinueLearningCard
                 resource={continueResource}
-                onContinue={() => navigate('/my-skills')}
+                onContinue={() => {
+                  console.log('[Dashboard] Continue Learning Clicked. Resource payload:', continueResource);
+                  navigate('/my-skills', { state: { targetNodeId: continueResource?.nodeId } });
+                }}
               />
             </div>
             <TodayScheduleCard

@@ -37,7 +37,11 @@ import {
   Bell,
   BellOff,
   LayoutGrid,
+  Play,
+  RotateCcw,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import { useLearningProgress } from '@/modules/skill-tree/ui/hooks/useLearningProgress';
 import { TimelineItem, LearningStatus } from '@/modules/skill-tree/domain/types/learning';
 import { AddToTimelineDialog } from '../components/AddToTimelineDialog';
@@ -245,15 +249,34 @@ export function Timeline() {
   const isToday = (date: Date) => date.toDateString() === new Date().toDateString();
   const isSelected = (date: Date) => date.toDateString() === selectedDate.toDateString();
 
-  const handleStatusChange = (item: TimelineItem) => {
-    const statusOrder: LearningStatus[] = ['not_started', 'in_progress', 'completed'];
-    const currentIndex = statusOrder.indexOf(item.status);
-    const nextStatus = statusOrder[(currentIndex + 1) % 3];
-    updateTimelineItem(item.id, { status: nextStatus });
+  const handleUpdateStatus = async (item: TimelineItem, nextStatus: LearningStatus) => {
+    if (item.status === nextStatus) return;
+    try {
+      // Optimitic Update
+      updateTimelineItem(item.id, { status: nextStatus });
 
-    // Sync with Learning Progress (Skill Tree)
-    if (item.resourceId) {
-      updateProgress(item.resourceId, { status: nextStatus });
+      // Update Context
+      if (item.resourceId) {
+        updateProgress(item.resourceId, { status: nextStatus });
+      }
+
+      // Backend Update
+      await (learningGateway as any).updateTimelineItem(item.id, { status: nextStatus });
+
+      if (nextStatus === 'completed') {
+        toast.success(t('mySkillTree.timeline.actions.markCompletedSuccess', '🎉 Đã hoàn thành học phần xuất sắc!'), {
+          description: item.resourceName
+        });
+      } else if (nextStatus === 'in_progress') {
+        toast.info('🚀 Đang học học phần này', {
+          description: item.resourceName
+        });
+      }
+    } catch (error) {
+      console.error('Lỗi khi cập nhật trạng thái:', error);
+      toast.error(t('mySkillTree.timeline.errors.statusUpdate', 'Cập nhật trạng thái thất bại. Vui lòng thử lại.'));
+      // Rollback on failure
+      window.location.reload();
     }
   };
 
@@ -432,7 +455,7 @@ export function Timeline() {
         item={item}
         priority={priority}
         barColor={barColor}
-        onStatusChange={handleStatusChange}
+        onStatusChange={(i: TimelineItem, status: LearningStatus) => handleUpdateStatus(i, status)}
         onDelete={handleDelete}
         onClick={() => setSelectedStudyItem(item)}
       />
@@ -466,24 +489,43 @@ export function Timeline() {
       : undefined;
 
     return (
-      <div
+      <motion.div
+        layout
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        whileHover={{ scale: 1.01 }}
+        transition={{ duration: 0.2 }}
         ref={setNodeRef}
         style={style}
         {...listeners}
         {...attributes}
-        className={`
-          bg-card p-5 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 relative border 
-          ${isOver ? 'border-primary ring-2 ring-primary/20 scale-[1.02]' : 'border-transparent hover:border-border'} 
-          group cursor-pointer active:cursor-grabbing
-          ${item.status === 'completed' ? 'opacity-60 grayscale' : ''}
-        `}
         onClick={onClick}
+        className={`
+          relative bg-card p-5 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border 
+          ${isOver ? 'border-primary ring-2 ring-primary/20 scale-[1.02]' : 'border-border'} 
+          group cursor-pointer active:cursor-grabbing overflow-hidden
+          ${item.status === 'completed' ? 'opacity-70 bg-muted/40' : ''}
+        `}
       >
+        {/* Dynamic Completed Overlay Badge & Strikethrough Effect */}
+        <AnimatePresence>
+          {item.status === 'completed' && (
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="absolute top-4 right-4 z-0 text-emerald-500/20"
+            >
+              <CheckCircle2 className="w-24 h-24" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Color bar */}
-        <div className={`absolute left-0 top-6 bottom-6 w-1 rounded-r-full ${barColor}`} />
+        <div className={`absolute left-0 top-6 bottom-6 w-1 rounded-r-full ${barColor} ${item.status === 'completed' ? 'opacity-30' : ''}`} />
 
         {/* Header: Priority & Actions */}
-        <div className="flex justify-between items-start mb-3 pl-3">
+        <div className="flex justify-between items-start mb-3 pl-3 relative z-10">
           <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide ${priority.badge || priority.bg + ' ' + priority.text}`}>
             {t(`mySkillTree.timeline.priorities.${item.priority}`)}
           </span>
@@ -492,7 +534,7 @@ export function Timeline() {
             <button
               onClick={(e) => { e.stopPropagation(); setEditingItem(item); setEditFormData({ ...item }); }}
               onPointerDown={(e) => e.stopPropagation()}
-              className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors relative z-10"
+              className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
               title={t('mySkillTree.timeline.actions.edit')}
             >
               <Edit3 className="w-4 h-4" />
@@ -500,7 +542,7 @@ export function Timeline() {
             <button
               onClick={(e) => { e.stopPropagation(); handleDelete(item); }}
               onPointerDown={(e) => e.stopPropagation()}
-              className="p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors relative z-10"
+              className="p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors"
               title={t('common.delete')}
             >
               <Trash2 className="w-4 h-4" />
@@ -509,11 +551,15 @@ export function Timeline() {
         </div>
 
         {/* Content */}
-        <h3 className="font-bold text-foreground pl-3 text-lg leading-tight mb-2 line-clamp-2">{item.resourceName}</h3>
-        <p className="text-sm text-muted-foreground pl-3 leading-relaxed mb-5 line-clamp-2">{item.nodeName}</p>
+        <h3 className={`font-bold pl-3 text-lg leading-tight mb-2 line-clamp-2 relative z-10 transition-colors 
+          ${item.status === 'completed' ? 'text-muted-foreground line-through decoration-emerald-500/50 decoration-2' : 'text-foreground'}`}
+        >
+          {item.resourceName}
+        </h3>
+        <p className="text-sm text-muted-foreground pl-3 leading-relaxed mb-5 line-clamp-2 relative z-10">{item.nodeName}</p>
 
         {/* Footer */}
-        <div className="pt-4 border-t border-border/50 flex items-center justify-between pl-3">
+        <div className="pt-4 border-t border-border/50 flex items-center justify-between pl-3 relative z-10">
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <Clock className="w-4 h-4" />
             <span className="text-xs font-medium">{item.scheduledTime || '08:00'}</span>
@@ -522,9 +568,12 @@ export function Timeline() {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onStatusChange(item);
+              const statusOrder: LearningStatus[] = ['not_started', 'in_progress', 'completed'];
+              const currentIndex = statusOrder.indexOf(item.status);
+              const nextStatus = statusOrder[(currentIndex + 1) % 3];
+              onStatusChange(item, nextStatus);
             }}
-            className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors"
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors cursor-pointer"
           >
             {item.status === 'completed' ? (
               <CheckCircle2 className="w-4 h-4 text-emerald-500" />
@@ -538,7 +587,64 @@ export function Timeline() {
             </span>
           </button>
         </div>
-      </div>
+
+        {/* Quick Complete Hover Overlay (Premium Action) */}
+        <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none">
+          {item.status === 'not_started' && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                onStatusChange(item, 'in_progress');
+              }}
+              className="pointer-events-auto flex items-center gap-2 px-5 py-2.5 bg-background shadow-xl hover:shadow-primary/20 text-foreground border border-border/60 hover:border-primary/50 rounded-full font-semibold translate-y-4 group-hover:translate-y-0 transition-all duration-300"
+            >
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                <Play className="w-4 h-4 ml-0.5" />
+              </div>
+              Bắt đầu học
+            </motion.button>
+          )}
+
+          {item.status === 'in_progress' && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                onStatusChange(item, 'completed');
+              }}
+              className="pointer-events-auto flex items-center gap-2 px-5 py-2.5 bg-background shadow-xl hover:shadow-emerald-500/20 text-foreground border border-border/60 hover:border-emerald-500/50 rounded-full font-semibold translate-y-4 group-hover:translate-y-0 transition-all duration-300"
+            >
+              <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
+              Hoàn thành
+            </motion.button>
+          )}
+
+          {item.status === 'completed' && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                onStatusChange(item, 'not_started');
+              }}
+              className="pointer-events-auto flex items-center gap-2 px-5 py-2.5 bg-background shadow-xl hover:shadow-muted/20 text-muted-foreground border border-border/60 hover:border-muted/50 rounded-full font-semibold translate-y-4 group-hover:translate-y-0 transition-all duration-300"
+            >
+              <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-muted-foreground border border-border/50">
+                <RotateCcw className="w-3.5 h-3.5" />
+              </div>
+              Học lại
+            </motion.button>
+          )}
+        </div>
+      </motion.div>
     );
   };
 
@@ -737,20 +843,6 @@ export function Timeline() {
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">{t('mySkillTree.timeline.status')}</label>
-              <select
-                value={editFormData.status}
-                onChange={(e) => {
-                  setEditFormData(prev => ({ ...prev, status: e.target.value as LearningStatus }));
-                }}
-                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-              >
-                <option value="not_started">{t('mySkillTree.timeline.statuses.not_started')}</option>
-                <option value="in_progress">{t('mySkillTree.timeline.statuses.in_progress')}</option>
-                <option value="completed">{t('mySkillTree.timeline.statuses.completed')}</option>
-              </select>
-            </div>
           </div>
 
           <div className="flex gap-3 mt-6">

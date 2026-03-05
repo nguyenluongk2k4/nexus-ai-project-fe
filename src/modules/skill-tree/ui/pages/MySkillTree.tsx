@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { GitBranch, Loader2, TreeDeciduous, Plus, Minus, BookOpen, Brain, Star, Layers, CheckCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { skillTreeGateway } from '../../providers';
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { useTranslation } from 'react-i18next';
@@ -57,6 +57,7 @@ const animationStyles = `
 export function MySkillTree() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const [tree, setTree] = useState<UserSkillTree | null>(null);
   const [loading, setLoading] = useState(true);
@@ -92,6 +93,8 @@ export function MySkillTree() {
   useEffect(() => {
     loadMyTree();
   }, []);
+
+
 
   const loadMyTree = async () => {
     setLoading(true);
@@ -163,6 +166,62 @@ export function MySkillTree() {
 
     return { childrenByParent: children, parentByChild: parents };
   }, [tree]);
+
+  // Handle navigation state for auto-focusing a node
+  useEffect(() => {
+    if (isVisible && tree && tree.nodes && tree.nodes.length > 0) {
+      const state = location.state as { targetNodeId?: string } | null;
+      if (state?.targetNodeId) {
+        console.log('[Auto-Focus] Target Node ID:', state.targetNodeId);
+        console.log('[Auto-Focus] Available tree nodes (first 10 IDs):', tree.nodes.slice(0, 10).map(n => ({
+          name: n.name,
+          id: n.id,
+          original_node_id: n.original_node_id
+        })));
+
+        // Find by ID or Original Node ID
+        const targetNode = tree.nodes.find(n => n.id === state.targetNodeId || n.original_node_id === state.targetNodeId);
+
+        if (targetNode) {
+          console.log('[Auto-Focus] Found Target Node:', targetNode.name, 'Level:', targetNode.level);
+
+          setSelectedNodeId(targetNode.id);
+          setActiveTab('resource');
+          if (window.innerWidth >= 768) {
+            setRightPanelCollapsed(false);
+          }
+
+          // Focus Logic
+          if (targetNode.level === 0) {
+            setFocusedRootId(targetNode.id);
+            setFocusedBranch(null);
+          } else if (targetNode.level === 1) {
+            const parentId = parentByChild[targetNode.id];
+            setFocusedBranch({ abilityId: targetNode.id });
+            if (parentId) setFocusedRootId(parentId);
+          } else if (targetNode.level === 2) {
+            const parentAbilityId = parentByChild[targetNode.id];
+            const rootId = parentAbilityId ? parentByChild[parentAbilityId] : null;
+            setFocusedBranch({ abilityId: parentAbilityId, skillId: targetNode.id });
+            if (rootId) setFocusedRootId(rootId);
+          } else if (targetNode.level === 3) {
+            const parentSkillId = parentByChild[targetNode.id];
+            const parentAbilityId = parentSkillId ? parentByChild[parentSkillId] : null;
+            const rootId = parentAbilityId ? parentByChild[parentAbilityId] : null;
+            if (parentSkillId && parentAbilityId) {
+              setFocusedBranch({ abilityId: parentAbilityId, skillId: parentSkillId });
+            }
+            if (rootId) setFocusedRootId(rootId);
+          }
+
+          // Temporarily commenting out clear state so I can inspect console logs on reload
+          // navigate(location.pathname, { replace: true, state: {} });
+        } else {
+          console.warn('[Auto-Focus] Target node not found in tree. targetNodeId:', state.targetNodeId);
+        }
+      }
+    }
+  }, [isVisible, tree, location.state, parentByChild, navigate, location.pathname]);
 
   // Handle node click with robust focus/expand logic
   const handleNodeClick = (node: UserSkillNode & { x: number; y: number }, e: React.MouseEvent) => {
@@ -709,6 +768,7 @@ export function MySkillTree() {
             activeTab={activeTab}
             onTabChange={setActiveTab}
             hideChat={true}
+            onResourceUpdate={loadMyTree}
           />
         </div>
       </div>

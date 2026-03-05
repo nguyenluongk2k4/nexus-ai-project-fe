@@ -1,37 +1,116 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Send } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ChevronRight, Send, Image as ImageIcon, X, Loader2 } from 'lucide-react';
 import { forumGateway } from '../../providers';
 import { ForumCategory } from '../../domain/entities/ForumEntities';
 import { useTranslation } from 'react-i18next';
+import { apiConfig } from '@/shared/config/api.config';
 
 export function CreatePost() {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const editPostId = searchParams.get('edit');
+    const isEditMode = !!editPostId;
+
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [categoryId, setCategoryId] = useState('');
+    const [images, setImages] = useState<string[]>([]);
     const [categories, setCategories] = useState<ForumCategory[]>([]);
+
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [uploadingImages, setUploadingImages] = useState(false);
     const [error, setError] = useState('');
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        const loadCategories = async () => {
+        const loadData = async () => {
             try {
                 const cats = await forumGateway.getCategories();
                 setCategories(cats);
-                if (cats.length > 0) {
+
+                if (isEditMode && editPostId) {
+                    const postData = await forumGateway.getPostDetails(editPostId);
+                    if (postData) {
+                        setTitle(postData.title);
+                        setContent(postData.content || postData.excerpt);
+                        setCategoryId(postData.categoryId);
+                        setImages(postData.images || []);
+                    } else {
+                        setError(t('forum.create.form.errorNotFound', 'Post not found or unauthorized'));
+                    }
+                } else if (cats.length > 0) {
                     setCategoryId(cats[0].id);
                 }
             } catch (err) {
-                console.error('Failed to load categories:', err);
+                console.error('Failed to load data:', err);
+                setError(t('forum.create.form.errorLoad', 'Failed to load initial data.'));
             } finally {
                 setLoading(false);
             }
         };
-        loadCategories();
-    }, []);
+        loadData();
+    }, [isEditMode, editPostId]);
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        // Validation for each file
+        const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        const validFiles = Array.from(files).filter(file => {
+            if (!validTypes.includes(file.type)) {
+                setError(`File ${file.name} is not a supported image format.`);
+                return false;
+            }
+            if (file.size > 5 * 1024 * 1024) { // 5MB Limit
+                setError(`File ${file.name} exceeds the 5MB size limit.`);
+                return false;
+            }
+            return true;
+        });
+
+        if (validFiles.length === 0) return;
+
+        try {
+            setUploadingImages(true);
+            setError('');
+            const uploadedUrls: string[] = [];
+
+            // We must upload them sequentially or in parallel. We'll do parallel for speed.
+            const uploadPromises = validFiles.map(async (file) => {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch(`${apiConfig.baseUrl}/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error(`Upload failed for ${file.name}`);
+                const data = await response.json();
+                return data.file_uri;
+            });
+
+            const results = await Promise.all(uploadPromises);
+            setImages(prev => [...prev, ...results].slice(0, 10)); // max 10 images maybe
+        } catch (err: any) {
+            console.error('Image upload failed:', err);
+            setError('Failed to upload image(s). Please try again.');
+        } finally {
+            setUploadingImages(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
+    const removeImage = (index: number) => {
+        setImages(prev => prev.filter((_, i) => i !== index));
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -46,16 +125,26 @@ export function CreatePost() {
 
             const selectedCat = categories.find(c => c.id === categoryId);
 
-            await forumGateway.createPost({
-                title: title.trim(),
-                excerpt: content.trim().slice(0, 200),
-                content: content.trim(),
-                categoryId,
-                categoryName: selectedCat?.name,
-                author: { id: '', name: '', avatar: '' },
-                isPinned: false,
-                isHot: false,
-            });
+            if (isEditMode && editPostId) {
+                await forumGateway.updatePost(editPostId, {
+                    title: title.trim(),
+                    content: content.trim(),
+                    categoryId,
+                    images,
+                });
+            } else {
+                await forumGateway.createPost({
+                    title: title.trim(),
+                    excerpt: content.trim().slice(0, 200),
+                    content: content.trim(),
+                    categoryId,
+                    categoryName: selectedCat?.name,
+                    images,
+                    author: { id: '', name: '', avatar: '' }, // Handled by backend
+                    isPinned: false,
+                    isHot: false,
+                });
+            }
 
             // Navigate back to forum
             navigate('/forum');
@@ -127,7 +216,7 @@ export function CreatePost() {
                                     <span className="p-3 bg-violet-100 text-violet-600 rounded-2xl shadow-sm">
                                         <Send className="w-6 h-6" />
                                     </span>
-                                    {t('forum.create.title')}
+                                    {isEditMode ? t('forum.create.titleEdit', 'Edit Post') : t('forum.create.title')}
                                 </h1>
 
                                 {/* Form */}
@@ -176,9 +265,53 @@ export function CreatePost() {
                                             value={content}
                                             onChange={(e) => setContent(e.target.value)}
                                             placeholder={t('forum.create.form.contentPlaceholder')}
-                                            rows={12}
+                                            rows={8}
                                             className="w-full p-4 bg-white/80 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-300 font-medium text-slate-900 placeholder:text-slate-400 shadow-sm hover:bg-white transition-all resize-none leading-relaxed"
                                         />
+                                    </div>
+
+                                    {/* Images */}
+                                    <div className="space-y-4">
+                                        <label className="block text-sm font-bold text-slate-700">Images (Optional, Max 4 recommended)</label>
+
+                                        {/* Image Previews */}
+                                        {images.length > 0 && (
+                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                                                {images.map((src, idx) => (
+                                                    <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group shadow-sm">
+                                                        <img src={src} alt="Preview" className="w-full h-full object-cover" />
+                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex justify-end p-2 pointer-events-none">
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
+                                                                className="pointer-events-auto p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full h-fit transition-colors"
+                                                            >
+                                                                <X size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        <input
+                                            type="file"
+                                            multiple
+                                            accept="image/png, image/jpeg, image/webp"
+                                            ref={fileInputRef}
+                                            onChange={handleImageUpload}
+                                            className="hidden"
+                                        />
+
+                                        <button
+                                            type="button"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            disabled={uploadingImages || images.length >= 10}
+                                            className="flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-dashed border-slate-300 text-sm"
+                                        >
+                                            {uploadingImages ? <Loader2 size={18} className="animate-spin" /> : <ImageIcon size={18} />}
+                                            {uploadingImages ? 'Uploading...' : 'Attach Images'}
+                                        </button>
                                     </div>
 
                                     {/* Actions */}

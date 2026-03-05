@@ -1,6 +1,6 @@
 // Auth API Gateway Implementation
 
-import { AuthGateway, AuthResponse, LoginRequest, RegisterRequest, User } from "../domain/types";
+import { AuthGateway, AuthResponse, LoginRequest, RegisterRequest, User, ForgotPasswordRequest, VerifyOtpRequest, ResetPasswordRequest } from "../domain/types";
 
 import { apiConfig } from "@/shared/config/api.config";
 
@@ -26,11 +26,21 @@ export class AuthApiGateway implements AuthGateway {
 
       if (!response.ok) {
         const errorText = await response.text();
-        let errorData = {};
+        let errorData: any = {};
         try {
           errorData = JSON.parse(errorText);
         } catch (e) { /* ignore */ }
-        throw new Error((errorData as any).detail || `Authentication failed: ${response.status}`);
+
+        let errorMessage = errorData?.detail;
+        if (Array.isArray(errorMessage)) {
+          // Flatten FastAPI validation errors: "field: error_msg"
+          errorMessage = errorMessage.map((err: any) => {
+            const field = err.loc ? err.loc[err.loc.length - 1] : 'unknown';
+            return `${field}: ${err.msg}`;
+          }).join(', ');
+        }
+
+        throw new Error(errorMessage || `Authentication failed: ${response.status}`);
       }
 
       return response.json();
@@ -68,6 +78,7 @@ export class AuthApiGateway implements AuthGateway {
         hasCompletedTour: data.user.has_completed_tour,
         hasCompletedDashboardTour: data.user.has_completed_dashboard_tour,
         hasCompletedSkillTreeTour: data.user.has_completed_skilltree_tour,
+        streak: data.user.streak,
         createdAt: data.user.created_at,
         lastLoginAt: data.user.last_login_at,
         hasCompletedMasterSkillTreeTour: data.user.has_completed_master_skilltree_tour
@@ -112,6 +123,7 @@ export class AuthApiGateway implements AuthGateway {
         hasCompletedTour: data.user.has_completed_tour,
         hasCompletedDashboardTour: data.user.has_completed_dashboard_tour,
         hasCompletedSkillTreeTour: data.user.has_completed_skilltree_tour,
+        streak: data.user.streak,
         createdAt: data.user.created_at,
         lastLoginAt: data.user.last_login_at,
         hasCompletedMasterSkillTreeTour: data.user.has_completed_master_skilltree_tour
@@ -141,9 +153,31 @@ export class AuthApiGateway implements AuthGateway {
       hasCompletedDashboardTour: response.has_completed_dashboard_tour,
       hasCompletedSkillTreeTour: response.has_completed_skilltree_tour,
       hasCompletedMasterSkillTreeTour: response.has_completed_master_skilltree_tour,
+      streak: response.streak,
       createdAt: response.created_at,
       lastLoginAt: response.last_login_at,
     };
+  }
+
+  async forgotPassword(request: ForgotPasswordRequest): Promise<{ status: string, message: string }> {
+    return this.request<{ status: string, message: string }>("/forgot-password", {
+      method: "POST",
+      body: JSON.stringify(request),
+    });
+  }
+
+  async verifyOtp(request: VerifyOtpRequest): Promise<{ status: string, message: string, reset_token: string }> {
+    return this.request<{ status: string, message: string, reset_token: string }>("/verify-otp", {
+      method: "POST",
+      body: JSON.stringify(request),
+    });
+  }
+
+  async resetPassword(request: ResetPasswordRequest): Promise<{ status: string, message: string }> {
+    return this.request<{ status: string, message: string }>("/reset-password", {
+      method: "POST",
+      body: JSON.stringify(request),
+    });
   }
 
   logout(): void {

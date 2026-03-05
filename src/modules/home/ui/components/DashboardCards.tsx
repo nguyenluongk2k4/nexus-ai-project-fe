@@ -62,7 +62,7 @@ export function ContinueLearningCard({ resource, onContinue }: ContinueLearningC
                         {t('dashboard.noResourceInProgress', { defaultValue: 'Chưa có bài học nào đang học' })}
                     </p>
                     <button
-                        onClick={() => navigate('/my-skill-tree')}
+                        onClick={() => navigate('/my-skills')}
                         className="mt-4 text-violet-600 text-sm font-medium hover:underline"
                     >
                         {t('dashboard.exploreCourses', { defaultValue: 'Khám phá Skill Tree →' })}
@@ -120,7 +120,7 @@ export function ContinueLearningCard({ resource, onContinue }: ContinueLearningC
                 )}
 
                 <button
-                    onClick={onContinue || (() => navigate('/my-skill-tree'))}
+                    onClick={onContinue || (() => navigate('/my-skills'))}
                     className="w-full py-3 bg-white text-violet-600 rounded-xl font-bold hover:bg-violet-50 transition-colors flex items-center justify-center gap-2"
                 >
                     <Play className="w-4 h-4 fill-current" />
@@ -337,7 +337,7 @@ export function ProgressDonutCard({ percentage, totalNodes, completedNodes, tree
                 </div>
 
                 <button
-                    onClick={() => navigate('/my-skill-tree')}
+                    onClick={() => navigate('/my-skills')}
                     className="w-full py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors"
                 >
                     {t('dashboard.viewSkillTree', { defaultValue: 'Xem Skill Tree' })}

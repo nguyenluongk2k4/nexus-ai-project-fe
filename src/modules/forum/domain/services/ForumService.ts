@@ -36,5 +36,9 @@ export class ForumService {
   async createPost(post: Omit<ForumPost, 'id' | 'stats' | 'createdAt'>): Promise<ForumPost> {
     return this.gateway.createPost(post);
   }
+
+  async deletePost(postId: string): Promise<boolean> {
+    return this.gateway.deletePost(postId);
+  }
 }
 

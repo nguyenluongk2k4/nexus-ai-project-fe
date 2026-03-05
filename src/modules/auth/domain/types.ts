@@ -18,6 +18,7 @@ export interface User {
   hasCompletedDashboardTour: boolean;
   hasCompletedSkillTreeTour: boolean;
   hasCompletedMasterSkillTreeTour: boolean;
+  streak: number;
   createdAt: string;
   lastLoginAt?: string;
 }
@@ -40,6 +41,21 @@ export interface RegisterRequest {
   fullName?: string;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface VerifyOtpRequest {
+  email: string;
+  otp: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  resetToken: string;
+  newPassword: string;
+}
+
 export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
@@ -51,6 +67,9 @@ export interface AuthState {
 export interface AuthGateway {
   login(request: LoginRequest): Promise<AuthResponse>;
   register(request: RegisterRequest): Promise<AuthResponse>;
+  forgotPassword(request: ForgotPasswordRequest): Promise<{ status: string, message: string }>;
+  verifyOtp(request: VerifyOtpRequest): Promise<{ status: string, message: string, reset_token: string }>;
+  resetPassword(request: ResetPasswordRequest): Promise<{ status: string, message: string }>;
   me(): Promise<User>;
   logout(): void;
   completeTour(phase?: string): Promise<void>;

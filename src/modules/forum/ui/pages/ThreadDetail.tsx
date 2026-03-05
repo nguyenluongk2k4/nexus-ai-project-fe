@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/modules/auth/AuthProvider';
-import { ChevronRight, ThumbsUp, MessageSquare, Share2, Bookmark, Clock, Reply, MoreHorizontal, Send, Image as ImageIcon, Code, Eye, Award } from 'lucide-react';
-import { getThreadDetailsUseCase, addCommentUseCase, likePostUseCase, forumGateway } from '../../providers';
+import { ChevronRight, ThumbsUp, MessageSquare, Share2, Bookmark, Clock, Reply, MoreHorizontal, Send, Image as ImageIcon, Code, Eye, Award, Edit, Trash } from 'lucide-react';
+import { getThreadDetailsUseCase, addCommentUseCase, likePostUseCase, forumGateway, deletePostUseCase } from '../../providers';
 import { ForumPost, ForumComment } from '../../domain/entities/ForumEntities';
 import { useTranslation } from 'react-i18next';
 import { ForumUserBadge } from '../components/ForumUserBadge';
 import { useTopContributors } from '../hooks/useTopContributors';
 import { RelatedPosts } from '../components/RelatedPosts';
+import { ImageGrid } from '../../../../shared/components/ImageGrid';
 
 // Monthly Contributors Component (moved from ForumSidebar)
 const MonthlyContributors = () => {
@@ -278,6 +279,19 @@ export function ThreadDetail() {
   const [relatedPosts, setRelatedPosts] = useState<ForumPost[]>([]);
   const [relatedLoading, setRelatedLoading] = useState(true);
 
+  const handleDeletePost = async () => {
+    if (!post) return;
+    if (window.confirm(t('forum.thread.confirmDelete', 'Are you sure you want to delete this post?'))) {
+      try {
+        await deletePostUseCase.execute(post.id);
+        navigate('/forum');
+      } catch (error) {
+        console.error('Failed to delete post:', error);
+        alert(t('forum.thread.deleteFail', 'Failed to delete the post.'));
+      }
+    }
+  };
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -464,18 +478,45 @@ export function ThreadDetail() {
                       </div>
                     </div>
                   </div>
-                  {/* Category tag */}
-                  {post.categoryName && (
-                    <button
-                      onClick={onNavigateToSubForum}
-                      className="group flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-violet-50 border border-violet-100 hover:bg-violet-100 transition-all cursor-pointer self-start sm:self-auto max-w-full"
-                    >
-                      <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-violet-500 animate-pulse flex-shrink-0"></span>
-                      <span className="text-[10px] sm:text-xs font-bold text-violet-600 group-hover:text-violet-700 truncate">
-                        {post.categoryName}
-                      </span>
-                    </button>
-                  )}
+                  {/* Category tag & Edit button */}
+                  <div className="flex items-center gap-3 self-start sm:self-auto max-w-full">
+                    {post.categoryName && (
+                      <button
+                        onClick={onNavigateToSubForum}
+                        className="group flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-violet-50 border border-violet-100 hover:bg-violet-100 transition-all cursor-pointer"
+                      >
+                        <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-violet-500 animate-pulse flex-shrink-0"></span>
+                        <span className="text-[10px] sm:text-xs font-bold text-violet-600 group-hover:text-violet-700 truncate">
+                          {post.categoryName}
+                        </span>
+                      </button>
+                    )}
+
+                    {user?.id === post.author.id && (
+                      <>
+                        <button
+                          onClick={() => navigate(`/forum/new?edit=${post.id}`)}
+                          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
+                          title={t('forum.thread.editPost', 'Edit Post')}
+                        >
+                          <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span className="text-[10px] sm:text-xs font-bold truncate">
+                            {t('forum.thread.edit', 'Edit')}
+                          </span>
+                        </button>
+                        <button
+                          onClick={handleDeletePost}
+                          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-red-50 border border-red-200 hover:bg-red-100 hover:border-red-300 text-red-600 hover:text-red-700 transition-all cursor-pointer"
+                          title={t('forum.thread.deletePost', 'Delete Post')}
+                        >
+                          <Trash className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span className="text-[10px] sm:text-xs font-bold truncate">
+                            {t('forum.thread.delete', 'Delete')}
+                          </span>
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 {/* Content */}
@@ -490,6 +531,12 @@ export function ThreadDetail() {
                   </h1>
                   <div className="prose prose-slate prose-lg max-w-none text-slate-600 leading-relaxed font-medium">
                     <p className="mb-4 whitespace-pre-wrap">{post.content || post.excerpt}</p>
+
+                    {post.images && post.images.length > 0 && (
+                      <div className="my-8">
+                        <ImageGrid images={post.images} maxDisplay={4} />
+                      </div>
+                    )}
                   </div>
                 </div>
 
