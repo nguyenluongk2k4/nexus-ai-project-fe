@@ -204,14 +204,14 @@ export function Purchase() {
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between p-4 bg-purple-50/50 rounded-xl border border-purple-100">
                                     <span className="text-slate-500 font-medium">{t('purchase.bankInfo.bank')}</span>
-                                    <span className="font-bold text-slate-900">MB Bank</span>
+                                    <span className="font-bold text-slate-900">TP Bank</span>
                                 </div>
                                 <div className="flex items-center justify-between p-4 bg-purple-50/50 rounded-xl border border-purple-100 group">
                                     <span className="text-slate-500 font-medium">{t('purchase.bankInfo.account')}</span>
                                     <div className="flex items-center gap-3">
-                                        <span className="font-bold text-slate-900 font-mono text-lg tracking-wide">0123456789</span>
+                                        <span className="font-bold text-slate-900 font-mono text-lg tracking-wide">12524042004</span>
                                         <button
-                                            onClick={() => copyToClipboard('0123456789', 'account')}
+                                            onClick={() => copyToClipboard('12524042004', 'account')}
                                             className="text-purple-400 hover:text-purple-600 transition-colors p-1 rounded hover:bg-purple-100"
                                         >
                                             {copiedField === 'account' ? (
@@ -225,9 +225,9 @@ export function Purchase() {
                                 <div className="flex items-center justify-between p-4 bg-purple-50/50 rounded-xl border border-purple-100 group">
                                     <span className="text-slate-500 font-medium">{t('purchase.bankInfo.owner')}</span>
                                     <div className="flex items-center gap-3">
-                                        <span className="font-bold text-slate-900 uppercase">NEXUS AI PLATFORM</span>
+                                        <span className="font-bold text-slate-900 uppercase">NEXUS AI</span>
                                         <button
-                                            onClick={() => copyToClipboard('NEXUS AI PLATFORM', 'name')}
+                                            onClick={() => copyToClipboard('NEXUS AI', 'name')}
                                             className="text-purple-400 hover:text-purple-600 transition-colors p-1 rounded hover:bg-purple-100"
                                         >
                                             {copiedField === 'name' ? (
