@@ -30,8 +30,6 @@ export function Plans() {
         purchasing,
         error,
         successMessage,
-        billingCycle,
-        setBillingCycle,
         purchasePlan,
         formatPrice,
     } = useSubscription();
@@ -40,25 +38,28 @@ export function Plans() {
 
     const getPlanIcon = (planId: string) => {
         switch (planId) {
-            case 'pro':
+            case 'pack_59k':
                 return Sparkles;
-            case 'premium':
+            case 'pack_139k':
                 return Diamond;
-            case 'business':
-                return Factory;
+            case 'pack_600k':
+                return Crown;
             default:
                 return Circle;
         }
     };
 
     const getPrice = (plan: any) => {
-        return billingCycle === 'monthly' ? plan.priceMonthly : plan.priceYearly;
+        return plan.priceMonthly; // Using priceMonthly as the single price struct mapped in gateway
     };
 
     const handlePurchase = async (planId: string) => {
         if (confirmPlan === planId) {
-            await purchasePlan(planId);
-            setConfirmPlan(null);
+            try {
+                await purchasePlan(planId);
+            } finally {
+                setConfirmPlan(null);
+            }
         } else {
             setConfirmPlan(planId);
         }
@@ -112,30 +113,7 @@ export function Plans() {
                         {t('profile.subscription.subtitleNew')}
                     </p>
 
-                    {/* Billing Cycle Toggle */}
-                    <div className="inline-flex items-center bg-white/60 backdrop-blur-sm rounded-full p-1.5 border border-white/50 shadow-sm relative ring-1 ring-slate-200/50">
-                        <button
-                            onClick={() => setBillingCycle('monthly')}
-                            className={`relative z-10 px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${billingCycle === 'monthly'
-                                ? 'text-white bg-slate-900 shadow-md'
-                                : 'text-slate-500 hover:text-slate-900'
-                                }`}
-                        >
-                            {t('profile.subscription.monthly')}
-                        </button>
-                        <button
-                            onClick={() => setBillingCycle('yearly')}
-                            className={`relative z-10 px-8 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${billingCycle === 'yearly'
-                                ? 'text-white bg-slate-900 shadow-md'
-                                : 'text-slate-500 hover:text-slate-900'
-                                }`}
-                        >
-                            {t('profile.subscription.yearly')}
-                            <span className="text-[10px] font-bold bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700 px-2 py-0.5 rounded-full uppercase tracking-wide border border-emerald-200/50">
-                                {t('profile.subscription.savePercent')}
-                            </span>
-                        </button>
-                    </div>
+                    {/* Removed Billing Cycle Toggle since packages are one-off */}
                 </div>
 
                 {/* Success/Error Messages */}
@@ -170,36 +148,36 @@ export function Plans() {
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-start">
                         {plans.map((plan) => {
                             const Icon = getPlanIcon(plan.id);
-                            const isCurrentPlan = currentSubscription?.tier === plan.id;
+                            // Coin packages can be purchased multiple times -> no "isCurrentPlan" check needed
                             const price = getPrice(plan);
 
                             // Determine border color based on plan
                             const borderColors: Record<string, string> = {
-                                free: 'border-t-cyan-500',
-                                pro: 'border-t-purple-600',
-                                premium: 'border-t-fuchsia-500',
-                                business: 'border-t-slate-600',
+                                pack_10k: 'border-t-cyan-500',
+                                pack_59k: 'border-t-purple-600',
+                                pack_139k: 'border-t-fuchsia-500',
+                                pack_600k: 'border-t-amber-500', // Premium gold colors for 600k
                             };
 
                             const iconBgColors: Record<string, string> = {
-                                free: 'bg-cyan-50 border-cyan-100 text-cyan-600',
-                                pro: 'bg-purple-50 border-purple-100 text-purple-600',
-                                premium: 'bg-gradient-to-br from-fuchsia-500 to-purple-600 text-white shadow-lg shadow-fuchsia-500/30',
-                                business: 'bg-slate-100 border-slate-200 text-slate-600',
+                                pack_10k: 'bg-cyan-50 border-cyan-100 text-cyan-600',
+                                pack_59k: 'bg-purple-50 border-purple-100 text-purple-600',
+                                pack_139k: 'bg-gradient-to-br from-fuchsia-500 to-purple-600 text-white shadow-lg shadow-fuchsia-500/30',
+                                pack_600k: 'bg-gradient-to-br from-amber-400 to-yellow-600 text-white shadow-lg shadow-amber-500/30',
                             };
 
                             const checkColors: Record<string, string> = {
-                                free: 'text-cyan-600',
-                                pro: 'text-purple-600',
-                                premium: 'text-fuchsia-600',
-                                business: 'text-slate-900',
+                                pack_10k: 'text-cyan-600',
+                                pack_59k: 'text-purple-600',
+                                pack_139k: 'text-fuchsia-600',
+                                pack_600k: 'text-amber-600',
                             };
 
                             const buttonGradients: Record<string, string> = {
-                                free: 'from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 shadow-cyan-500/20',
-                                pro: 'from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-purple-600/20',
-                                premium: 'from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 shadow-fuchsia-600/30',
-                                business: 'from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 shadow-slate-500/20',
+                                pack_10k: 'from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 shadow-cyan-500/20',
+                                pack_59k: 'from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-purple-600/20',
+                                pack_139k: 'from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 shadow-fuchsia-600/30',
+                                pack_600k: 'from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 shadow-amber-500/30',
                             };
 
                             return (
@@ -208,8 +186,8 @@ export function Plans() {
                                     className={`bg-white/90 rounded-xl p-8 border-t-4 ${borderColors[plan.id]} border-x border-b border-slate-200 shadow-lg hover:shadow-xl flex flex-col h-full hover:-translate-y-1 transition-all duration-300 relative ${plan.isPopular ? 'ring-1 ring-fuchsia-500/10 bg-white' : ''
                                         }`}
                                 >
-                                    {/* Popular/Current Badge */}
-                                    {plan.isPopular && !isCurrentPlan && (
+                                    {/* Popular Badge */}
+                                    {plan.isPopular && (
                                         <div className="absolute -top-5 left-0 right-0 flex justify-center">
                                             <div className="bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 border border-yellow-300 px-4 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg shadow-amber-300/30">
                                                 <Sparkles className="w-4 h-4 text-amber-800" />
@@ -220,13 +198,6 @@ export function Plans() {
                                         </div>
                                     )}
 
-                                    {isCurrentPlan && (
-                                        <div className="absolute -top-5 left-0 right-0 flex justify-center">
-                                            <span className="bg-violet-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg">
-                                                {t('profile.subscription.currentPlan')}
-                                            </span>
-                                        </div>
-                                    )}
 
                                     <div className="mb-6 pt-2">
                                         <div className={`w-12 h-12 rounded-lg ${iconBgColors[plan.id]} ${plan.id !== 'premium' ? 'border' : ''} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
@@ -242,10 +213,7 @@ export function Plans() {
                                         ) : (
                                             <>
                                                 <span className="text-4xl font-bold text-slate-900 tracking-tight">
-                                                    {formatPrice(price).replace('₫', '')}
-                                                </span>
-                                                <span className="text-sm text-slate-400 font-medium">
-                                                    {i18n.language === 'en' ? 'VND' : 'đ'}{billingCycle === 'monthly' ? t('profile.subscription.perMonth') : t('profile.subscription.perYear')}
+                                                    {formatPrice(price)}
                                                 </span>
                                             </>
                                         )}
@@ -262,29 +230,21 @@ export function Plans() {
 
                                     <button
                                         onClick={() => handlePurchase(plan.id)}
-                                        disabled={isCurrentPlan || purchasing || plan.id === 'free'}
-                                        className={`w-full py-3 px-4 rounded-lg font-semibold shadow-lg transition-all duration-200 text-sm ${isCurrentPlan
-                                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
-                                            : plan.id === 'free'
-                                                ? 'bg-slate-100 text-slate-500 cursor-not-allowed shadow-none'
-                                                : confirmPlan === plan.id
-                                                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                                                    : `bg-gradient-to-r ${buttonGradients[plan.id]} text-white transform hover:-translate-y-0.5`
+                                        disabled={purchasing}
+                                        className={`w-full py-3 px-4 rounded-lg font-semibold shadow-lg transition-all duration-200 text-sm ${confirmPlan === plan.id
+                                            ? 'bg-green-600 hover:bg-green-700 text-white'
+                                            : `bg-gradient-to-r ${buttonGradients[plan.id]} text-white transform hover:-translate-y-0.5`
                                             }`}
                                     >
                                         {purchasing && confirmPlan === plan.id ? (
                                             <span className="flex items-center justify-center gap-2">
                                                 <Loader2 className="w-4 h-4 animate-spin" />
-                                                {t('profile.subscription.processing')}
+                                                Processing...
                                             </span>
-                                        ) : isCurrentPlan ? (
-                                            t('profile.subscription.current')
-                                        ) : plan.id === 'free' ? (
-                                            t('profile.subscription.default')
                                         ) : confirmPlan === plan.id ? (
-                                            t('profile.subscription.confirm')
+                                            'Nhấn lại để Xác Nhận'
                                         ) : (
-                                            t('profile.subscription.select', { plan: plan.name })
+                                            `Mua ${plan.name}`
                                         )}
                                     </button>
                                 </div>

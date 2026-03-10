@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { GitBranch, Calendar, Users, FileQuestion, ChevronDown, Home } from 'lucide-react';
+import { GitBranch, Calendar, Users, FileQuestion, ChevronDown, Home, Diamond } from 'lucide-react';
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { useTranslation } from 'react-i18next';
 import { DotLottiePlayer } from '@dotlottie/react-player';
@@ -34,6 +34,7 @@ export function Navigation() {
     { id: 'timeline', label: t('nav.timeline'), icon: Calendar, path: '/timeline' },
     // { id: 'chat', label: 'Chat', icon: MessageSquare, path: '/chat' },
     { id: 'forum', label: t('nav.forum'), icon: Users, path: '/forum' },
+    { id: 'plans', label: 'Nạp Xu', icon: Diamond, path: '/plans' },
     { id: 'missions', label: 'Nhiệm vụ', icon: FileQuestion, path: '/missions' },
     // { id: 'referral', label: 'Giới thiệu', icon: Users, path: '/referral' },
   ];
@@ -91,46 +92,8 @@ export function Navigation() {
           );
         })}
 
-        {/* Falling Flowers Animation - Hidden on very short screens */}
-        {!isCollapsed && (
-          <div className="flex justify-center -mx-4 mt-0 mb-1 overflow-visible [@media(max-height:620px)]:hidden">
-            <DotLottiePlayer
-              src="/assets/Hoa_dao_den_long.lottie"
-              autoplay
-              loop
-              style={{ width: '100%', height: 'auto', border: 'none' }}
-            />
-          </div>
-        )}
-
-        {/* Happy New Year Animation - Hidden on medium-short screens */}
-        {!isCollapsed && (
-          <div className="flex justify-center relative z-10 py-1 [@media(max-height:720px)]:hidden">
-            <DotLottiePlayer
-              src="/assets/home/HAPPY NEW YEAR 2026.lottie"
-              autoplay
-              loop
-              style={{ width: '240px', height: '120px', border: 'none' }}
-            />
-          </div>
-        )}
-
-        {/* Festive Animations - Hidden first on short screens */}
-        {!isCollapsed && (
-          <div className="mt-auto flex flex-col items-center gap-1 -mx-4 pb-0 pt-2 overflow-visible mb-0 [@media(max-height:820px)]:hidden -mt-12">
-            {/* Peach Blossom - Smaller */}
-            <div className="relative w-full flex justify-center">
-              <DotLottiePlayer
-                src="/assets/home/Animation - 1705409067911.lottie"
-                autoplay
-                loop
-                style={{ width: '100%', height: 'auto', border: 'none' }}
-              />
-            </div>
-          </div>
-        )}
       </div>
 
-    </nav >
+    </nav>
   );
 }

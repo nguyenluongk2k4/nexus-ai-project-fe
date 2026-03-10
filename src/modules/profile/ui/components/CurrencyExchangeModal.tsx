@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, ArrowRightLeft, Wallet, Coins, Loader2, CheckCircle2 } from 'lucide-react';
 import { coinsStore } from '@/modules/coins/domain/services/CoinsStore';
+import { apiConfig } from '@/shared/config/api.config';
 
 interface CurrencyExchangeModalProps {
     isOpen: boolean;
@@ -21,7 +22,6 @@ export const CurrencyExchangeModal: React.FC<CurrencyExchangeModalProps> = ({
     onExchangeSuccess
 }) => {
     const { t } = useTranslation();
-    const [direction, setDirection] = useState<ExchangeDirection>('balance_to_coins');
     const [amount, setAmount] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -36,13 +36,8 @@ export const CurrencyExchangeModal: React.FC<CurrencyExchangeModalProps> = ({
     let isValid = false;
     let expectedReceive = 0;
 
-    if (direction === 'balance_to_coins') {
-        isValid = parsedAmount > 0 && parsedAmount <= currentBalance;
-        expectedReceive = parsedAmount / EXCHANGE_RATE;
-    } else {
-        isValid = parsedAmount > 0 && parsedAmount <= currentCoins;
-        expectedReceive = parsedAmount * EXCHANGE_RATE;
-    }
+    isValid = parsedAmount >= 200 && parsedAmount <= currentBalance && parsedAmount % 200 === 0;
+    expectedReceive = Math.floor(parsedAmount / EXCHANGE_RATE);
 
     const handleExchange = async () => {
         if (!isValid) return;
@@ -53,14 +48,11 @@ export const CurrencyExchangeModal: React.FC<CurrencyExchangeModalProps> = ({
 
         try {
             const token = localStorage.getItem('token');
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-
             const reqBody = {
-                from_currency: direction === 'balance_to_coins' ? 'balance' : 'coins',
-                amount: parsedAmount
+                amount_vnd: parsedAmount
             };
 
-            const response = await fetch(`${API_URL}/coins/exchange`, {
+            const response = await fetch(apiConfig.getHttpUrl('/purchase/convert-balance-to-coins'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -79,12 +71,12 @@ export const CurrencyExchangeModal: React.FC<CurrencyExchangeModalProps> = ({
             // Show success animation
             setSuccessMessage(data.message);
 
-            // After 2 seconds, trigger refresh and close
+            // After 2.5 seconds, trigger refresh and close
             setTimeout(() => {
                 onExchangeSuccess();
                 // Optionally let coins store refresh itself via socket or API if we had it,
                 // but for now relying on Profile reload to trigger app-wide sync
-            }, 2000);
+            }, 2500);
 
         } catch (err: any) {
             setError(err.message);
@@ -94,7 +86,8 @@ export const CurrencyExchangeModal: React.FC<CurrencyExchangeModalProps> = ({
     };
 
     const handleMax = () => {
-        setAmount(direction === 'balance_to_coins' ? currentBalance.toString() : currentCoins.toString());
+        const maxExchangable = Math.floor(currentBalance / EXCHANGE_RATE) * EXCHANGE_RATE;
+        setAmount(maxExchangable.toString());
     };
 
     return (
@@ -140,30 +133,16 @@ export const CurrencyExchangeModal: React.FC<CurrencyExchangeModalProps> = ({
                         <>
 
 
-                            {/* Toggle Direction */}
-                            <div className="flex bg-slate-100 p-1 rounded-xl mb-6 mt-4">
-                                <button
-                                    onClick={() => { setDirection('balance_to_coins'); setAmount(''); setError(null); }}
-                                    className={`flex-1 py-2 font-bold text-sm rounded-lg transition-all ${direction === 'balance_to_coins' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                                >
-                                    To Coins
-                                </button>
-                                <button
-                                    onClick={() => { setDirection('coins_to_balance'); setAmount(''); setError(null); }}
-                                    className={`flex-1 py-2 font-bold text-sm rounded-lg transition-all ${direction === 'coins_to_balance' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                                >
-                                    To Balance
-                                </button>
-                            </div>
+                            {/* Toggle Direction REMOVED */}
 
                             {/* Exchange Graph */}
-                            <div className="relative flex items-center justify-between mb-8 px-2">
+                            <div className="relative flex items-center justify-between mb-8 px-2 mt-6">
                                 <div className="flex flex-col items-center gap-2">
-                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-md ${direction === 'balance_to_coins' ? 'bg-purple-100 text-purple-700' : 'bg-yellow-100 text-yellow-600'}`}>
-                                        {direction === 'balance_to_coins' ? <Wallet size={28} /> : <Coins size={28} />}
+                                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-md bg-purple-100 text-purple-700">
+                                        <Wallet size={28} />
                                     </div>
                                     <span className="text-xs font-bold text-slate-500">
-                                        Avail: {direction === 'balance_to_coins' ? `${currentBalance.toLocaleString('vi-VN')}đ` : `${currentCoins.toLocaleString()} Coins`}
+                                        Avail: {currentBalance.toLocaleString('vi-VN')}đ
                                     </span>
                                 </div>
 
@@ -174,13 +153,13 @@ export const CurrencyExchangeModal: React.FC<CurrencyExchangeModalProps> = ({
                                         </div>
                                     </div>
                                     <span className="absolute top-4 text-[10px] font-bold text-slate-400 bg-white px-2 rounded-full border border-slate-100 uppercase tracking-widest whitespace-nowrap">
-                                        Rate: 10,000đ = 50 Coins
+                                        Rate: 200đ = 1 Coin
                                     </span>
                                 </div>
 
                                 <div className="flex flex-col items-center gap-2">
-                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-md ${direction === 'balance_to_coins' ? 'bg-yellow-100 text-yellow-600' : 'bg-purple-100 text-purple-700'}`}>
-                                        {direction === 'balance_to_coins' ? <Coins size={28} /> : <Wallet size={28} />}
+                                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-md bg-yellow-100 text-yellow-600">
+                                        <Coins size={28} />
                                     </div>
                                     <span className="text-xs font-bold text-slate-500">
                                         Receive
@@ -196,7 +175,7 @@ export const CurrencyExchangeModal: React.FC<CurrencyExchangeModalProps> = ({
                                     </label>
                                     <div className="relative flex items-center">
                                         <div className="absolute left-4 opacity-50 font-bold flex items-center">
-                                            {direction === 'balance_to_coins' ? 'đ' : <Coins className="w-4 h-4" />}
+                                            đ
                                         </div>
                                         <input
                                             type="number"
@@ -207,7 +186,7 @@ export const CurrencyExchangeModal: React.FC<CurrencyExchangeModalProps> = ({
                                             }}
                                             placeholder="0"
                                             min="0"
-                                            step="1000"
+                                            step="200"
                                             className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-12 pr-20 text-xl font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all placeholder:text-slate-300"
                                         />
                                         <button
@@ -223,12 +202,14 @@ export const CurrencyExchangeModal: React.FC<CurrencyExchangeModalProps> = ({
                                     <div className="bg-purple-50 rounded-xl p-4 border border-purple-100 flex items-center justify-between mb-4 animate-fade-in">
                                         <span className="text-sm font-semibold text-purple-900">You will receive:</span>
                                         <span className="text-lg font-extrabold text-purple-700 flex items-center gap-1.5">
-                                            {direction === 'balance_to_coins' ? (
-                                                <><Coins className="w-5 h-5 text-yellow-500" /> {expectedReceive.toLocaleString('vi-VN')} Coins</>
-                                            ) : (
-                                                <><Wallet className="w-5 h-5 text-purple-500" /> {expectedReceive.toLocaleString('vi-VN')}đ</>
-                                            )}
+                                            <><Coins className="w-5 h-5 text-yellow-500" /> {expectedReceive.toLocaleString('vi-VN')} Coins</>
                                         </span>
+                                    </div>
+                                )}
+
+                                {!isValid && parsedAmount > 0 && (
+                                    <div className="text-xs text-red-500 font-medium px-1">
+                                        Exchange amount must be a multiple of 200đ and not exceed your balance.
                                     </div>
                                 )}
 

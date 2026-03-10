@@ -12,8 +12,6 @@ interface UseSubscriptionResult {
     purchasing: boolean;
     error: string | null;
     successMessage: string | null;
-    billingCycle: BillingCycle;
-    setBillingCycle: (cycle: BillingCycle) => void;
     purchasePlan: (planId: string) => Promise<void>;
     formatPrice: (price: number) => string;
     refresh: () => Promise<void>;
@@ -27,7 +25,6 @@ export function useSubscription(): UseSubscriptionResult {
     const [purchasing, setPurchasing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
-    const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
 
     const subscriptionService = getSubscriptionService();
 
@@ -60,7 +57,7 @@ export function useSubscription(): UseSubscriptionResult {
             setError(null);
             setSuccessMessage(null);
 
-            const result = await subscriptionService.purchasePlan(planId, billingCycle);
+            const result = await subscriptionService.purchasePlan(planId, 'monthly'); // pass default
 
             setSuccessMessage(result.message);
 
@@ -87,8 +84,6 @@ export function useSubscription(): UseSubscriptionResult {
         purchasing,
         error,
         successMessage,
-        billingCycle,
-        setBillingCycle,
         purchasePlan,
         formatPrice: subscriptionService.formatPrice.bind(subscriptionService),
         refresh: loadData,

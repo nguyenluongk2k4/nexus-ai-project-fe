@@ -6,6 +6,7 @@ import { SubscriptionPlan, UserSubscription, PurchasePlanResult, BillingCycle } 
 import { apiConfig } from "@/shared/config/api.config";
 
 const API_SUBSCRIPTION_URL = apiConfig.getHttpUrl('/subscription');
+const API_PURCHASE_URL = apiConfig.getHttpUrl('/purchase');
 
 export class SubscriptionApiGateway implements SubscriptionGateway {
     private getToken(): string | null {
@@ -24,13 +25,13 @@ export class SubscriptionApiGateway implements SubscriptionGateway {
     }
 
     async getPlans(): Promise<SubscriptionPlan[]> {
-        const response = await fetch(`${API_SUBSCRIPTION_URL}/plans`, {
+        const response = await fetch(`${API_PURCHASE_URL}/packages`, {
             method: 'GET',
             headers: this.getHeaders(),
         });
 
         if (!response.ok) {
-            throw new Error('Không thể tải danh sách gói');
+            throw new Error('Không thể tải danh sách gói Xu');
         }
 
         const data = await response.json();
@@ -38,10 +39,15 @@ export class SubscriptionApiGateway implements SubscriptionGateway {
         return data.map((plan: any) => ({
             id: plan.id,
             name: plan.name,
-            description: plan.description,
-            priceMonthly: plan.price_monthly,
-            priceYearly: plan.price_yearly,
-            features: plan.features,
+            description: `Nhận ngay ${plan.coin_amount} Xu ${plan.bonus_amount > 0 ? `+ ${plan.bonus_amount} Bonus` : ''}`,
+            priceMonthly: plan.price,
+            priceYearly: plan.price,
+            features: [
+                `${plan.coin_amount} Xu mặc định`,
+                ...(plan.bonus_amount > 0 ? [`${plan.bonus_amount} Xu thưởng thêm`] : []),
+                'Không giới hạn thời gian sử dụng',
+                'Nạp qua số dư hoặc chuyển khoản'
+            ],
             badgeColor: plan.badge_color,
             isPopular: plan.is_popular,
         }));
@@ -83,13 +89,10 @@ export class SubscriptionApiGateway implements SubscriptionGateway {
             throw new Error('Chưa đăng nhập');
         }
 
-        const response = await fetch(`${API_SUBSCRIPTION_URL}/purchase`, {
+        // We use buy-with-balance first
+        const response = await fetch(`${API_PURCHASE_URL}/packages/${planId}/buy-with-balance`, {
             method: 'POST',
             headers: this.getHeaders(),
-            body: JSON.stringify({
-                plan_id: planId,
-                billing_cycle: billingCycle,
-            }),
         });
 
         if (!response.ok) {
@@ -102,9 +105,9 @@ export class SubscriptionApiGateway implements SubscriptionGateway {
         return {
             success: data.success,
             message: data.message,
-            newTier: data.new_tier,
-            expiresAt: data.expires_at,
-            amountCharged: data.amount_charged,
+            newTier: 'free',
+            expiresAt: '',
+            amountCharged: 0,
         };
     }
 }
