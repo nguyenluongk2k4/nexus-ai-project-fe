@@ -15,10 +15,16 @@ import {
     Circle,
     Diamond,
     Factory,
+    ArrowRightLeft,
+    Plus,
 } from 'lucide-react';
 import { useSubscription } from '../hooks/useSubscription';
 import { DotLottiePlayer } from '@dotlottie/react-player';
 import { PageLoading } from '@/shared/components/PageLoading';
+import { CurrencyExchangeModal } from '@/modules/profile/ui/components/CurrencyExchangeModal';
+import { useAuth } from '@/modules/auth/AuthProvider';
+import { coinsStore } from '@/modules/coins/domain/services/CoinsStore';
+import { useEffect } from 'react';
 
 export function Plans() {
     const { t, i18n } = useTranslation();
@@ -33,8 +39,18 @@ export function Plans() {
         purchasePlan,
         formatPrice,
     } = useSubscription();
+    const { user } = useAuth();
+    const [currentCoins, setCurrentCoins] = useState(coinsStore.currentBalance || 0);
+
+    useEffect(() => {
+        const sub = coinsStore.balance$.subscribe(val => {
+            if (val !== null) setCurrentCoins(val);
+        });
+        return () => sub.unsubscribe();
+    }, []);
 
     const [confirmPlan, setConfirmPlan] = useState<string | null>(null);
+    const [isExchangeOpen, setIsExchangeOpen] = useState(false);
 
     const getPlanIcon = (planId: string) => {
         switch (planId) {
@@ -72,7 +88,7 @@ export function Plans() {
             className="flex-1 overflow-auto relative min-h-screen bg-white"
         >
 
-            <div className="max-w-7xl mx-auto px-6 pt-8 pb-4 relative z-10">
+            <div className="max-w-7xl mx-auto px-6 pt-8 pb-4 relative z-10 flex items-center justify-between">
                 <button
                     onClick={() => navigate('/profile')}
                     className="inline-flex items-center text-slate-500 hover:text-indigo-900 transition-colors text-sm font-medium gap-2 group"
@@ -80,6 +96,22 @@ export function Plans() {
                     <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                     {t('common.back')}
                 </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => navigate('/purchase')}
+                        className="bg-yellow-400 hover:bg-yellow-500 text-yellow-950 px-4 py-2 rounded-2xl font-bold text-sm shadow-sm hover:shadow-md transition-all inline-flex items-center gap-1.5"
+                    >
+                        <Plus className="w-4 h-4" />
+                        {t('profile.balance.deposit', 'Nạp Tiền')}
+                    </button>
+                    <button
+                        onClick={() => setIsExchangeOpen(true)}
+                        className="bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-2 rounded-2xl font-bold text-sm border border-purple-200 transition-all inline-flex items-center gap-1.5"
+                    >
+                        <ArrowRightLeft className="w-4 h-4" />
+                        {t('profile.balance.exchange', 'Đổi Xu')}
+                    </button>
+                </div>
             </div>
 
             <main className="w-full pb-24 relative z-10">
@@ -351,6 +383,15 @@ export function Plans() {
                     </button>
                 </div>
             </main>
+
+            {/* Modal */}
+            <CurrencyExchangeModal
+                isOpen={isExchangeOpen}
+                onClose={() => setIsExchangeOpen(false)}
+                currentBalance={user?.balance || 0}
+                currentCoins={currentCoins}
+                onExchangeSuccess={() => window.location.reload()}
+            />
         </div>
     );
 }

@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/modules/auth/AuthProvider';
 import { useTranslation } from 'react-i18next';
-import { Bell, Settings, Flame, User, ChevronDown, TreeDeciduous, Globe, Wallet, Coins, LogOut } from 'lucide-react';
+import { Bell, Settings, Flame, User, ChevronDown, TreeDeciduous, Globe, Wallet, Coins, LogOut, ArrowRightLeft, Plus } from 'lucide-react';
 import { CoinsDisplay } from '@/modules/coins/ui/components/CoinsDisplay';
+import { coinsStore } from '@/modules/coins/domain/services/CoinsStore';
+import { CurrencyExchangeModal } from '@/modules/profile/ui/components/CurrencyExchangeModal';
 import { DotLottiePlayer } from '@dotlottie/react-player';
 import { useDashboard } from '@/modules/home/ui/hooks/useDashboard';
 import { formatImageUrl } from '@/shared/utils/url';
@@ -15,7 +17,16 @@ export const TopHeader: React.FC = () => {
     const stats = dashboardData?.stats;
     const { t, i18n } = useTranslation();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isExchangeOpen, setIsExchangeOpen] = useState(false);
+    const [currentCoins, setCurrentCoins] = useState(coinsStore.currentBalance || 0);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const sub = coinsStore.balance$.subscribe(val => {
+            if (val !== null) setCurrentCoins(val);
+        });
+        return () => sub.unsubscribe();
+    }, []);
 
     const toggleLanguage = () => {
         const newLang = i18n.language === 'en' ? 'vi' : 'en';
@@ -95,6 +106,24 @@ export const TopHeader: React.FC = () => {
                             {t('missions.coins')}
                         </span>
                     </div>
+                </div>
+
+                {/* Quick Action Buttons: Desktop/Tablet Only */}
+                <div className="hidden lg:flex items-center gap-2">
+                    <button
+                        onClick={() => navigate('/purchase')}
+                        className="bg-yellow-400 hover:bg-yellow-500 text-yellow-950 px-4 py-2 rounded-2xl font-bold text-sm shadow-sm hover:shadow-md transition-all inline-flex items-center gap-1.5"
+                    >
+                        <Plus className="w-4 h-4" />
+                        {t('profile.balance.deposit', 'Nạp Tiền')}
+                    </button>
+                    <button
+                        onClick={() => setIsExchangeOpen(true)}
+                        className="bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-2 rounded-2xl font-bold text-sm border border-purple-200 transition-all inline-flex items-center gap-1.5"
+                    >
+                        <ArrowRightLeft className="w-4 h-4" />
+                        {t('profile.balance.exchange', 'Đổi Xu')}
+                    </button>
                 </div>
 
                 {/* Vertical Divider */}
@@ -201,6 +230,14 @@ export const TopHeader: React.FC = () => {
                     </div>
                 </div>
             </div>
+            {/* Modal */}
+            <CurrencyExchangeModal
+                isOpen={isExchangeOpen}
+                onClose={() => setIsExchangeOpen(false)}
+                currentBalance={user.balance || 0}
+                currentCoins={currentCoins}
+                onExchangeSuccess={() => window.location.reload()}
+            />
         </header>
     );
 };

@@ -34,7 +34,7 @@ export function Navigation() {
     { id: 'timeline', label: t('nav.timeline'), icon: Calendar, path: '/timeline' },
     // { id: 'chat', label: 'Chat', icon: MessageSquare, path: '/chat' },
     { id: 'forum', label: t('nav.forum'), icon: Users, path: '/forum' },
-    { id: 'plans', label: 'Nạp Xu', icon: Diamond, path: '/plans' },
+    { id: 'plans', label: 'Dịch vụ', icon: Diamond, path: '/plans' },
     { id: 'missions', label: 'Nhiệm vụ', icon: FileQuestion, path: '/missions' },
     // { id: 'referral', label: 'Giới thiệu', icon: Users, path: '/referral' },
   ];
