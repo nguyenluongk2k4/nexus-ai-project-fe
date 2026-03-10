@@ -10,6 +10,7 @@ export interface ReferralStats {
     my_code: string;
     total_invited: number;
     total_earned: number;
+    referred_by_code?: string;
     history: ReferralHistoryItem[];
 }
 

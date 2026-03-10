@@ -146,7 +146,8 @@
     "forum": "Diễn đàn",
     "profile": "Hồ sơ cá nhân",
     "mySkillTree": "Lộ trình của tôi",
-    "logout": "Đăng xuất"
+    "logout": "Đăng xuất",
+    "missions": "Nhiệm vụ"
   },
   "profile": {
     "title": "Hồ Sơ Cá Nhân",
@@ -817,6 +818,40 @@
     "view_calendar": "Xem lịch đầy đủ",
     "ready_to_claim": "Sẵn sàng nhận thưởng",
     "reward_claimed": "Đã nhận thưởng thành công!",
-    "claim_failed": "Nhận thưởng thất bại, vui lòng thử lại."
+    "claim_failed": "Nhận thưởng thất bại, vui lòng thử lại.",
+    "done": "Hoàn thành"
+  },
+  "referral": {
+    "title": "Giới thiệu bạn bè",
+    "subtitle": "Chia sẻ NexusAI với bạn bè và nhận phần thưởng xu hấp dẫn.",
+    "filledFromLink": "Đã điền mã giới thiệu từ liên kết: {{code}}",
+    "copiedCode": "Đã sao chép mã giới thiệu!",
+    "copiedLink": "Đã sao chép link mời!",
+    "codeTooShort": "Mã giới thiệu phải có ít nhất 6 ký tự.",
+    "errorGeneric": "Có lỗi xảy ra.",
+    "yourCode": "Mã giới thiệu của bạn",
+    "copyCodeBtn": "Sao chép mã",
+    "copyLinkBtn": "Sao chép link mời",
+    "linkCopiedBtn": "Đã sao chép!",
+    "friendCode": "Nhập mã của bạn bè",
+    "friendCodeDesc": "Nhập mã giới thiệu để cả hai nhận xu thưởng.",
+    "friendCodePlaceholder": "VD: NEX8VXQK",
+    "applyBtn": "Áp dụng",
+    "alreadyAppliedCode": "Bạn đã nhập mã:",
+    "howItWorks": "Cách thức hoạt động",
+    "step1": "Chia sẻ mã hoặc link mời cho bạn bè.",
+    "step2": "Bạn bè đăng ký và nhập mã của bạn.",
+    "step3": "Cả hai nhận xu thưởng ngay lập tức!",
+    "stats": {
+      "friends": "Bạn bè",
+      "earnedCoins": "Xu nhận được"
+    },
+    "rewardsTitle": "Phần thưởng giới thiệu",
+    "referrer": "Người giới thiệu",
+    "referee": "Người được mời",
+    "shareBtn": "Chia sẻ ngay",
+    "history": "Lịch sử giới thiệu",
+    "statusCompleted": "Hoàn thành",
+    "statusPending": "Đang chờ"
   }
 }

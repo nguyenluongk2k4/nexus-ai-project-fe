@@ -24,7 +24,7 @@ import { LoginPage } from '@/modules/auth/ui/LoginPage';
 import { RegisterPage } from '@/modules/auth/ui/RegisterPage';
 import { GoogleCallbackPage } from '@/modules/auth/ui/GoogleCallbackPage';
 import { MissionsPage } from '@/modules/coins/ui/pages/MissionsPage';
-import { ReferralPage } from '@/modules/coins/ui/pages/ReferralPage';
+import { ReferralPage } from '@/modules/referral/ui/pages/ReferralPage';
 import { TopHeader } from '@/shared/components/TopHeader';
 import { Toaster } from 'sonner';
 import { GlobalDailyAgenda } from '@/modules/skill-tree/ui/components/GlobalDailyAgenda';

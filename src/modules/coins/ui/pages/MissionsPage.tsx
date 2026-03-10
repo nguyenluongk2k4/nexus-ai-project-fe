@@ -180,7 +180,7 @@ export const MissionsPage: React.FC = () => {
                                                         </div>
                                                         {/* Progress Bubble */}
                                                         <div className="absolute -top-8 md:-top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[9px] md:text-[10px] font-black px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                                            {Math.round(overallProgress)}% Done
+                                                            {Math.round(overallProgress)}% {t('missions.done')}
                                                         </div>
                                                     </div>
                                                 </div>

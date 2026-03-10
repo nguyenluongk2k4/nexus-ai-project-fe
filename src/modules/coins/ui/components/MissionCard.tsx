@@ -131,7 +131,7 @@ export const MissionCard: React.FC<MissionCardProps> = ({ mission, userMission, 
 
             {/* Right: Reward */}
             <div className="flex-shrink-0 flex items-center justify-between sm:justify-end w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 sm:border-l sm:pl-4 md:pl-8">
-                <span className="text-[10px] sm:hidden font-black uppercase text-slate-400">Phần thưởng:</span>
+                <span className="text-[10px] sm:hidden font-black uppercase text-slate-400">{t('missions.reward')}:</span>
                 <div
                     className={`
                         flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-0 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl border transition-all duration-500

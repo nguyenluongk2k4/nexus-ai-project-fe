@@ -146,7 +146,8 @@
     "forum": "Forum",
     "profile": "Profile",
     "mySkillTree": "My Skill Tree",
-    "logout": "Logout"
+    "logout": "Logout",
+    "missions": "Missions"
   },
   "profile": {
     "title": "Personal Profile",
@@ -819,6 +820,40 @@
     "view_calendar": "View Full Calendar",
     "ready_to_claim": "Ready to claim",
     "reward_claimed": "Reward claimed successfully!",
-    "claim_failed": "Claim failed, please try again."
+    "claim_failed": "Claim failed, please try again.",
+    "done": "Done"
+  },
+  "referral": {
+    "title": "Invite Friends",
+    "subtitle": "Share NexusAI with your friends and get attractive coin rewards.",
+    "filledFromLink": "Referral code autofilled from link: {{code}}",
+    "copiedCode": "Referral code copied!",
+    "copiedLink": "Invitation link copied!",
+    "codeTooShort": "Referral code must be at least 6 characters.",
+    "errorGeneric": "An error occurred.",
+    "yourCode": "Your Referral Code",
+    "copyCodeBtn": "Copy Code",
+    "copyLinkBtn": "Copy Invite Link",
+    "linkCopiedBtn": "Copied!",
+    "friendCode": "Enter Friend's Code",
+    "friendCodeDesc": "Enter a referral code so both can get coins.",
+    "friendCodePlaceholder": "Ex: NEX8VXQK",
+    "applyBtn": "Apply",
+    "alreadyAppliedCode": "You have applied code:",
+    "howItWorks": "How it works",
+    "step1": "Share your code or invite link with friends.",
+    "step2": "Friends sign up and enter your code.",
+    "step3": "Both get coins immediately!",
+    "stats": {
+      "friends": "Friends",
+      "earnedCoins": "Earned Coins"
+    },
+    "rewardsTitle": "Referral Rewards",
+    "referrer": "Referrer",
+    "referee": "Invitee",
+    "shareBtn": "Share Now",
+    "history": "Referral History",
+    "statusCompleted": "Completed",
+    "statusPending": "Pending"
   }
 }
