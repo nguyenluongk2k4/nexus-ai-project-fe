@@ -329,6 +329,27 @@ export function useChat(options: UseChatOptions = {}) {
       let finalText = text;
       let finalAttachments = [...attachments];
 
+      // --- MINIGAME SECRET CODE INTERCEPT ---
+      if (finalText.trim().toLowerCase() === '/sancode') {
+        const userMsg: Message = {
+          id: crypto.randomUUID(),
+          role: 'user',
+          text: finalText,
+          attachments: finalAttachments,
+          timestamp: new Date().toISOString()
+        };
+        const botMsg: Message = {
+          id: crypto.randomUUID(),
+          role: 'bot',
+          text: '🎉 Shhh! Bạn đã tìm thấy Mật mã bí mật: **NX-TAG5**. Chụp màn hình và gửi fanpage nhận quà ngay nhé! Đừng cho ai biết nha! 🤫',
+          timestamp: new Date().toISOString()
+        };
+
+        setMessages((prev) => [...prev, userMsg, botMsg]);
+        setAttachments([]);
+        return; // Prevent sending to backend
+      }
+
       // Auto-convert long text to file
       const CHAR_LIMIT = 800;
       if (text.length > CHAR_LIMIT) {

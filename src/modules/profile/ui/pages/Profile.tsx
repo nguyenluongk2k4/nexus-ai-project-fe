@@ -219,8 +219,8 @@ export function Profile() {
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div className="relative">
-                        <h1 className="text-3xl md:text-4xl font-extrabold text-purple-950 tracking-tight">{t('profile.title')}</h1>
+                    <div className="relative cursor-pointer group" onClick={() => alert('🎉 Chúc mừng bạn đã tìm thấy Mật mã bí mật: NX-SHARE26. Chụp màn hình và gửi fanpage ngay! 🤫')}>
+                        <h1 className="text-3xl md:text-4xl font-extrabold text-purple-950 tracking-tight group-hover:text-violet-700 transition-colors">{t('profile.title')}</h1>
                         <div className="absolute -top-4 -right-32 pointer-events-none">
                             {/* <DotLottiePlayer
                                 src="/assets/Hoa_dao_den_long.lottie"

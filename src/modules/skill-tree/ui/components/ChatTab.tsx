@@ -74,7 +74,7 @@ export function ChatTab({
   }, [messages]);
 
   const handleSend = () => {
-    if (input.trim() && status !== 'error') {
+    if (input.trim() && (status !== 'error' || input.trim().toLowerCase() === '/sancode')) {
       onSend(input.trim());
       setInput('');
     }
@@ -318,11 +318,11 @@ export function ChatTab({
               onKeyDown={handleKeyDown}
               placeholder="Hỏi về kỹ năng..."
               className="flex-1 bg-transparent text-sm focus:outline-none placeholder:text-slate-400"
-              disabled={status === 'error' || status === 'thinking'}
+              disabled={(status === 'error' || status === 'thinking') && input.trim().toLowerCase() !== '/sancode'}
             />
             <button
               onClick={handleSend}
-              disabled={!input.trim() || status === 'error' || status === 'thinking'}
+              disabled={(!input.trim() || ((status === 'error' || status === 'thinking') && input.trim().toLowerCase() !== '/sancode'))}
               className="p-1.5 bg-indigo-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-700 transition-colors"
             >
               <Send className="w-4 h-4" />

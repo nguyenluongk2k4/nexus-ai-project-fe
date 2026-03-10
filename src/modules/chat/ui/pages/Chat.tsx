@@ -51,7 +51,7 @@ export function Chat() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
-  
+
   // Async tree rendering state (can be removed now, using hook state instead)
   const [currentTree, setCurrentTree] = useState<SkillTree | null>(null);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
@@ -64,11 +64,13 @@ export function Chat() {
 
   const handleSend = async () => {
     if (!input.trim()) return;
-    if (status !== 'idle') return; // Prevent sending while processing
-    
+
+    // Allow /sancode even if not idle
+    if (status !== 'idle' && input.trim().toLowerCase() !== '/sancode') return; // Prevent sending while processing
+
     const messageText = input;
     setInput('');
-    
+
     // Send message via WebSocket
     // Backend will auto-trigger Celery task on tree query
     send(messageText);
@@ -295,32 +297,30 @@ export function Chat() {
                   {currentTree.nodes.length} nodes
                 </span>
               </div>
-              
+
               <div className="space-y-3">
                 {currentTree.nodes.map((node) => (
                   <div
                     key={node.id}
                     onClick={() => setSelectedNode(selectedNode === node.id ? null : node.id)}
-                    className={`p-3 rounded-lg cursor-pointer transition-all ${
-                      node.difficulty === 'advanced'
+                    className={`p-3 rounded-lg cursor-pointer transition-all ${node.difficulty === 'advanced'
                         ? 'bg-red-50 border border-red-200 hover:bg-red-100'
                         : node.difficulty === 'intermediate'
-                        ? 'bg-amber-50 border border-amber-200 hover:bg-amber-100'
-                        : 'bg-blue-50 border border-blue-200 hover:bg-blue-100'
-                    }`}
+                          ? 'bg-amber-50 border border-amber-200 hover:bg-amber-100'
+                          : 'bg-blue-50 border border-blue-200 hover:bg-blue-100'
+                      }`}
                   >
                     <div className="flex items-center gap-2">
-                      <span className={`inline-block w-2.5 h-2.5 rounded-full ${
-                        node.difficulty === 'advanced' ? 'bg-red-500' :
-                        node.difficulty === 'intermediate' ? 'bg-amber-500' :
-                        'bg-blue-500'
-                      }`} />
+                      <span className={`inline-block w-2.5 h-2.5 rounded-full ${node.difficulty === 'advanced' ? 'bg-red-500' :
+                          node.difficulty === 'intermediate' ? 'bg-amber-500' :
+                            'bg-blue-500'
+                        }`} />
                       <span className="font-semibold text-gray-800">{node.label}</span>
                       <span className="ml-auto text-xs px-2 py-1 bg-white rounded-full">
                         {node.difficulty || 'general'}
                       </span>
                     </div>
-                    
+
                     {selectedNode === node.id && node.description && (
                       <p className="mt-2 text-sm text-gray-600 pl-5">{node.description}</p>
                     )}
@@ -370,7 +370,7 @@ export function Chat() {
           <button
             className="px-5 py-3 bg-gradient-to-r from-violet-600 to-teal-600 hover:from-violet-700 hover:to-teal-700 text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center gap-2"
             onClick={handleSend}
-            disabled={status === 'connecting' || !input.trim()}
+            disabled={(status === 'connecting' && input.trim().toLowerCase() !== '/sancode') || !input.trim()}
           >
             <Send className="w-4 h-4" />
             <span>{CHAT_CONFIG.SEND_LABEL}</span>

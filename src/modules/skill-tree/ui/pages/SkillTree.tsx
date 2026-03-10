@@ -494,7 +494,7 @@ export function SkillTree() {
     // Chỉ cần gọi send() - WebSocket sẽ trigger tree_generating event
     // Event listener sẽ tự động gọi HTTP streaming (generateTree)
     // KHÔNG gọi generateTree trực tiếp ở đây để tránh duplicate
-    if (!currentSessionId) {
+    if (!currentSessionId && message.trim().toLowerCase() !== '/sancode') {
       // Instant visual feedback: switch canvas to loading state mimicking ChatGPT's instant reaction
       treeNodeService.setLoading(true);
     }

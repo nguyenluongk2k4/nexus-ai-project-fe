@@ -427,7 +427,13 @@ export function Landing() {
           </div>
 
           <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-slate-200">
-            <p className="text-xs text-slate-400">{t('landing.footer.rights')}</p>
+            <div className="flex items-center gap-4">
+              <p className="text-xs text-slate-400">{t('landing.footer.rights')}</p>
+              {/* MINIGAME SECRET CODE */}
+              <span className="text-[10px] text-slate-300 hover:text-violet-600 transition-colors duration-300 cursor-default select-all" title="Secret Code">
+                NX-MAYMAN
+              </span>
+            </div>
             <div className="flex gap-6 mt-4 md:mt-0">
               <a href="#" className="text-slate-400 hover:text-violet-600 transition-colors"><Twitter className="w-5 h-5" /></a>
               <a href="#" className="text-slate-400 hover:text-violet-600 transition-colors"><Linkedin className="w-5 h-5" /></a>

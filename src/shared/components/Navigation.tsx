@@ -49,8 +49,13 @@ export function Navigation() {
     >
       <div className={`mb-8 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
         {!isCollapsed && (
-          <div className="flex items-center ml-2">
+          <div className="flex items-center ml-2 relative group cursor-help">
             <img src="/logo-icon.png" alt="Nexus AI" className="h-12 mb-1" />
+
+            {/* MINIGAME SECRET CODE */}
+            <div className="absolute left-1/2 -bottom-2 -translate-x-1/2 translate-y-full px-2 py-1 bg-violet-600 text-[10px] font-bold text-white rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-300 delay-[2000ms] shadow-lg whitespace-nowrap z-50">
+              Mã bí mật: NX-TYM83
+            </div>
           </div>
         )}
         <button

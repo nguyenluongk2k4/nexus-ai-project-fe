@@ -20,10 +20,15 @@ export function PublicHeader({ showAuthButtons = true, className = '' }: PublicH
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white/95 rounded-full px-6 py-4 flex justify-between items-center shadow-lg border border-slate-100">
           <div
-            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity bg-white/10 group relative"
             onClick={() => navigate('/')}
           >
             <img src="/logo-icon.png" alt="NexusAI" className="h-15" />
+
+            {/* MINIGAME SECRET CODE */}
+            <div className="absolute left-1/2 -bottom-2 -translate-x-1/2 translate-y-full px-2 py-1 bg-violet-600 text-[10px] font-bold text-white rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-300 delay-[2000ms] shadow-lg whitespace-nowrap z-50">
+              Mã bí mật: NX-TYM83
+            </div>
           </div>
 
 

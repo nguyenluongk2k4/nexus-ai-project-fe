@@ -200,7 +200,15 @@ export function Plans() {
 
 
                                     <div className="mb-6 pt-2">
-                                        <div className={`w-12 h-12 rounded-lg ${iconBgColors[plan.id]} ${plan.id !== 'premium' ? 'border' : ''} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                                        <div
+                                            className={`w-12 h-12 rounded-lg ${iconBgColors[plan.id]} ${plan.id !== 'premium' ? 'border' : ''} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 cursor-pointer`}
+                                            onDoubleClick={() => {
+                                                if (plan.id === 'pack_600k' || plan.isPopular) {
+                                                    alert("🎉 Chúc mừng bạn đã tìm thấy Mật mã bí mật: NX-VIP99. Chụp màn hình và gửi fanpage ngay!");
+                                                }
+                                            }}
+                                            title={plan.id === 'pack_600k' || plan.isPopular ? "Secret Area" : undefined}
+                                        >
                                             <Icon className="w-7 h-7" />
                                         </div>
                                         <h3 className="text-xl font-bold text-slate-900">{plan.name}</h3>
