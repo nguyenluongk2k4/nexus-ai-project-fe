@@ -197,32 +197,6 @@ export const LoginPage = () => {
           <div className="relative mb-4 group">
             <div className="absolute inset-0 "></div>
             <img src="/logo.png" alt="NexusAI" className=" h-20" />
-
-            {/* Lantern Animation - Top Right */}
-            <div
-              className="absolute pointer-events-none z-10 top-[-30px] right-[-60px] sm:right-[-90px] md:right-[-120px] transition-all duration-300"
-            >
-              <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 transition-all duration-300">
-                <DotLottiePlayer
-                  src="/assets/Newyear lantern.lottie"
-                  autoplay
-                  loop
-                  style={{ width: '100%', height: '100%', border: 'none' }}
-                />
-              </div>
-            </div>
-
-            {/* Red Envelope Animation - Left of Logo */}
-            <div className="absolute bottom-0 left-[-50px] sm:left-[-90px] md:left-[-110px] pointer-events-none z-10 transition-all duration-300">
-              <div className="w-14 h-14 sm:w-20 sm:h-20">
-                <DotLottiePlayer
-                  src="/assets/Li_xi_do.lottie"
-                  autoplay
-                  loop
-                  style={{ width: '100%', height: '100%' }}
-                />
-              </div>
-            </div>
           </div>
           <p className="text-violet-600 text-xs font-bold tracking-[0.2em] uppercase">{t('auth.login.subtitle')}</p>
         </div>

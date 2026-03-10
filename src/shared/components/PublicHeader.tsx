@@ -26,16 +26,6 @@ export function PublicHeader({ showAuthButtons = true, className = '' }: PublicH
             <img src="/logo-icon.png" alt="NexusAI" className="h-15" />
           </div>
 
-          {/* New Year Banner - Desktop */}
-          <div className="flex-shrink-0 mx-4 hidden md:block">
-            <DotLottiePlayer
-              src="/assets/home/Happy new year_banner.lottie"
-              autoplay
-              loop
-              style={{ width: '280px', height: '80px', border: 'none' }}
-            />
-          </div>
-
 
           <div className="flex items-center gap-4">
             {showAuthButtons && !user && (

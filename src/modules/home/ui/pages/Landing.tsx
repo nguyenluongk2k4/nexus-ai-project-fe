@@ -4,7 +4,7 @@ import { LanguageSwitcher } from '@/shared/components/LanguageSwitcher';
 import { PublicHeader } from '@/shared/components/PublicHeader';
 import {
   ArrowRight, TreeDeciduous, Brain, Target, Sparkles, ChevronDown,
-  Mail, Twitter, Github, Linkedin, Award, Check, Code, Flower2,
+  Mail, Twitter, Github, Linkedin, Award, Check, Code,
   Key, TrendingUp, Quote, Flag
 } from 'lucide-react';
 import { useState } from 'react';
@@ -29,26 +29,6 @@ export function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="relative z-10 space-y-8">
-              {/* Lottie Animation - Festive Atmosphere */}
-              <div
-                className="absolute"
-                style={{
-                  top: '-200px',
-                  left: '0px',
-                  opacity: 0.7,
-                  pointerEvents: 'none',
-                  zIndex: 0,
-                  width: '350px',
-                  height: '350px'
-                }}
-              >
-                <DotLottiePlayer
-                  src="/assets/home/Animation - 1705409067911.lottie"
-                  autoplay
-                  loop
-                  style={{ width: '100%', height: '100%' }}
-                />
-              </div>
 
               <h1 className="font-bold text-6xl md:text-7xl leading-[1.3] text-slate-900 relative z-10">
                 {t('landing.hero.title')} <span className="italic bg-gradient-to-r from-violet-600 to-amber-600 bg-clip-text text-transparent inline-block py-4 -my-4">{t('landing.hero.titleHighlight')}</span>
@@ -130,15 +110,6 @@ export function Landing() {
                       <p className="text-sm font-bold text-slate-900">{t('landing.hero.neuralNetworks')}</p>
                     </div>
                   </div>
-                  {/* Lantern Animation - Aligned with Skill Card */}
-                  <div className="absolute -top-24 -right-14 pointer-events-none">
-                    <DotLottiePlayer
-                      src="/assets/Newyear lantern.lottie"
-                      autoplay
-                      loop
-                      style={{ width: '160px', height: '160px' }}
-                    />
-                  </div>
                 </div>
 
                 <div className="absolute bottom-[20%] left-0 bg-white/90 p-4 rounded-xl shadow-lg animate-float border border-white/50" style={{ animationDelay: '2.5s' }}>
@@ -177,33 +148,6 @@ export function Landing() {
                 <p className="text-slate-500 font-medium tracking-wide uppercase text-sm">{stat.label}</p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* New Year 2026 Celebration Section */}
-      <section className="py-20 relative overflow-hidden bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center backdrop-blur-md bg-white/50 rounded-3xl p-12 border border-white/50">
-            <div className="flex justify-center mb-2">
-              <div
-                className="overflow-hidden rounded-2xl"
-                style={{ clipPath: 'inset(10% 5% 10% 5%)' }}
-              >
-                <DotLottiePlayer
-                  src="/assets/home/HAPPY NEW YEAR 2026.lottie"
-                  autoplay
-                  loop
-                  style={{ width: '800px', height: '400px' }}
-                />
-              </div>
-            </div>
-            <h2 className="font-bold text-3xl md:text-4xl text-slate-900 mb-4">
-              🎊 Chào Mừng Năm Mới 2026! 🎊
-            </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Cùng NexusAI bắt đầu hành trình học tập mới, nâng tầm kỹ năng và chinh phục những đỉnh cao tri thức trong năm mới!
-            </p>
           </div>
         </div>
       </section>

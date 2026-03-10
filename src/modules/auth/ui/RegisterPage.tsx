@@ -96,30 +96,6 @@ export const RegisterPage = () => {
           <div className="relative mb-4 group">
             <div className="absolute inset-0 "></div>
             <img src="/logo.png" alt="NexusAI" className=" h-20" />
-
-            {/* Peach Blossom Animation - Right of NexusAI */}
-            <div className="absolute top-[-16px] right-[-40px] sm:right-[-120px] md:right-[-140px] pointer-events-none transition-all duration-300">
-              <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40">
-                <DotLottiePlayer
-                  src="/assets/Hoa_dao_den_long.lottie"
-                  autoplay
-                  loop
-                  style={{ width: '100%', height: '100%' }}
-                />
-              </div>
-            </div>
-
-            {/* Red Envelope Animation - Left of Tree/Logo */}
-            <div className="absolute bottom-1 left-[-60px] sm:left-[-120px] md:left-[-150px] pointer-events-none transition-all duration-300">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24">
-                <DotLottiePlayer
-                  src="/assets/Li_xi_do.lottie"
-                  autoplay
-                  loop
-                  style={{ width: '100%', height: '100%' }}
-                />
-              </div>
-            </div>
           </div>
 
           <p className="text-violet-600 text-xs font-bold tracking-[0.2em] uppercase">{t('auth.register.subtitle')}</p>
