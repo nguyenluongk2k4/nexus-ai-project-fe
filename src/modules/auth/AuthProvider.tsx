@@ -6,6 +6,7 @@ import { AuthApiGateway } from "./infrastructure/AuthApiGateway";
 import { CompleteTourUseCase } from "./usecases/CompleteTourUseCase";
 import { notificationGateway } from "@/shared/infrastructure/NotificationGateway";
 import { coinsStore } from "../coins/domain/services/CoinsStore";
+import { balanceStore } from "@/modules/profile/domain/services/BalanceStore";
 
 interface AuthContextType extends AuthState {
   login: (request: LoginRequest) => Promise<void>;
@@ -66,6 +67,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     checkAuth();
   }, []);
+
+  useEffect(() => {
+    const subscription = balanceStore.balance$.subscribe((balance) => {
+      if (balance === null) return;
+
+      setState((current) => {
+        if (!current.user || current.user.balance === balance) {
+          return current;
+        }
+
+        return {
+          ...current,
+          user: {
+            ...current.user,
+            balance,
+          },
+        };
+      });
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (state.user) {
+      balanceStore.setBalance(state.user.balance || 0);
+      return;
+    }
+
+    balanceStore.clear();
+  }, [state.user]);
 
   // Connect notification gateway when user changes
   useEffect(() => {
@@ -131,6 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     authGateway.logout();
     coinsStore.clear(); // Reset coins balance on logout
+    balanceStore.clear();
     setState({
       user: null,
       isAuthenticated: false,

@@ -1,6 +1,8 @@
 import { coinsStore } from '@/modules/coins/domain/services/CoinsStore';
+import { balanceStore } from '@/modules/profile/domain/services/BalanceStore';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { apiConfig } from '@/shared/config/api.config';
+import { toast } from 'sonner';
 
 export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
 
@@ -40,6 +42,22 @@ export class NotificationGateway {
 
                     if (data.type === 'balance_update') {
                         coinsStore.setBalance(data.current_coins);
+                        return;
+                    }
+
+                    if (data.type === 'wallet_balance_update') {
+                        balanceStore.setBalance(data.current_balance);
+                        return;
+                    }
+
+                    if (data.type === 'mission_update') {
+                        window.dispatchEvent(new CustomEvent('mission-update', { detail: data }));
+
+                        if (data.message) {
+                            toast.success(data.message, {
+                                icon: '🎯',
+                            });
+                        }
                     }
                 } catch (error) {
                     console.error('❌ Failed to parse notification:', error);

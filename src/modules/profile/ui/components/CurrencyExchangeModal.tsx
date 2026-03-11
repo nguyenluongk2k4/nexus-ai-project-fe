@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, ArrowRightLeft, Wallet, Coins, Loader2, CheckCircle2 } from 'lucide-react';
-import { coinsStore } from '@/modules/coins/domain/services/CoinsStore';
+import { balanceStore } from '@/modules/profile/domain/services/BalanceStore';
 import { apiConfig } from '@/shared/config/api.config';
 
 interface CurrencyExchangeModalProps {
@@ -67,6 +67,10 @@ export const CurrencyExchangeModal: React.FC<CurrencyExchangeModalProps> = ({
             }
 
             const data = await response.json();
+
+            if (typeof data.new_balance === 'number') {
+                balanceStore.setBalance(data.new_balance);
+            }
 
             // Show success animation
             setSuccessMessage(data.message);

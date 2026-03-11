@@ -43,6 +43,18 @@ export const MissionsPage: React.FC = () => {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        const handleMissionUpdate = () => {
+            fetchData(true);
+        };
+
+        window.addEventListener('mission-update', handleMissionUpdate as EventListener);
+
+        return () => {
+            window.removeEventListener('mission-update', handleMissionUpdate as EventListener);
+        };
+    }, []);
+
     const handleClaim = async (missionId: string, x?: number, y?: number) => {
         if (claimingIds.has(missionId)) return;
 
@@ -80,11 +92,6 @@ export const MissionsPage: React.FC = () => {
                     fontWeight: 'bold'
                 }
             });
-
-            if (user) {
-                // Balance will be synced exclusively via WebSocket 'balance_update' notification
-                // to avoid double-counting with the optimistic local update.
-            }
         } catch (error: any) {
             console.error('Failed to claim reward', error);
             toast.error(error.message || t('missions.claim_failed'));

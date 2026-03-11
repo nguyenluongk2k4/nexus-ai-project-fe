@@ -390,7 +390,7 @@ export function Plans() {
                 onClose={() => setIsExchangeOpen(false)}
                 currentBalance={user?.balance || 0}
                 currentCoins={currentCoins}
-                onExchangeSuccess={() => window.location.reload()}
+                onExchangeSuccess={() => setIsExchangeOpen(false)}
             />
         </div>
     );
